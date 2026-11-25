@@ -40,6 +40,9 @@ nsis:
   perMachine: false
   allowToChangeInstallationDirectory: true
   artifactName: kalan-setup-${version}.${ext}
+  # Removes Electron's own folder (caches, window state) on uninstall. The user's statements live in the back end's
+  # data folder (%LOCALAPPDATA%\kalan) and are kept.
+  deleteAppDataOnUninstall: true
 mac:
   category: public.app-category.finance
   target:
