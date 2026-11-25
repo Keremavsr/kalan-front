@@ -11,8 +11,9 @@ export const DEFAULT_API_BASE = 'http://127.0.0.1:8765';
 export async function createApi(): Promise<KalanApi> {
   if (import.meta.env.VITE_KALAN_MOCK === '1') {
     const { createMockApi } = await import('./mock');
-    // VITE_KALAN_MOCK_PRESET=full stores every scenario (second card, review, fixed costs, alerts).
-    return createMockApi({ preset: (import.meta.env as Record<string, string | undefined>).VITE_KALAN_MOCK_PRESET === 'full' ? 'full' : 'basic' });
+    // VITE_KALAN_MOCK_PRESET=full stores every scenario (second card, review, fixed costs, alerts); =empty stores nothing.
+    const preset = (import.meta.env as Record<string, string | undefined>).VITE_KALAN_MOCK_PRESET;
+    return createMockApi({ preset: preset === 'full' || preset === 'empty' ? preset : 'basic' });
   }
   const base = window.kalan?.apiBase || import.meta.env.VITE_KALAN_API || DEFAULT_API_BASE;
   return createHttpApi(base);

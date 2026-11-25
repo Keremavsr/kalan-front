@@ -262,22 +262,22 @@ export const analysisTexts: Record<string, AnalysisText> = {
       watch_items: [
         {
           title: 'Nakit avansın iki taksiti kaldı',
-          detail: 'Her taksit 3.497,26 TL. Bunun 497,26 TL’si faiz, BSMV ve KKDF. Erken kapatmanın faizi ne kadar azaltacağını bankanıza sorabilirsiniz.',
+          detail: 'Her taksit 3.497,26 TL. Bunun 497,26 TL’si faiz, BSMV ve KKDF. Erken kapatmanın faizi ne kadar azaltacağını bankana sorabilirsin.',
           transaction_ids: ['tx_10_10', 'tx_10_11', 'tx_10_12', 'tx_10_13'],
         },
         {
           title: 'STREAMFLIX ücreti yüzde 20 arttı',
-          detail: 'Ağustos ve Eylül’de 149,99 TL olan ücret Ekim’de 179,99 TL oldu. Bu fiyatla yılda 360,00 TL fazla ödenir.',
+          detail: 'Ağustos ve Eylül’de 149,99 TL olan ücret Ekim’de 179,99 TL oldu. Bu fiyatla yılda 360,00 TL fazla ödersin.',
           transaction_ids: ['tx_10_03'],
         },
         {
           title: 'Ekstre toplamı okunan işlemlerle tutmuyor',
-          detail: 'Ekstrede yazan tutar, okunan işlemlerin toplamından 149,99 TL fazla. Ödemeden önce bankanın işlem listesiyle karşılaştırın.',
+          detail: 'Ekstrede yazan tutar, okunan işlemlerin toplamından 149,99 TL fazla. Ödemeden önce bankanın işlem listesiyle karşılaştır.',
           transaction_ids: [],
         },
         {
           title: 'Yıllık kart aidatı alındı',
-          detail: 'Bu dönem 1.234,56 TL aidat yansıdı. Aidat iadesi için bankaya başvurulabilir.',
+          detail: 'Bu dönem 1.234,56 TL aidat yansıdı. Aidat iadesi için bankaya başvurabilirsin.',
           transaction_ids: ['tx_10_18'],
         },
       ],

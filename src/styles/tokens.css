@@ -103,9 +103,14 @@
 
 :root {
   /* Font axes */
-  --axes-display: 'opsz' 96, 'wdth' 75;   /* page and section titles: narrow, weight 800 */
+  --axes-display: 'opsz' 96, 'wdth' 75;   /* page titles: narrow, weight 800 */
+  /* Section titles sit at 28-32px: the optical size follows the size and the cut opens up a little,
+     so the counters do not close at this size the way the page cut does. */
+  --axes-section: 'opsz' 32, 'wdth' 86;
+  --weight-section: 760;
   --axes-text: 'opsz' 14, 'wdth' 100;
   --tracking-display: -0.02em;
+  --tracking-section: -0.01em;
 
   /* Space rhythm (8px base, from the site) */
   --space-gutter: 2.5rem;

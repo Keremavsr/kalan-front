@@ -9,6 +9,7 @@
 // - "kart2" / "deneme": the second card (denemebank 1111) with a refunded annual fee
 // - anything else: the October statement (needs_review: printed total 149,99 TL above the rows)
 // - preset "full": all of the above stored, fixed costs, a cancelled subscription, a provider selected
+// - preset "empty": no statement, no provider (the first run of the overview)
 // The mock clock is the day before the latest due date, so due_soon is always critical.
 import {
   AI_FALLBACK_PARSER,
@@ -86,7 +87,7 @@ import {
 } from './mock-calc';
 import { addMonths, monthOf, monthsBetween } from '../lib/month';
 
-export type MockPreset = 'basic' | 'full';
+export type MockPreset = 'empty' | 'basic' | 'full';
 
 export interface MockOptions {
   /** Delay for ordinary reads and writes, in ms. */
@@ -95,7 +96,7 @@ export interface MockOptions {
   uploadMs?: number;
   /** Time the simulated model call takes, in ms. */
   analysisMs?: number;
-  /** `basic` (default): two statements. `full`: every scenario stored. */
+  /** `basic` (default): two statements. `full`: every scenario stored. `empty`: nothing stored, no provider (first run). */
   preset?: MockPreset;
   /** Fixed "today" (YYYY-MM-DD). Default: the day before the latest due date. */
   today?: IsoDate;
@@ -141,9 +142,11 @@ export function createMockApi(options: MockOptions = {}): KalanApi {
   const state = {
     selected: (full ? 'claude-cli' : null) as ProviderId | null,
     settings: clone<Settings>(defaultSettings),
-    statements: (full
-      ? [statement08, statement09, statement10, statementAiFallback, statementCard2]
-      : [statement08, statement09]
+    statements: (options.preset === 'empty'
+      ? []
+      : full
+        ? [statement08, statement09, statement10, statementAiFallback, statementCard2]
+        : [statement08, statement09]
     ).map((s) => clone(s)),
     manualTransactions: [] as Transaction[],
     manualPlans: [] as ManualPlan[],

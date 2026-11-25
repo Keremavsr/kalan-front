@@ -54,6 +54,9 @@
   .title-section {
     font-size: var(--text-section);
     line-height: var(--text-section--line-height);
+    font-variation-settings: var(--axes-section);
+    font-weight: var(--weight-section);
+    letter-spacing: var(--tracking-section);
   }
 
   /* Press feedback for anything pressable */

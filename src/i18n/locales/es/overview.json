@@ -1,6 +1,7 @@
 {
   "title": "",
   "lead": "",
+  "leadForecast": "",
   "noStatementsTitle": "",
   "noStatements": "",
   "goUpload": "",
@@ -22,5 +23,127 @@
   "noCites": "",
   "meta": "",
   "disclaimer": "",
-  "done": ""
+  "done": "",
+  "first": {
+    "lead": "",
+    "title": "",
+    "label": "",
+    "uploadTitle": "",
+    "uploadBody": "",
+    "uploadAction": "",
+    "aiTitle": "",
+    "aiBody": "",
+    "aiAction": "",
+    "aiChosen": "",
+    "aiChange": "",
+    "step": ""
+  },
+  "forecast": {
+    "title": "",
+    "description": "",
+    "barLabel": "",
+    "total": "",
+    "installments": "",
+    "installmentsNote": "",
+    "subscriptions": "",
+    "subscriptionsNote": "",
+    "subscriptionsNone": "",
+    "variable": "",
+    "variableNote": "",
+    "variableNoteOne": "",
+    "variableNoteNone": "",
+    "variableKnown": "",
+    "fixed": "",
+    "fixedNote": "",
+    "fixedExcluded": "",
+    "includeFixed": "",
+    "includeFixedYes": "",
+    "includeFixedNo": "",
+    "openPeriod": "",
+    "openPeriodNone": "",
+    "backtest": "",
+    "backtestNoPct": "",
+    "backtestLow": "",
+    "backtestHigh": "",
+    "backtestEven": "",
+    "backtestNone": "",
+    "backtestOpen": "",
+    "backtestCaption": "",
+    "colMonth": "",
+    "colForecast": "",
+    "colActual": "",
+    "colError": "",
+    "loadError": ""
+  },
+  "alerts": {
+    "title": "",
+    "none": "",
+    "label": "",
+    "moreInfo": "",
+    "lessInfo": "",
+    "loadError": "",
+    "unknown": "",
+    "go": {
+      "statements": "",
+      "spending": "",
+      "recurring": "",
+      "installments": "",
+      "rights": ""
+    },
+    "kind": {
+      "installment_ending": {
+        "title": "",
+        "detail": ""
+      },
+      "limit_high": {
+        "title": "",
+        "titleFull": "",
+        "detail": ""
+      },
+      "interest_charged": {
+        "title": "",
+        "detail": ""
+      },
+      "fee_charged": {
+        "title": "",
+        "detail": ""
+      },
+      "tax_charged": {
+        "title": "",
+        "detail": ""
+      },
+      "foreign_currency": {
+        "title": "",
+        "detail": ""
+      },
+      "missing_statement": {
+        "title": "",
+        "detail": ""
+      },
+      "subscription_price_rise": {
+        "title": "",
+        "detail": ""
+      },
+      "due_soon": {
+        "title": "",
+        "detail": "",
+        "today": ""
+      },
+      "statement_overdue": {
+        "title": "",
+        "detail": ""
+      },
+      "charged_after_cancel": {
+        "title": "",
+        "detail": ""
+      }
+    }
+  },
+  "load": {
+    "title": "",
+    "sentence": "",
+    "sentenceNone": "",
+    "go": "",
+    "loadError": ""
+  }
 }

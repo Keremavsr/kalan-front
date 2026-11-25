@@ -1,6 +1,7 @@
 {
   "title": "Özet",
   "lead": "Son ekstrende gözünden kaçmaması gerekenleri burada topluyorum.",
+  "leadForecast": "{{month}} ekstren için tahminim <c>{{amount}}</c>. Bunun <m>{{installments}}</m> kadarı şimdiden taksit olarak belli.",
   "noStatementsTitle": "Henüz ekstre yok",
   "noStatements": "İlk ekstreni yüklediğinde taksitlerini, harcamalarını ve dikkat etmen gerekenleri buradan izlersin.",
   "goUpload": "Ekstre yükle",
@@ -22,5 +23,127 @@
   "noCites": "Bu nokta tek bir işleme bağlı değil.",
   "meta": "{{provider}} ile hazırlandı, {{date}}.",
   "disclaimer": "Toplamları ve taksitleri kod hesaplıyor; model yalnız kategori ve yorum ekliyor.",
-  "done": "Yorum hazır."
+  "done": "Yorum hazır.",
+  "first": {
+    "lead": "Kartının ekstresini yüklediğinde gelecek ekstrenin tahminini, uyarıları ve taksit yükünü burada gösteririm.",
+    "title": "İki adımda başla",
+    "label": "Başlangıç adımları",
+    "uploadTitle": "Ekstreni yükle",
+    "uploadBody": "Bankanın PDF ekstresini seç. Dosya bu bilgisayardan çıkmaz; tutarları ve taksitleri kod okur.",
+    "uploadAction": "Ekstre yükle",
+    "aiTitle": "İstersen yorum için bir araç seç",
+    "aiBody": "Kategori ve yorum için bilgisayarındaki bir yapay zekâ aracını kullanırım. Seçmezsen de taksitler ve tahmin çalışır.",
+    "aiAction": "Araç seç",
+    "aiChosen": "Seçili araç: {{name}}.",
+    "aiChange": "Değiştir",
+    "step": "Adım {{n}}"
+  },
+  "forecast": {
+    "title": "Gelecek ekstre",
+    "description": "{{month}} ekstresi için tahmin. Taksitler kesin; abonelikleri son tutarlarıyla, değişken harcamayı önceki ayların ortancasıyla sayıyorum.",
+    "barLabel": "Tahminin parçaları",
+    "total": "Tahmin",
+    "installments": "Taksitler",
+    "installmentsNote": "Planlarda bu aya düşen taksitler",
+    "subscriptions": "Abonelikler",
+    "subscriptionsNote": "Son tutarlarıyla: {{names}}",
+    "subscriptionsNone": "Son ayda abonelik görmedim",
+    "variable": "Değişken harcama",
+    "variableNote": "{{from}} – {{to}} arası ortanca",
+    "variableNoteOne": "{{month}} harcaması",
+    "variableNoteNone": "Önceki ay yok",
+    "variableKnown": "Bu ay şimdiden {{amount}} girildi",
+    "fixed": "Sabit giderler",
+    "fixedNote": "Bu ay ödenecek sabit giderler",
+    "fixedExcluded": "Toplama katmadım",
+    "includeFixed": "Sabit giderler",
+    "includeFixedYes": "Dahil",
+    "includeFixedNo": "Hariç",
+    "openPeriod": "{{from}} kesiminden beri elle ya da içe aktararak eklediğin harcama: <m>{{amount}}</m>.",
+    "openPeriodNone": "{{from}} kesiminden beri eklediğin harcama yok.",
+    "backtest": "Bu yöntemi geçmişteki {{count}} ayda sınadım: tahmin ortalama <m>{{mae}}</m> saptı (yüzde {{mape}}), çoğunlukla {{direction}} kaldı.",
+    "backtestNoPct": "Bu yöntemi geçmişteki {{count}} ayda sınadım: tahmin ortalama <m>{{mae}}</m> saptı, çoğunlukla {{direction}} kaldı.",
+    "backtestLow": "düşük",
+    "backtestHigh": "yüksek",
+    "backtestEven": "Bu yöntemi geçmişteki {{count}} ayda sınadım: tahmin ortalama <m>{{mae}}</m> saptı.",
+    "backtestNone": "Tahmini henüz sınayamadım. Bunun için en az {{need}} aylık ekstre gerekiyor.",
+    "backtestOpen": "Ay ay sınama",
+    "backtestCaption": "Her ay yalnız kendinden önceki verilerle tahmin edildi.",
+    "colMonth": "Ay",
+    "colForecast": "Tahmin",
+    "colActual": "Gerçekleşen",
+    "colError": "Sapma",
+    "loadError": "Tahmini alamadım. Arka uç kapalı olabilir."
+  },
+  "alerts": {
+    "title": "Uyarılar",
+    "none": "Şu an bir uyarı yok.",
+    "label": "Uyarılar",
+    "moreInfo": "{{count}} bilgi notunu da göster",
+    "lessInfo": "Bilgi notlarını gizle",
+    "loadError": "Uyarıları alamadım.",
+    "unknown": "Bir uyarı var ama bu sürüm onu tanımıyor.",
+    "go": {
+      "statements": "Ekstreler",
+      "spending": "Harcamalar",
+      "recurring": "Düzenli ödemeler",
+      "installments": "Taksitler",
+      "rights": "Haklarım"
+    },
+    "kind": {
+      "installment_ending": {
+        "title": "{{description}} için son taksit",
+        "detail": "{{month}} ekstresinde son taksit var: <m>{{amount}}</m>. Sonraki aydan itibaren bu tutarı ödemeyeceksin."
+      },
+      "limit_high": {
+        "title": "Limitin dolmak üzere",
+        "titleFull": "Limitin doldu",
+        "detail": "Ekstre toplamı <m>{{total}}</m>, kart limiti <m>{{limit}}</m>. Limitin yüzde {{share}} kadarını kullanmışsın."
+      },
+      "interest_charged": {
+        "title": "Bu dönem faiz işlendi",
+        "detail": "{{month}} ekstresinde toplam <m>{{total}}</m> faiz var."
+      },
+      "fee_charged": {
+        "title": "Ücret ya da aidat alındı",
+        "detail": "{{month}} ekstresinde toplam <m>{{total}}</m> ücret var. Kart aidatıysa iadesini isteyebilirsin."
+      },
+      "tax_charged": {
+        "title": "Vergi yansıdı",
+        "detail": "{{month}} ekstresinde toplam <m>{{total}}</m> BSMV ve KKDF var."
+      },
+      "foreign_currency": {
+        "title": "Döviz cinsinden harcama",
+        "detail": "{{month}} ekstresinde {{currencies}} cinsinden harcamaların karşılığı <m>{{total}}</m>."
+      },
+      "missing_statement": {
+        "title": "Bir ekstre eksik",
+        "detail": "{{card}} için {{month}} ekstresi yok. Bu ayın taksit ve harcama toplamları eksik kalır."
+      },
+      "subscription_price_rise": {
+        "title": "{{merchant}} ücreti arttı",
+        "detail": "<m>{{previous}}</m> olan ücret <m>{{last}}</m> oldu, yüzde {{change}} artış."
+      },
+      "due_soon": {
+        "title": "Son ödeme {{date}}",
+        "detail": "Ekstre borcu <m>{{total}}</m>, asgari ödeme <m>{{minimum}}</m>.",
+        "today": "Son ödeme bugün."
+      },
+      "statement_overdue": {
+        "title": "{{card}} ekstresi gecikti",
+        "detail": "Kesim {{date}} olmalıydı. Ekstreyi yüklediğinde tahmin ve uyarılar güncellenir."
+      },
+      "charged_after_cancel": {
+        "title": "{{merchant}} iptalden sonra çekim yaptı",
+        "detail": "{{date}} tarihinde iptal ettiğini işaretledin; sonrasında <m>{{total}}</m> çekildi. Bankana itiraz edebilirsin."
+      }
+    }
+  },
+  "load": {
+    "title": "12 aylık taksit yükü",
+    "sentence": "Önümüzdeki 12 ayın {{busy}} ayında taksit var. En yüksek ay {{month}}, <m>{{amount}}</m>.",
+    "sentenceNone": "Önümüzdeki 12 ayda taksit yok.",
+    "go": "Taksitlere git",
+    "loadError": "Taksit planını alamadım."
+  }
 }
