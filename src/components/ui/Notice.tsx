@@ -1,15 +1,15 @@
 import type { ReactNode } from 'react';
-import { AlertTriangle, CheckCircle2, Info, XCircle } from 'lucide-react';
+import { Check } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
+import { MarginMark, Scribble } from '../pencil';
 import { cx } from '../../lib/cx';
 
-export type NoticeTone = 'info' | 'positive' | 'caution' | 'negative';
-
-const tones: Record<NoticeTone, { border: string; icon: string; Icon: typeof Info }> = {
-  info: { border: 'border-l-line-strong', icon: 'text-ink-muted', Icon: Info },
-  positive: { border: 'border-l-positive', icon: 'text-positive', Icon: CheckCircle2 },
-  caution: { border: 'border-l-caution', icon: 'text-caution', Icon: AlertTriangle },
-  negative: { border: 'border-l-negative', icon: 'text-negative', Icon: XCircle },
-};
+/**
+ * How much a message matters is marked with the pencil, not with a coloured badge:
+ * critical: a pencil mark in the margin and the word itself; warning: the title is underlined
+ * by the pencil; info: no mark; done: a small ink tick. Text is always ink.
+ */
+export type NoticeTone = 'info' | 'done' | 'warning' | 'critical';
 
 export interface NoticeProps {
   tone?: NoticeTone;
@@ -20,16 +20,28 @@ export interface NoticeProps {
   role?: 'status' | 'alert';
 }
 
-/** A status message. Colour lives in the left rule and the icon; surface and text stay neutral. */
 export function Notice({ tone = 'info', title, children, actions, className, role }: NoticeProps) {
-  const { border, icon, Icon } = tones[tone];
+  const { t } = useTranslation();
   return (
-    <div role={role} className={cx('flex gap-3 rounded-md border border-line border-l-3 bg-surface px-4 py-3', border, className)}>
-      <Icon aria-hidden className={cx('mt-0.5 size-4 shrink-0', icon)} />
-      <div className="min-w-0 flex-1 text-sm text-ink">
-        {title ? <p className="font-semibold">{title}</p> : null}
-        {children ? <div className={title ? 'mt-1' : ''}>{children}</div> : null}
-        {actions ? <div className="mt-3 flex flex-wrap gap-2">{actions}</div> : null}
+    <div role={role} className={cx('flex gap-3 rounded-card bg-paper px-5 py-4 text-ink', className)} data-tone={tone}>
+      {tone === 'critical' ? <MarginMark className="mt-0.5" /> : null}
+      {tone === 'done' ? <Check aria-hidden className="mt-1 size-4 shrink-0" /> : null}
+      <div className="min-w-0 flex-1 text-body">
+        {title || tone === 'critical' ? (
+          <p className="font-semibold">
+            {tone === 'critical' ? <span className="mr-2 font-bold">{t('common.critical')}</span> : null}
+            {tone === 'warning' && typeof title === 'string' ? (
+              <span className="scribble-host relative" data-marked="true">
+                {title}
+                <Scribble seed={title} />
+              </span>
+            ) : (
+              title
+            )}
+          </p>
+        ) : null}
+        {children ? <div className={title || tone === 'critical' ? 'mt-1.5' : ''}>{children}</div> : null}
+        {actions ? <div className="mt-4 flex flex-wrap items-center gap-3">{actions}</div> : null}
       </div>
     </div>
   );

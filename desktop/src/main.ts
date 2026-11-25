@@ -170,7 +170,7 @@ function createWindow(): void {
     minHeight: MIN_SIZE.height,
     show: false,
     title: 'kalan',
-    backgroundColor: '#ffffff',
+    backgroundColor: '#ecece6', // --color-ground, so the first paint matches the page
     autoHideMenuBar: true,
     webPreferences: {
       preload: preloadPath,

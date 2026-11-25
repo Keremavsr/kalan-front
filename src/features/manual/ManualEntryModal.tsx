@@ -88,8 +88,8 @@ export function ManualEntryModal({ open, onClose }: { open: boolean; onClose: ()
       description={t('manual.intro')}
       footer={
         <>
-          <Button onClick={close}>{t('common.cancel')}</Button>
-          <Button variant="primary" type="submit" form="manual-entry" loading={create.isPending}>
+          <Button variant="ghost" onClick={close}>{t('common.cancel')}</Button>
+          <Button variant="go" type="submit" form="manual-entry" loading={create.isPending}>
             {t('manual.submit')}
           </Button>
         </>
@@ -119,7 +119,7 @@ export function ManualEntryModal({ open, onClose }: { open: boolean; onClose: ()
           value={amountText}
           onChange={(e) => setAmountText(e.target.value)}
           error={errors.amount}
-          className="text-right font-mono tabular"
+          className="text-right"
           autoComplete="off"
         />
         <SelectField
@@ -128,11 +128,11 @@ export function ManualEntryModal({ open, onClose }: { open: boolean; onClose: ()
           onChange={(e) => setCount(Number(e.target.value))}
           options={COUNTS.map((n) => ({ value: String(n), label: n === 1 ? t('manual.single') : t('manual.count', { count: n }) }))}
         />
-        <p className="self-end pb-2.5 text-sm text-ink-muted" aria-live="polite">
+        <p className="self-end pb-3 text-meta text-ink" aria-live="polite">
           {each ? t('manual.each', { amount: fmt(each, currency) }) : null}
         </p>
         {create.isError ? (
-          <Notice tone="negative" role="alert" className="col-span-2">
+          <Notice tone="critical" role="alert" className="col-span-2">
             {create.error instanceof ApiError ? create.error.message : String(create.error)}
           </Notice>
         ) : null}

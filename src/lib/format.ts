@@ -101,7 +101,7 @@ export function formatDateTime(iso: string, locale: string): string {
   return new Intl.DateTimeFormat(locale, { dateStyle: 'medium', timeStyle: 'short' }).format(new Date(iso));
 }
 
-/** Parse a user-typed amount ("1.149,50", "1149.5", "1 149,50") into minor units. Returns null if invalid. */
+/** Parse a user-typed amount ("1.234,56", "1234.56", "1 234,56") into minor units. Returns null if invalid. */
 export function parseAmountToMinor(input: string, locale: string, currency: string): number | null {
   const lang = locale.split('-')[0];
   let text = input.trim().replace(/\s/g, '').split(NBSP).join('');

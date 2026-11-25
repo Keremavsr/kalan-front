@@ -1,0 +1,19 @@
+{
+  "title": "Harcama ekle",
+  "intro": "Ekstrede henüz görünmeyen bir harcamayı elle ekle.",
+  "date": "Tarih",
+  "description": "Açıklama",
+  "descriptionHint": "Örnek: ELEKTRO-ORNEK telefon",
+  "amount": "Toplam tutar",
+  "amountHint": "Örnek: 1.234,56",
+  "installments": "Taksit",
+  "single": "Tek çekim",
+  "count_one": "{{count}} taksit",
+  "count_other": "{{count}} taksit",
+  "each": "Taksit başına {{amount}}",
+  "required": "Bu alan gerekli.",
+  "amountInvalid": "Tutarı rakamla yaz, örnek 1.234,56.",
+  "submit": "Ekle",
+  "added": "Harcama eklendi.",
+  "addedPlan": "{{count}} taksitli harcama eklendi ve taksitlere işlendi."
+}

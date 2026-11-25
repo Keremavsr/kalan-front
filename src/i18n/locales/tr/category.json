@@ -1,0 +1,16 @@
+{
+  "groceries": "Market",
+  "dining": "Yeme içme",
+  "transport": "Ulaşım ve yakıt",
+  "subscriptions": "Abonelik",
+  "electronics": "Elektronik",
+  "home": "Ev",
+  "health": "Sağlık",
+  "travel": "Seyahat",
+  "education": "Kitap ve eğitim",
+  "cash_advance": "Nakit avans",
+  "interest_tax": "Faiz ve vergi",
+  "fees": "Ücret ve aidat",
+  "other": "Diğer",
+  "none": "Kategorisiz"
+}

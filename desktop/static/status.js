@@ -5,15 +5,17 @@
 const TEXT = {
   tr: {
     starting: 'kalan başlatılıyor…',
-    stopped: 'kalan arka ucu durdu.',
+    stopped: 'kalan çalışmayı bıraktı',
+    explain: 'Ekstrelerin bu bilgisayarda duruyor. Yeniden başlat; yine durursa nedeni aşağıdaki satırlarda.',
     restart: 'Yeniden başlat',
-    log: 'Son günlük satırları:',
+    log: 'Son günlük satırları',
   },
   en: {
     starting: 'Starting kalan…',
-    stopped: 'The kalan back end stopped.',
+    stopped: 'kalan stopped working',
+    explain: 'Your statements are safe on this computer. Restart it; if it stops again, the lines below say why.',
     restart: 'Restart',
-    log: 'Last log lines:',
+    log: 'Last log lines',
   },
 };
 

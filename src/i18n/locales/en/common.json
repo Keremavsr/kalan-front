@@ -1,0 +1,16 @@
+{
+  "loading": "Loading",
+  "retry": "Try again",
+  "loadErrorTitle": "I can’t reach your data",
+  "loadError": "The local server is not answering. Try again in a moment; if it keeps happening, close and reopen the app.",
+  "cancel": "Cancel",
+  "close": "Close",
+  "card": "Card •••• {{last4}}",
+  "demoData": "Running on demo data",
+  "skipToContent": "Skip to content",
+  "manual": "Entered by hand",
+  "left_one": "{{count}} installment left",
+  "left_other": "{{count}} installments left",
+  "dismiss": "Dismiss notification",
+  "critical": "Critical"
+}

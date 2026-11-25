@@ -1,0 +1,12 @@
+{
+  "purchase": "Alışveriş",
+  "installment": "Taksit",
+  "cash_advance": "Nakit avans",
+  "fee": "Ücret",
+  "tax": "Vergi",
+  "interest": "Faiz",
+  "payment": "Ödeme",
+  "refund": "İade",
+  "carry_over": "Devir",
+  "other": "Diğer"
+}

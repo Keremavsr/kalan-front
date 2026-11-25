@@ -9,13 +9,13 @@ export interface SegmentedProps<T extends string> {
   className?: string;
 }
 
-/** A small radio group drawn as joined segments. Arrow keys move between options natively. */
+/** A small radio group drawn as a pill with an ink thumb. Arrow keys move between options natively. */
 export function Segmented<T extends string>({ label, value, options, onChange, className }: SegmentedProps<T>) {
   const name = useId();
   return (
     <fieldset className={cx('inline-flex', className)}>
       <legend className="sr-only">{label}</legend>
-      <div className="inline-flex rounded-md border border-control bg-surface p-0.5">
+      <div className="inline-flex rounded-pill border border-ink bg-paper p-1">
         {options.map((option) => (
           <label key={option.value} className="relative">
             <input
@@ -28,9 +28,9 @@ export function Segmented<T extends string>({ label, value, options, onChange, c
             />
             <span
               className={cx(
-                'pressable flex h-8 cursor-pointer items-center rounded-sm px-3 text-sm font-medium text-ink-muted',
-                'hover:text-ink peer-checked:bg-ink peer-checked:text-paper',
-                'peer-focus-visible:outline-2 peer-focus-visible:outline-offset-2 peer-focus-visible:outline-focus',
+                'pressable flex h-8 cursor-pointer items-center rounded-pill px-4 text-meta font-semibold text-ink',
+                'hover:bg-ground-alt peer-checked:bg-ink peer-checked:text-paper',
+                'peer-focus-visible:outline-2 peer-focus-visible:outline-offset-2 peer-focus-visible:outline-ink',
               )}
             >
               {option.label}

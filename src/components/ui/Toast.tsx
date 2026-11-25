@@ -1,6 +1,7 @@
 import { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState, type ReactNode } from 'react';
-import { CheckCircle2, X, XCircle } from 'lucide-react';
+import { Check, X } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
+import { MarginMark } from '../pencil';
 import { cx } from '../../lib/cx';
 
 type ToastTone = 'positive' | 'negative' | 'neutral';
@@ -43,7 +44,7 @@ export function ToastProvider({ children }: { children: ReactNode }) {
       <div
         role="status"
         aria-live="polite"
-        className="pointer-events-none fixed right-6 bottom-6 z-50 flex w-sm max-w-full flex-col gap-2"
+        className="pointer-events-none fixed right-6 bottom-6 z-50 flex w-sm max-w-[calc(100vw-3rem)] flex-col gap-2"
       >
         {items.map((item) => (
           <ToastView key={item.id} item={item} onDismiss={dismiss} />
@@ -53,6 +54,7 @@ export function ToastProvider({ children }: { children: ReactNode }) {
   );
 }
 
+/** A note lifted off the page: anchor ink, paper text. A failure carries the pencil mark. */
 function ToastView({ item, onDismiss }: { item: ToastItem; onDismiss: (id: number) => void }) {
   const { t } = useTranslation();
   const [paused, setPaused] = useState(false);
@@ -63,11 +65,10 @@ function ToastView({ item, onDismiss }: { item: ToastItem; onDismiss: (id: numbe
     return () => clearTimeout(timer);
   }, [paused, item.id, item.leaving, onDismiss]);
 
-  const Icon = item.tone === 'negative' ? XCircle : CheckCircle2;
   return (
     <div
       className={cx(
-        'enter pointer-events-auto flex items-start gap-3 rounded-md border border-line bg-surface px-4 py-3 text-sm text-ink shadow-overlay',
+        'enter on-anchor pointer-events-auto flex items-start gap-3 rounded-card bg-anchor px-5 py-4 text-body text-paper shadow-lift',
         item.leaving && 'opacity-0 transition-opacity duration-(--duration-exit)',
       )}
       onMouseEnter={() => setPaused(true)}
@@ -75,14 +76,13 @@ function ToastView({ item, onDismiss }: { item: ToastItem; onDismiss: (id: numbe
       onFocus={() => setPaused(true)}
       onBlur={() => setPaused(false)}
     >
-      {item.tone === 'neutral' ? null : (
-        <Icon aria-hidden className={cx('mt-0.5 size-4 shrink-0', item.tone === 'negative' ? 'text-negative' : 'text-positive')} />
-      )}
+      {item.tone === 'negative' ? <MarginMark className="mt-0.5" /> : null}
+      {item.tone === 'positive' ? <Check aria-hidden className="mt-1 size-4 shrink-0" /> : null}
       <p className="flex-1">{item.message}</p>
       <button
         type="button"
         onClick={() => onDismiss(item.id)}
-        className="pressable -mr-1 rounded-sm p-0.5 text-ink-muted hover:text-ink"
+        className="pressable -mr-1 grid size-7 place-items-center rounded-pill text-paper hover:bg-paper hover:text-ink"
         aria-label={t('common.dismiss')}
       >
         <X aria-hidden className="size-4" />

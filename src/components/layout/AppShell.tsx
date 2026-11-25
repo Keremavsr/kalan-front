@@ -1,39 +1,33 @@
-import type { ReactNode } from 'react';
-import { NavLink } from 'react-router-dom';
+import { useEffect, useState, type ReactNode } from 'react';
+import { Plus, Settings } from 'lucide-react';
+import { Link, NavLink } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { useProviders, useStatements } from '../../api/queries';
+import { Logo } from '../brand/Logo';
+import { Scribble } from '../pencil';
+import { Button, buttonClass } from '../ui';
+import { ManualEntryModal } from '../../features/manual/ManualEntryModal';
 import { cx } from '../../lib/cx';
 
-const primary = [
-  { to: '/', key: 'nav.calendar', end: true },
-  { to: '/month', key: 'nav.month', end: false },
-  { to: '/subscriptions', key: 'nav.subscriptions', end: false },
-  { to: '/watch', key: 'nav.watch', end: false },
+/** Main menu, in reading order. Settings sits apart as an icon. */
+const NAV = [
+  { to: '/', key: 'nav.overview', end: true },
+  { to: '/installments', key: 'nav.installments', end: false },
+  { to: '/spending', key: 'nav.spending', end: false },
+  { to: '/recurring', key: 'nav.recurring', end: false },
+  { to: '/rights', key: 'nav.rights', end: false },
+  { to: '/statements', key: 'nav.statements', end: false },
 ] as const;
 
-const secondary = [
-  { to: '/upload', key: 'nav.upload', end: false },
-  { to: '/setup', key: 'nav.setup', end: false },
-] as const;
-
-function NavItem({ to, label, end }: { to: string; label: string; end: boolean }) {
-  return (
-    <li>
-      <NavLink
-        to={to}
-        end={end}
-        className={({ isActive }) =>
-          cx(
-            'pressable relative flex h-9 items-center rounded-sm px-3 text-sm',
-            'before:absolute before:top-2 before:bottom-2 before:left-0 before:w-0.5 before:rounded-full before:transition-colors before:duration-(--duration-fast)',
-            isActive ? 'font-medium text-ink before:bg-ink' : 'text-ink-muted before:bg-transparent hover:bg-sunken hover:text-ink',
-          )
-        }
-      >
-        {label}
-      </NavLink>
-    </li>
-  );
+function useScrolled() {
+  const [scrolled, setScrolled] = useState(false);
+  useEffect(() => {
+    const check = () => setScrolled(window.scrollY > 4);
+    check();
+    window.addEventListener('scroll', check, { passive: true });
+    return () => window.removeEventListener('scroll', check);
+  }, []);
+  return scrolled;
 }
 
 export function AppShell({ children }: { children: ReactNode }) {
@@ -43,40 +37,72 @@ export function AppShell({ children }: { children: ReactNode }) {
   const latest = statements.data?.items[0];
   const selected = providers.data?.providers.find((p) => p.id === providers.data?.selected);
   const isMock = import.meta.env.VITE_KALAN_MOCK === '1';
+  const scrolled = useScrolled();
+  const [manualOpen, setManualOpen] = useState(false);
 
   return (
-    <div className="flex min-h-dvh">
+    <div className="flex min-h-dvh flex-col">
       <a
         href="#main"
-        className="sr-only z-50 rounded-md bg-ink px-3 py-2 text-paper focus:not-sr-only focus:fixed focus:top-3 focus:left-3"
+        className="sr-only z-50 rounded-pill bg-ink px-4 py-2 text-paper focus:not-sr-only focus:fixed focus:top-3 focus:left-3"
       >
         {t('common.skipToContent')}
       </a>
-      <aside className="sticky top-0 flex h-dvh w-sidebar shrink-0 flex-col border-r border-line bg-paper px-4 py-6">
-        <div className="px-3">
-          <p className="font-display text-2xl leading-none font-semibold tracking-tight text-ink">kalan</p>
-          {latest ? <p className="mt-2 font-mono text-xs text-ink-muted">{t('common.card', { last4: latest.card_last4 })}</p> : null}
+      <header
+        className={cx(
+          'sticky top-0 z-40 border-b bg-ground transition-[border-color] duration-(--duration-2) ease-(--ease-out)',
+          scrolled ? 'border-line' : 'border-transparent',
+        )}
+      >
+        <div className="mx-auto flex h-(--header-height) max-w-content items-center gap-6 px-(--space-gutter)">
+          <Link to="/" aria-label={t('nav.home')} className="shrink-0 rounded-sm py-2">
+            <Logo className="h-7 w-auto text-ink" />
+          </Link>
+          <nav aria-label={t('nav.label')} className="ml-auto min-w-0">
+            <ul className="flex items-center gap-x-5 text-table font-semibold xl:gap-x-7">
+              {NAV.map((item) => (
+                <li key={item.to}>
+                  <NavLink
+                    to={item.to}
+                    end={item.end}
+                    className="scribble-host relative inline-flex min-h-11 items-center whitespace-nowrap text-ink"
+                  >
+                    {t(item.key)}
+                    <Scribble seed={item.to} />
+                  </NavLink>
+                </li>
+              ))}
+            </ul>
+          </nav>
+          <div className="flex shrink-0 items-center gap-2">
+            <Button variant="primary" size="sm" dot={<Plus aria-hidden className="size-4" />} onClick={() => setManualOpen(true)}>
+              {t('nav.add')}
+            </Button>
+            <NavLink
+              to="/settings"
+              aria-label={t('nav.settings')}
+              title={t('nav.settings')}
+              className={({ isActive }) => cx(buttonClass('icon', 'sm'), isActive && 'bg-ink text-paper')}
+            >
+              <Settings aria-hidden className="size-4" />
+            </NavLink>
+          </div>
         </div>
-        <nav aria-label={t('nav.label')} className="mt-8 flex flex-1 flex-col">
-          <ul className="flex flex-col gap-0.5">
-            {primary.map((item) => (
-              <NavItem key={item.to} to={item.to} label={t(item.key)} end={item.end} />
-            ))}
-          </ul>
-          <ul className="mt-6 flex flex-col gap-0.5 border-t border-line pt-6">
-            {secondary.map((item) => (
-              <NavItem key={item.to} to={item.to} label={t(item.key)} end={item.end} />
-            ))}
-          </ul>
-        </nav>
-        <div className="space-y-1 px-3 text-xs text-ink-muted">
-          <p>{selected ? t('nav.providerSelected', { name: selected.name }) : t('nav.providerNone')}</p>
-          {isMock ? <p>{t('common.demoData')}</p> : null}
-        </div>
-      </aside>
-      <main id="main" tabIndex={-1} className="min-w-0 flex-1 px-10 py-10 focus:outline-none">
-        <div className="mx-auto max-w-content">{children}</div>
+      </header>
+
+      <main id="main" tabIndex={-1} className="w-full flex-1 focus:outline-none">
+        <div className="mx-auto max-w-content px-(--space-gutter) pt-10 pb-16">{children}</div>
       </main>
+
+      <footer className="mx-auto w-full max-w-content px-(--space-gutter) pb-6">
+        <p className="flex flex-wrap gap-x-5 gap-y-1 border-t border-line pt-4 text-meta text-muted">
+          <span>{selected ? t('nav.providerSelected', { name: selected.name }) : t('nav.providerNone')}</span>
+          {latest ? <span>{t('common.card', { last4: latest.card_last4 })}</span> : null}
+          {isMock ? <span>{t('common.demoData')}</span> : null}
+        </p>
+      </footer>
+
+      <ManualEntryModal open={manualOpen} onClose={() => setManualOpen(false)} />
     </div>
   );
 }

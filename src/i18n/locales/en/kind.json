@@ -1,0 +1,12 @@
+{
+  "purchase": "Purchase",
+  "installment": "Installment",
+  "cash_advance": "Cash advance",
+  "fee": "Fee",
+  "tax": "Tax",
+  "interest": "Interest",
+  "payment": "Payment",
+  "refund": "Refund",
+  "carry_over": "Carried over",
+  "other": "Other"
+}

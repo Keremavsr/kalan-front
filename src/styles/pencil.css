@@ -1,0 +1,97 @@
+/*
+ * Pencil marks. The vermilion pencil is the only red in kalan and it only
+ * draws: a scribble under the active menu link or a hovered text link, a hand
+ * circle around the one number that matters on a screen, a margin mark beside
+ * something critical, and the text caret. Components: src/components/pencil.
+ */
+
+input,
+textarea {
+  caret-color: var(--color-pencil);
+}
+
+/* Scribble underline: drawn on hover, focus or when the link is current. */
+.scribble {
+  position: absolute;
+  left: -2%;
+  bottom: -0.34em;
+  width: 104%;
+  height: 0.5em;
+  overflow: visible;
+  pointer-events: none;
+}
+.scribble path {
+  fill: none;
+  stroke: var(--color-pencil);
+  stroke-width: 2.2;
+  stroke-linecap: round;
+  vector-effect: non-scaling-stroke;
+  /* Gap longer than the path: browsers measure pathLength a hair long, and a 1 1 pattern would leak a tick. */
+  stroke-dasharray: 1 2;
+  stroke-dashoffset: 1;
+  transition: stroke-dashoffset var(--duration-2) var(--ease-out);
+}
+.on-anchor .scribble path {
+  stroke: var(--color-pencil-hi);
+}
+@media (hover: hover) and (pointer: fine) {
+  .scribble-host:hover .scribble path {
+    stroke-dashoffset: 0;
+  }
+}
+.scribble-host:focus-visible .scribble path,
+.scribble-host[aria-current='page'] .scribble path,
+.scribble-host[data-marked='true'] .scribble path {
+  stroke-dashoffset: 0;
+}
+
+/* Hand circle around one figure per screen. Drawn once on first paint. */
+.circled {
+  position: relative;
+  display: inline-block;
+  white-space: nowrap;
+  padding-inline: 0.4em;
+  margin-inline: 0.3em;
+}
+.circled svg {
+  position: absolute;
+  left: -0.35em;
+  top: -0.32em;
+  width: calc(100% + 0.7em);
+  height: calc(100% + 0.64em);
+  overflow: visible;
+  pointer-events: none;
+}
+.circled path {
+  fill: none;
+  stroke: var(--color-pencil);
+  stroke-width: 2;
+  stroke-linecap: round;
+  vector-effect: non-scaling-stroke;
+  stroke-dasharray: 1 2;
+  stroke-dashoffset: 0;
+  transition: stroke-dashoffset var(--duration-3) var(--ease-out);
+  @starting-style {
+    stroke-dashoffset: 1;
+  }
+}
+
+/* Margin mark: a short pencil tick beside a critical line. */
+.margin-mark {
+  display: inline-block;
+  flex: none;
+  width: 1.375rem;
+  height: 1.375rem;
+  overflow: visible;
+}
+.margin-mark path {
+  fill: none;
+  stroke: var(--color-pencil);
+  stroke-width: 2.2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  vector-effect: non-scaling-stroke;
+}
+.pencil-text {
+  color: var(--color-pencil-ink);
+}

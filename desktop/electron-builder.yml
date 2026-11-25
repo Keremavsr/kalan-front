@@ -8,6 +8,8 @@ directories:
   buildResources: desktop/build
 files:
   - package.json
+  - NOTICE
+  - LICENSE
   - dist/**/*
   - desktop/dist/**/*
   - desktop/static/**/*
@@ -24,7 +26,10 @@ asar: true
 electronLanguages:
   - en-US
   - tr
+# App icon: ink square with the sliced instalment pill (scripts/brand). Not under the MIT licence, see NOTICE.
+icon: desktop/build/icon.png
 win:
+  icon: desktop/build/icon.ico
   target:
     - target: nsis
       arch: [x64]
@@ -42,6 +47,7 @@ mac:
       arch: [x64, arm64]
   hardenedRuntime: true
 linux:
+  icon: desktop/build/icons
   category: Finance
   target:
     - AppImage

@@ -1,9 +1,6 @@
 import i18n from 'i18next';
 import { initReactI18next } from 'react-i18next';
-import tr from './locales/tr.json';
-import en from './locales/en.json';
-import pt from './locales/pt.json';
-import es from './locales/es.json';
+import { resources } from './resources';
 
 /** Locales the UI offers today. pt and es have their key files ready but no text yet. */
 export const UI_LOCALES = ['tr', 'en'] as const;
@@ -25,7 +22,7 @@ function initialLanguage(): UiLocale {
 }
 
 void i18n.use(initReactI18next).init({
-  resources: { tr: { translation: tr }, en: { translation: en }, pt: { translation: pt }, es: { translation: es } },
+  resources: resources(),
   lng: initialLanguage(),
   fallbackLng: 'en',
   returnEmptyString: false,

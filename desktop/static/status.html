@@ -2,22 +2,40 @@
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
-    <meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self'; base-uri 'none'; form-action 'none'" />
+    <meta
+      http-equiv="Content-Security-Policy"
+      content="default-src 'none'; script-src 'self'; style-src 'self'; img-src 'self'; font-src 'self'; base-uri 'none'; form-action 'none'"
+    />
+    <meta name="color-scheme" content="light" />
     <title>kalan</title>
+    <link rel="stylesheet" href="status.css" />
     <script src="status.js" defer></script>
   </head>
   <body>
-    <!-- Plain on purpose: the owner restyles the desktop shell later. -->
     <main>
-      <section id="starting">
-        <p data-text="starting">Starting kalan…</p>
+      <img class="mark" src="kalan-wordmark.svg" alt="kalan" width="140" height="28" />
+
+      <section id="starting" aria-live="polite">
+        <p class="lead" data-text="starting">Starting kalan…</p>
+        <div class="track" aria-hidden="true"><div class="run"></div></div>
       </section>
+
       <section id="error" hidden>
-        <h1 data-text="stopped">The kalan back end stopped.</h1>
-        <p id="message"></p>
-        <p><button id="restart" type="button" data-text="restart">Restart</button></p>
-        <p data-text="log">Last log lines:</p>
-        <pre id="stderr"></pre>
+        <h1 data-text="stopped">kalan stopped working</h1>
+        <p class="lead" data-text="explain">Your statements are safe on this computer. Restart it; if it stops again, the lines below say why.</p>
+        <p id="message" class="meta"></p>
+        <p>
+          <button id="restart" type="button" class="pill">
+            <span data-text="restart">Restart</span>
+            <span class="dot" aria-hidden="true">
+              <svg viewBox="0 0 24 24"><path d="M3 12a9 9 0 1 0 3-6.7M3 4v5h5" /></svg>
+            </span>
+          </button>
+        </p>
+        <details>
+          <summary data-text="log">Last log lines</summary>
+          <pre id="stderr"></pre>
+        </details>
       </section>
     </main>
   </body>

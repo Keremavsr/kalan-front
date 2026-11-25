@@ -1,58 +1,102 @@
 @import 'tailwindcss';
 @import './tokens.css';
-
-@import '@fontsource/source-serif-4/400.css';
-@import '@fontsource/source-serif-4/600.css';
-@import '@fontsource/ibm-plex-sans/400.css';
-@import '@fontsource/ibm-plex-sans/500.css';
-@import '@fontsource/ibm-plex-sans/600.css';
-@import '@fontsource/ibm-plex-mono/400.css';
-@import '@fontsource/ibm-plex-mono/500.css';
+@import './pencil.css';
 
 @layer base {
   html {
-    background: var(--color-paper);
+    background: var(--color-ground);
     color: var(--color-ink);
     font-family: var(--font-body);
-    font-size: 15px;
-    line-height: 1.5;
+    font-variation-settings: var(--axes-text);
+    font-size: 16px;
+    line-height: 1.55;
+    /* Every figure in the app lines up in columns. */
+    font-variant-numeric: tabular-nums;
     -webkit-font-smoothing: antialiased;
     text-rendering: optimizeLegibility;
   }
   body {
     min-height: 100dvh;
+    overflow-x: clip;
+  }
+  button,
+  input,
+  select,
+  textarea {
+    font: inherit;
+    font-variation-settings: inherit;
+    color: inherit;
   }
   :focus-visible {
-    outline: 2px solid var(--color-focus);
-    outline-offset: 2px;
-    border-radius: var(--radius-sm);
+    outline: 2px solid var(--color-ink);
+    outline-offset: 3px;
+    border-radius: 4px;
   }
   ::selection {
-    background: var(--color-line-strong);
-  }
-  .tabular {
-    font-variant-numeric: tabular-nums;
+    background: var(--color-line);
   }
 }
 
 @layer components {
+  /* Title roles: the narrow heavy cut of the site, smaller for a desktop tool. */
+  .title-page,
+  .title-section {
+    font-family: var(--font-display);
+    font-variation-settings: var(--axes-display);
+    font-weight: 800;
+    letter-spacing: var(--tracking-display);
+    text-wrap: balance;
+  }
+  .title-page {
+    font-size: var(--text-page);
+    line-height: var(--text-page--line-height);
+  }
+  .title-section {
+    font-size: var(--text-section);
+    line-height: var(--text-section--line-height);
+  }
+
   /* Press feedback for anything pressable */
   .pressable {
     transition:
-      transform var(--duration-press) var(--ease-out),
-      background-color var(--duration-fast) var(--ease-standard),
-      border-color var(--duration-fast) var(--ease-standard),
-      color var(--duration-fast) var(--ease-standard);
+      transform var(--duration-1) var(--ease-out),
+      background-color var(--duration-1) var(--ease-out),
+      border-color var(--duration-1) var(--ease-out),
+      color var(--duration-1) var(--ease-out);
   }
   .pressable:active:not(:disabled) {
     transform: scale(var(--press-scale));
   }
 
+  /* Text roll on pill buttons (the site's R17): the label slides up, a copy follows. */
+  .roll {
+    display: block;
+    height: 1.25em;
+    overflow: hidden;
+    clip-path: inset(0 -0.25em);
+  }
+  .roll > span {
+    display: block;
+    line-height: 1.25em;
+    transition: transform var(--duration-2) var(--ease-out);
+  }
+  .roll-dot {
+    transition: transform var(--duration-2) var(--ease-back);
+  }
+  @media (hover: hover) and (pointer: fine) {
+    .roll-host:hover:not(:disabled) .roll > span {
+      transform: translateY(-100%);
+    }
+    .roll-host:hover:not(:disabled) .roll-dot {
+      transform: scale(1.12) rotate(-8deg);
+    }
+  }
+
   /* Entry for overlays and result panels: short, from a visible start */
   .enter {
     transition:
-      opacity var(--duration-base) var(--ease-out),
-      transform var(--duration-base) var(--ease-out);
+      opacity var(--duration-2) var(--ease-out),
+      transform var(--duration-2) var(--ease-out);
     @starting-style {
       opacity: 0;
       transform: translateY(var(--enter-offset));
@@ -71,7 +115,7 @@
   dialog.modal[open] {
     opacity: 1;
     transform: scale(1);
-    transition-duration: var(--duration-base);
+    transition-duration: var(--duration-1);
     @starting-style {
       opacity: 0;
       transform: scale(var(--enter-scale));
@@ -81,9 +125,9 @@
     background: var(--color-scrim);
     opacity: 0;
     transition:
-      opacity var(--duration-base) var(--ease-out),
-      overlay var(--duration-base) allow-discrete,
-      display var(--duration-base) allow-discrete;
+      opacity var(--duration-1) var(--ease-out),
+      overlay var(--duration-1) allow-discrete,
+      display var(--duration-1) allow-discrete;
   }
   dialog.modal[open]::backdrop {
     opacity: 1;
@@ -92,9 +136,22 @@
     }
   }
 
-  .bar-grow {
-    transform-origin: bottom;
-    transition: transform var(--duration-base) var(--ease-out);
+  /* Bars grow once, on first paint (420ms). Reduced motion: they are simply there. */
+  .bar-x,
+  .bar-y {
+    transition: transform var(--duration-2) var(--ease-out);
+  }
+  .bar-x {
+    transform-origin: left center;
+    @starting-style {
+      transform: scaleX(var(--bar-from));
+    }
+  }
+  .bar-y {
+    transform-origin: bottom center;
+    @starting-style {
+      transform: scaleY(var(--bar-from));
+    }
   }
 
   /* Indeterminate progress: constant motion, so linear */
@@ -109,19 +166,6 @@
       transform: translateX(300%);
     }
   }
-  @media (prefers-reduced-motion: reduce) {
-    .indeterminate {
-      animation: pulse 2s ease-in-out infinite;
-      transform: none;
-      width: 100%;
-    }
-    @keyframes pulse {
-      50% {
-        opacity: 0.4;
-      }
-    }
-  }
-
   .spin {
     animation: spin 0.8s linear infinite;
   }
@@ -131,33 +175,14 @@
     }
   }
   @media (prefers-reduced-motion: reduce) {
-    /* Indeterminate progress: constant motion, so linear */
-  .indeterminate {
-    animation: slide 1.4s linear infinite;
-  }
-  @keyframes slide {
-    from {
-      transform: translateX(-100%);
-    }
-    to {
-      transform: translateX(300%);
-    }
-  }
-  @media (prefers-reduced-motion: reduce) {
     .indeterminate {
-      animation: pulse 2s ease-in-out infinite;
+      animation: none;
       transform: none;
       width: 100%;
+      opacity: 0.5;
     }
-    @keyframes pulse {
-      50% {
-        opacity: 0.4;
-      }
-    }
-  }
-
-  .spin {
-      animation-duration: 2.4s;
+    .spin {
+      animation: none;
     }
   }
 }

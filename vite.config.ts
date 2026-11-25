@@ -17,7 +17,8 @@ export default defineConfig({
           environment: 'jsdom',
           setupFiles: ['./src/test/setup.ts'],
           include: ['src/**/*.test.{ts,tsx}'],
-          css: false,
+          // The token test reads stylesheets as text (?raw); with css: false Vitest would hand it empty strings.
+          css: true,
         },
       },
       {

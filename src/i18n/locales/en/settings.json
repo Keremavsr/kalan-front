@@ -1,0 +1,21 @@
+{
+  "title": "Settings",
+  "providerTitle": "Commentary tool",
+  "providerIntro": "For categories and a short commentary I can use a tool installed on this computer. Without one I only do the arithmetic.",
+  "found": "Found on this computer",
+  "notFound": "Not found",
+  "saved": "{{name}} chosen.",
+  "localeTitle": "Language and format",
+  "locale": "Interface language",
+  "localeTr": "Türkçe",
+  "localeEn": "English",
+  "example": "Amounts and dates look like this: {{amount}}, {{date}}.",
+  "monthsAhead": "Default range for installments",
+  "settingsSaved": "Settings saved.",
+  "privacyTitle": "Privacy",
+  "privacy1": "I read and keep your statements on this computer. The local server only listens on 127.0.0.1.",
+  "privacy2": "Card number, name, address, IBAN and customer number are removed before anything is saved.",
+  "privacy3": "Only the date, description, amount, currency and type of each transaction, plus totals the code computed, go to the tool you chose.",
+  "privacy4": "Code computes the totals and installments; the model never produces a number.",
+  "privacy5": "kalan is open source (MIT licence). You can check all of this by reading the code."
+}

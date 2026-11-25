@@ -1,0 +1,14 @@
+{
+  "label": "Main",
+  "home": "kalan, back to overview",
+  "overview": "Overview",
+  "installments": "Installments",
+  "spending": "Spending",
+  "recurring": "Recurring",
+  "rights": "My rights",
+  "statements": "Statements",
+  "settings": "Settings",
+  "add": "Add purchase",
+  "providerNone": "No commentary tool chosen",
+  "providerSelected": "Commentary: {{name}}"
+}

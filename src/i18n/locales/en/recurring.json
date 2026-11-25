@@ -1,0 +1,15 @@
+{
+  "title": "Recurring",
+  "lead_one": "I found {{count}} charge that comes every month; <c>{{amount}}</c> in the latest month.",
+  "lead_other": "I found {{count}} charges that come every month; <c>{{amount}}</c> in the latest month.",
+  "leadRise": "Price went up: {{list}}.",
+  "leadNoRise": "None of them went up in the latest month.",
+  "listLabel": "Recurring charges",
+  "seen_one": "{{count}} month",
+  "seen_other": "{{count}} months",
+  "previous": "Month before {{amount}}",
+  "same": "No change",
+  "yearly": "{{amount}} a year",
+  "emptyTitle": "No recurring charges found",
+  "rule": "I count a charge as recurring when the same merchant appears in at least two months in a row and the amount moves by less than 25 percent."
+}

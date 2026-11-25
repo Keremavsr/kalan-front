@@ -1,0 +1,15 @@
+{
+  "title": "Düzenli ödemeler",
+  "lead_one": "Her ay gelen {{count}} ödeme buldum; son ay toplamı <c>{{amount}}</c>.",
+  "lead_other": "Her ay gelen {{count}} ödeme buldum; son ay toplamı <c>{{amount}}</c>.",
+  "leadRise": "Fiyatı artan: {{list}}.",
+  "leadNoRise": "Son ay hiçbirinin fiyatı artmadı.",
+  "listLabel": "Düzenli ödemeler",
+  "seen_one": "{{count}} aydır",
+  "seen_other": "{{count}} aydır",
+  "previous": "Önceki ay {{amount}}",
+  "same": "Değişmedi",
+  "yearly": "yılda {{amount}}",
+  "emptyTitle": "Düzenli ödeme bulamadım",
+  "rule": "Aynı işyerinden art arda en az iki ay gelen ve tutarı yüzde 25’ten az değişen ödemeleri düzenli sayıyorum."
+}

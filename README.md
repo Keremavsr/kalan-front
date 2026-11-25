@@ -48,18 +48,34 @@ npm run desktop:build      # Windows NSIS installer (unsigned) in release/
 ```sh
 npm run lint && npm run typecheck && npm test && npm run build
 npm run test:e2e   # Playwright smoke test on the mock build
+npm run build:mock && npm run shots -- <dir>   # review screenshots at 1440x900 and 1024x768, empty and error states
 ```
 
 ## Structure
 
-- `src/styles/tokens.css`: every colour, font, radius, shadow and motion value. Change the look here only.
-  Tailwind's default palette is switched off; a unit test fails if a raw colour appears elsewhere.
-- `src/components/ui`: Button, Field, Modal, Card, Toast, Table, Money, Notice, Segmented.
+- `src/styles/tokens.css`: every colour, font, size, radius, shadow and motion value. Change the look here only.
+  Tailwind's default palette, fonts and radii are switched off; `tokens.test.ts` fails if a raw colour, a font name,
+  a monospaced face or a tinted fill (`bg-x/10`) appears elsewhere, and if the vermilion pencil colour leaves
+  `src/components/pencil`.
+- Type: one family, Bricolage Grotesque (variable, subset to Latin and Latin Extended, `src/assets/fonts`). Titles use
+  the narrow heavy cut; every figure is tabular.
+- `src/components/pencil`: the pencil marks (scribble underline, hand circle, margin mark). The only red in the app.
+- `src/components/ui`: Button (pill), Field (pill input), Modal, Card, Toast, Table, List and ListRow, KeyValue
+  (museum label), StackedBar, EmptyState, Money, Notice, Segmented, PageHeader and Section.
+- `src/components/brand` and `scripts/brand`: the kalan mark, generated from the font (`python scripts/brand/make_brand.py`,
+  then `node scripts/brand/render-icons.mjs` and `python scripts/brand/make_ico.py` for the desktop icons).
 - `src/api`: contract types, HTTP client, mock adapter (`VITE_KALAN_MOCK=1`), TanStack Query hooks.
-- `src/features`: one folder per screen (calendar, month, subscriptions, watch, upload, setup, manual entry).
+- `src/features`: one folder per screen: overview (`/`), installments, spending, recurring, rights, statements,
+  settings, and the manual entry modal. Old v0.1 paths (`/month`, `/subscriptions`, `/watch`, `/upload`, `/setup`)
+  redirect to the new ones.
 - `desktop/src`: Electron main process, sidecar, preload; `desktop/static`: start and error page.
-- `src/i18n/locales`: `tr` and `en` complete; `pt` and `es` have every key, waiting for text.
+- `src/i18n/locales/<lang>/<area>.json`: one file per screen area, so screens can be translated in parallel. `tr` and
+  `en` are complete; `pt` and `es` have every key, waiting for text.
 
 ## Licence
 
-MIT
+The code is MIT (see `LICENSE`).
+
+The kalan name and logo are not licensed under MIT. Forks and redistributions under a different maintainer must use
+a different name and logo. Bricolage Grotesque is under the SIL Open Font License 1.1 (`src/assets/fonts/OFL.txt`).
+See `NOTICE`.

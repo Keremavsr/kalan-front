@@ -1,0 +1,19 @@
+{
+  "title": "Add purchase",
+  "intro": "Add a purchase by hand that is not on a statement yet.",
+  "date": "Date",
+  "description": "Description",
+  "descriptionHint": "For example: ELEKTRO-ORNEK phone",
+  "amount": "Total amount",
+  "amountHint": "For example: 1,234.56",
+  "installments": "Installments",
+  "single": "Single payment",
+  "count_one": "{{count}} installment",
+  "count_other": "{{count}} installments",
+  "each": "{{amount}} per installment",
+  "required": "This field is required.",
+  "amountInvalid": "Write the amount in digits, for example 1,234.56.",
+  "submit": "Add",
+  "added": "Purchase added.",
+  "addedPlan": "Added in {{count}} installments and put on your installments."
+}

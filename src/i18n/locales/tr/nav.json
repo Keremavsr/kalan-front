@@ -1,0 +1,14 @@
+{
+  "label": "Ana menü",
+  "home": "kalan, özete dön",
+  "overview": "Özet",
+  "installments": "Taksitler",
+  "spending": "Harcamalar",
+  "recurring": "Düzenli ödemeler",
+  "rights": "Haklarım",
+  "statements": "Ekstreler",
+  "settings": "Ayarlar",
+  "add": "Harcama ekle",
+  "providerNone": "Yorum aracı seçilmedi",
+  "providerSelected": "Yorumlar: {{name}}"
+}

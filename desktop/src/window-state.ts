@@ -15,7 +15,7 @@ export interface WindowState {
 }
 
 export const DEFAULT_SIZE = { width: 1280, height: 820 };
-export const MIN_SIZE = { width: 900, height: 600 };
+export const MIN_SIZE = { width: 960, height: 640 };
 
 function isRect(value: unknown): value is Rect {
   if (typeof value !== 'object' || value === null) return false;

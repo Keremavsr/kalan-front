@@ -39,9 +39,9 @@ describe('dates and percents', () => {
 
 describe('parseAmountToMinor', () => {
   it('reads Turkish and English input', () => {
-    expect(parseAmountToMinor('1.149,50', 'tr-TR', 'TRY')).toBe(114950);
+    expect(parseAmountToMinor('1.234,56', 'tr-TR', 'TRY')).toBe(123456);
     expect(parseAmountToMinor('1234', 'tr-TR', 'TRY')).toBe(123400);
-    expect(parseAmountToMinor('1,149.50', 'en-GB', 'TRY')).toBe(114950);
+    expect(parseAmountToMinor('1,234.56', 'en-GB', 'TRY')).toBe(123456);
   });
 
   it('rejects text, zero and too many decimals', () => {

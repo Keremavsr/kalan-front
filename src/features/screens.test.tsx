@@ -7,37 +7,42 @@ import { NBSP } from '../lib/format';
 const pdf = () => new File(['%PDF-1.4 invented'], 'ekstre-ekim.pdf', { type: 'application/pdf' });
 const text = (s: string | null | undefined) => (s ?? '').split(NBSP).join(' ');
 
-describe('upload', () => {
+describe('statements', () => {
   it('shows the parse result and explains a mismatch in plain words', async () => {
     const user = userEvent.setup();
-    await renderApp('/upload');
-    await user.upload(await screen.findByLabelText('Dosya seçin'), pdf());
+    await renderApp('/statements');
+    await user.upload(await screen.findByLabelText('Dosya seç'), pdf());
 
     const alert = await screen.findByRole('alert');
     expect(within(alert).getByText('Toplamlar tutmuyor')).toBeInTheDocument();
     expect(text(alert.textContent)).toContain('Aradaki fark 149,99 TL');
-    expect(text(alert.textContent)).toContain('bankanın işlem listesiyle karşılaştırın');
-    expect(screen.getByText('Okunan ekstre')).toBeInTheDocument();
-    expect(text(screen.getByText('•••• 0000').textContent)).toBe('•••• 0000');
+    expect(text(alert.textContent)).toContain('bankanın işlem listesiyle karşılaştır');
+    expect(screen.getByText('Okuduğum ekstre')).toBeInTheDocument();
+    expect(text(screen.getAllByText('•••• 0000')[0]!.textContent)).toBe('•••• 0000');
+    // The uploaded statement joins the list below, marked by the pencil because its totals differ.
+    const list = await screen.findByRole('list', { name: 'Yüklenen ekstreler' });
+    expect(text(list.textContent)).toContain('Toplamlar tutmuyor');
   });
 
   it('refuses a non-PDF file without calling the back end', async () => {
     const user = userEvent.setup({ applyAccept: false });
-    await renderApp('/upload');
-    await user.upload(await screen.findByLabelText('Dosya seçin'), new File(['x'], 'notlar.txt', { type: 'text/plain' }));
-    expect(await screen.findByText('Yalnızca PDF dosyası yüklenebilir.')).toBeInTheDocument();
+    await renderApp('/statements');
+    await user.upload(await screen.findByLabelText('Dosya seç'), new File(['x'], 'notlar.txt', { type: 'text/plain' }));
+    expect(await screen.findByText('Yalnız PDF dosyası yükleyebilirsin.')).toBeInTheDocument();
   });
 });
 
-describe('installment calendar', () => {
+describe('installments', () => {
   it('states the committed future and shows the cash advance parts', async () => {
-    await renderApp('/', { uploaded: true });
+    await renderApp('/installments', { uploaded: true });
 
     const header = await screen.findByText(/şimdiden/);
     await waitFor(() => expect(text(header.textContent)).toContain('28.994,52 TL'));
     expect(text(header.textContent)).toBe(
       'Önümüzdeki 12 ay için şimdiden 28.994,52 TL taksit ödemesi var. En yüksek ay Kasım 2026: 6.997,26 TL. Ocak 2027 ve sonrasında ayda en fazla 3.500,00 TL.',
     );
+    // The figure the screen is about is ringed by the pencil, once.
+    expect(header.querySelectorAll('[data-pencil="circle"]')).toHaveLength(1);
     expect(screen.getByRole('heading', { name: 'Nakit avans taksitinin içeriği' })).toBeInTheDocument();
     expect(screen.getByText('BSMV')).toBeInTheDocument();
     expect(screen.getByText('KKDF')).toBeInTheDocument();
@@ -45,7 +50,7 @@ describe('installment calendar', () => {
 
   it('switches to 6 months', async () => {
     const user = userEvent.setup();
-    await renderApp('/');
+    await renderApp('/installments');
     await screen.findByText(/şimdiden/);
     await user.click(screen.getByLabelText('6 ay'));
     await waitFor(() => expect(screen.getByText(/Önümüzdeki 6 ay/)).toBeInTheDocument());
@@ -55,7 +60,7 @@ describe('installment calendar', () => {
 describe('manual entry', () => {
   it('validates fields, then adds an installment plan', async () => {
     const user = userEvent.setup();
-    await renderApp('/');
+    await renderApp('/installments');
     await user.click(await screen.findByRole('button', { name: 'Harcama ekle' }));
     const dialog = await screen.findByRole('dialog');
     await user.click(within(dialog).getByRole('button', { name: 'Ekle' }));
@@ -64,7 +69,7 @@ describe('manual entry', () => {
     await user.type(within(dialog).getByLabelText('Açıklama'), 'TELEFON-ORNEK');
     await user.type(within(dialog).getByLabelText('Toplam tutar'), 'on bin');
     await user.click(within(dialog).getByRole('button', { name: 'Ekle' }));
-    expect(within(dialog).getByText('Tutarı rakamla yazın, örnek 1.149,50.')).toBeInTheDocument();
+    expect(within(dialog).getByText('Tutarı rakamla yaz, örnek 1.234,56.')).toBeInTheDocument();
 
     await user.clear(within(dialog).getByLabelText('Toplam tutar'));
     await user.type(within(dialog).getByLabelText('Toplam tutar'), '12.000');
@@ -72,15 +77,15 @@ describe('manual entry', () => {
     expect(text(within(dialog).getByText(/Taksit başına/).textContent)).toBe('Taksit başına 2.000,00 TL');
     await user.click(within(dialog).getByRole('button', { name: 'Ekle' }));
 
-    expect(await screen.findByText('6 taksitli harcama eklendi ve takvime işlendi.')).toBeInTheDocument();
+    expect(await screen.findByText('6 taksitli harcama eklendi ve taksitlere işlendi.')).toBeInTheDocument();
     expect(await screen.findAllByText('TELEFON-ORNEK')).not.toHaveLength(0);
   });
 });
 
-describe('month', () => {
+describe('spending', () => {
   it('shows the change against the previous month and filters transactions', async () => {
     const user = userEvent.setup();
-    await renderApp('/month/2026-09');
+    await renderApp('/spending/2026-09');
     const lead = await screen.findByText(/ekstresinde/);
     expect(text(lead.textContent)).toContain('7.683,17 TL');
     expect(text(screen.getByText(/Bir önceki ay/).textContent)).toContain('9.415,63 TL');
@@ -92,22 +97,37 @@ describe('month', () => {
     await user.selectOptions(screen.getByLabelText('Tür'), 'installment');
     expect(screen.getByText('2 / 11 işlem')).toBeInTheDocument();
   });
+
+  it('moves an old v0.1 link to the new screen', async () => {
+    await renderApp('/month/2026-09');
+    expect(await screen.findByText(/ekstresinde/)).toBeInTheDocument();
+    expect(screen.getByRole('heading', { level: 1, name: 'Harcamalar' })).toBeInTheDocument();
+  });
 });
 
-describe('subscriptions', () => {
+describe('recurring', () => {
   it('lists recurring charges and the price rise', async () => {
-    await renderApp('/subscriptions', { uploaded: true });
-    const row = (await screen.findByRole('rowheader', { name: 'STREAMFLIX' })).closest('tr')!;
+    await renderApp('/recurring', { uploaded: true });
+    const list = await screen.findByRole('list', { name: 'Düzenli ödemeler' });
+    const row = within(list).getByText('STREAMFLIX').closest('li')!;
     expect(text(row.textContent)).toContain('+%20');
     expect(text(row.textContent)).toContain('yılda +360,00 TL');
     expect(text(screen.getByText(/Fiyatı artan/).textContent)).toContain('Fiyatı artan: STREAMFLIX (+%20).');
   });
 });
 
-describe('setup and watch items', () => {
+describe('rights', () => {
+  it('holds its place with an empty state', async () => {
+    await renderApp('/rights');
+    expect(await screen.findByRole('heading', { level: 1, name: 'Haklarım' })).toBeInTheDocument();
+    expect(screen.getByRole('heading', { name: 'Şimdilik itiraz edilecek bir şey yok' })).toBeInTheDocument();
+  });
+});
+
+describe('settings and overview', () => {
   it('shows which providers exist, then analyses a statement with a pending state', async () => {
     const user = userEvent.setup();
-    await renderApp('/setup', { analysisMs: 60, uploaded: true });
+    await renderApp('/settings', { analysisMs: 60, uploaded: true });
 
     const claude = await screen.findByRole('radio', { name: /Claude Code/ });
     expect(screen.getByRole('radio', { name: /Gemini CLI/ })).toBeDisabled();
@@ -115,19 +135,25 @@ describe('setup and watch items', () => {
     await user.click(claude);
     expect(await screen.findByText('Claude Code seçildi.')).toBeInTheDocument();
 
-    await user.click(screen.getByRole('link', { name: 'Dikkat edilecekler' }));
+    await user.click(screen.getByRole('link', { name: 'Özet' }));
     await user.click(await screen.findByRole('button', { name: 'Yorumla' }));
     expect(await screen.findByText(/Yorum hazırlanıyor/)).toBeInTheDocument();
     expect(await screen.findByText('Nakit avansın iki taksiti kaldı', {}, { timeout: 4000 })).toBeInTheDocument();
     const link = screen.getAllByRole('link', { name: /STREAMFLIX/ })[0]!;
-    expect(link).toHaveAttribute('href', '/month/2026-10?tx=tx_10_03');
+    expect(link).toHaveAttribute('href', '/spending/2026-10?tx=tx_10_03');
+  });
+
+  it('says plainly when a month has no statement', async () => {
+    await renderApp('/spending/2027-01');
+    expect(await screen.findByRole('heading', { name: 'Bu ay boş' })).toBeInTheDocument();
+    expect(screen.getByText('Bu ay için yüklenmiş ekstre yok.')).toBeInTheDocument();
   });
 
   it('switches the interface to English', async () => {
     const user = userEvent.setup();
-    await renderApp('/setup');
+    await renderApp('/settings');
     await user.click(await screen.findByLabelText('English'));
-    expect(await screen.findByRole('heading', { name: 'Setup' })).toBeInTheDocument();
-    expect(text(screen.getByText(/Amounts and dates look like this/).textContent)).toContain('TRY 1,149.50');
+    expect(await screen.findByRole('heading', { level: 1, name: 'Settings' })).toBeInTheDocument();
+    expect(text(screen.getByText(/Amounts and dates look like this/).textContent)).toContain('TRY 1,234.56');
   });
 });

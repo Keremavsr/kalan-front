@@ -1,0 +1,21 @@
+{
+  "title": "Ayarlar",
+  "providerTitle": "Yorum aracı",
+  "providerIntro": "Kategoriler ve kısa yorum için bu bilgisayarda kurulu bir aracı kullanabilirim. Araç seçmezsen yalnız hesap yaparım.",
+  "found": "Bu bilgisayarda bulundu",
+  "notFound": "Bulunamadı",
+  "saved": "{{name}} seçildi.",
+  "localeTitle": "Dil ve biçim",
+  "locale": "Arayüz dili",
+  "localeTr": "Türkçe",
+  "localeEn": "English",
+  "example": "Tutar ve tarih şöyle görünür: {{amount}}, {{date}}.",
+  "monthsAhead": "Taksitlerde varsayılan süre",
+  "settingsSaved": "Ayarlar kaydedildi.",
+  "privacyTitle": "Gizlilik",
+  "privacy1": "Ekstreni bu bilgisayarda okuyor ve saklıyorum. Yerel sunucu yalnız 127.0.0.1 adresini dinliyor.",
+  "privacy2": "Kart numarası, ad, adres, IBAN ve müşteri numarası kaydedilmeden önce siliniyor.",
+  "privacy3": "Seçtiğin araca yalnız işlem tarihi, açıklaması, tutarı, para birimi ve türü ile kodun hesapladığı toplamlar gider.",
+  "privacy4": "Toplamları ve taksitleri kod hesaplıyor; model sayı üretmiyor.",
+  "privacy5": "kalan açık kaynaklı (MIT lisansı). Burada yazanları kodu okuyarak doğrulayabilirsin."
+}

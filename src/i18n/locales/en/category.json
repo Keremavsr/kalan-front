@@ -1,0 +1,16 @@
+{
+  "groceries": "Groceries",
+  "dining": "Eating out",
+  "transport": "Transport and fuel",
+  "subscriptions": "Subscriptions",
+  "electronics": "Electronics",
+  "home": "Home",
+  "health": "Health",
+  "travel": "Travel",
+  "education": "Books and learning",
+  "cash_advance": "Cash advance",
+  "interest_tax": "Interest and tax",
+  "fees": "Fees",
+  "other": "Other",
+  "none": "Uncategorised"
+}

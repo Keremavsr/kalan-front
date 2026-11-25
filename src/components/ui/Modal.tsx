@@ -1,6 +1,7 @@
 import { useEffect, useId, useRef, type ReactNode } from 'react';
 import { X } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
+import { Button } from './Button';
 
 export interface ModalProps {
   open: boolean;
@@ -13,7 +14,7 @@ export interface ModalProps {
 
 /**
  * Native <dialog> opened with showModal(): focus is trapped, Escape closes,
- * focus returns to the trigger. Enter and exit are CSS transitions (base.css).
+ * focus returns to the trigger. A paper sheet lifted off the ground; enter and exit are CSS (index.css).
  */
 export function Modal({ open, onClose, title, description, children, footer }: ModalProps) {
   const ref = useRef<HTMLDialogElement>(null);
@@ -31,7 +32,7 @@ export function Modal({ open, onClose, title, description, children, footer }: M
   return (
     <dialog
       ref={ref}
-      className="modal m-auto w-full max-w-lg rounded-lg border border-line bg-surface p-0 text-ink shadow-overlay"
+      className="modal m-auto w-full max-w-xl rounded-card bg-paper p-0 text-ink shadow-lift"
       aria-labelledby={titleId}
       aria-describedby={description ? descId : undefined}
       onCancel={(event) => {
@@ -42,28 +43,21 @@ export function Modal({ open, onClose, title, description, children, footer }: M
         if (event.target === event.currentTarget) onClose();
       }}
     >
-      <div className="flex items-start justify-between gap-4 border-b border-line px-5 py-4">
+      <div className="mx-7 flex items-start justify-between gap-4 border-b border-ink pt-6 pb-4">
         <div>
-          <h2 id={titleId} className="font-display text-xl leading-tight">
+          <h2 id={titleId} className="title-section">
             {title}
           </h2>
           {description ? (
-            <p id={descId} className="mt-1 text-sm text-ink-muted">
+            <p id={descId} className="mt-2 text-body text-muted">
               {description}
             </p>
           ) : null}
         </div>
-        <button
-          type="button"
-          onClick={onClose}
-          className="pressable -mr-1 rounded-sm p-1 text-ink-muted hover:bg-sunken hover:text-ink"
-          aria-label={t('common.close')}
-        >
-          <X aria-hidden className="size-4" />
-        </button>
+        <Button variant="icon" size="sm" onClick={onClose} aria-label={t('common.close')} icon={<X aria-hidden className="size-4" />} />
       </div>
-      <div className="px-5 py-4">{children}</div>
-      {footer ? <div className="flex justify-end gap-2 border-t border-line px-5 py-3">{footer}</div> : null}
+      <div className="px-7 py-6">{children}</div>
+      {footer ? <div className="flex justify-end gap-3 px-7 pb-6">{footer}</div> : null}
     </dialog>
   );
 }

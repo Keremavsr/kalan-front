@@ -47,7 +47,7 @@ describe('window state', () => {
 
   it('drops the position of a window left on a removed display and ignores bad files', () => {
     const state = parseWindowState('{"bounds":{"x":2500,"y":80,"width":300,"height":200}}');
-    expect(fitToDisplays(state, [display])).toEqual({ width: 900, height: 600 });
+    expect(fitToDisplays(state, [display])).toEqual({ width: 960, height: 640 });
     expect(parseWindowState('not json')).toBeNull();
     expect(fitToDisplays(null, [display])).toEqual({ width: 1280, height: 820 });
   });

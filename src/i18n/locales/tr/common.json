@@ -1,0 +1,16 @@
+{
+  "loading": "Yükleniyor",
+  "retry": "Yeniden dene",
+  "loadErrorTitle": "Veriye ulaşamadım",
+  "loadError": "Yerel sunucu yanıt vermiyor. Birazdan yeniden dene; sürerse uygulamayı kapatıp aç.",
+  "cancel": "Vazgeç",
+  "close": "Kapat",
+  "card": "Kart •••• {{last4}}",
+  "demoData": "Örnek veriyle çalışıyor",
+  "skipToContent": "İçeriğe geç",
+  "manual": "Elle girildi",
+  "left_one": "{{count}} taksit kaldı",
+  "left_other": "{{count}} taksit kaldı",
+  "dismiss": "Bildirimi kapat",
+  "critical": "Kritik"
+}
