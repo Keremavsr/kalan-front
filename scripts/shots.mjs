@@ -11,7 +11,7 @@ import { chromium } from '@playwright/test';
 
 const root = fileURLToPath(new URL('..', import.meta.url));
 const outDir = resolve(process.argv[2] ?? join(root, 'test-results', 'shots'));
-const base = 'http://127.0.0.1:4317';
+const base = `http://127.0.0.1:${process.env.KALAN_PREVIEW_PORT ?? 4317}`;
 const pdf = join(root, 'e2e', 'fixtures', 'ornek-ekstre.pdf');
 const vite = join(root, 'node_modules', 'vite', 'bin', 'vite.js');
 mkdirSync(outDir, { recursive: true });
