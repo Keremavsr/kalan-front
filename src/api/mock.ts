@@ -1068,10 +1068,16 @@ export function createMockApi(options: MockOptions = {}): KalanApi {
       state.manualTransactions.push(tx);
       return wait(tx);
     },
+    // `month` is the statement month: a statement row belongs to the month of its statement's period_end,
+    // a manual or imported row to the month of its own date (contract: GET /transactions).
     listTransactions: (filter = {}) =>
       wait({
-        items: allRows()
-          .filter((t) => (!filter.month || monthOf(t.date) === filter.month) && (!filter.source || t.source === filter.source))
+        items: [
+          ...state.statements.flatMap((s) => s.transactions.map((t) => ({ t, month: monthOf(s.period_end) }))),
+          ...looseRows().map((t) => ({ t, month: monthOf(t.date) })),
+        ]
+          .filter(({ t, month }) => (!filter.month || month === filter.month) && (!filter.source || t.source === filter.source))
+          .map(({ t }) => t)
           .sort((a, b) => a.date.localeCompare(b.date)),
       }),
     deleteTransaction: (id) => {

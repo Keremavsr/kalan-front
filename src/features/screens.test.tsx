@@ -105,16 +105,7 @@ describe('spending', () => {
   });
 });
 
-describe('recurring', () => {
-  it('lists recurring charges and the price rise', async () => {
-    await renderApp('/recurring', { uploaded: true });
-    const list = await screen.findByRole('list', { name: 'Düzenli ödemeler' });
-    const row = within(list).getByText('STREAMFLIX').closest('li')!;
-    expect(text(row.textContent)).toContain('+%20');
-    expect(text(row.textContent)).toContain('yılda +360,00 TL');
-    expect(text(screen.getByText(/Fiyatı artan/).textContent)).toContain('Fiyatı artan: STREAMFLIX (+%20).');
-  });
-});
+// The recurring screen's test lives in recurring/recurring.test.tsx.
 
 describe('rights', () => {
   it('holds its place with an empty state', async () => {

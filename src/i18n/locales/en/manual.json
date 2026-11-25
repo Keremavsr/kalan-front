@@ -15,5 +15,8 @@
   "amountInvalid": "Write the amount in digits, for example 1,234.56.",
   "submit": "Add",
   "added": "Purchase added.",
-  "addedPlan": "Added in {{count}} installments and put on your installments."
+  "addedPlan": "Added in {{count}} installments and put on your installments.",
+  "day": "Day",
+  "month": "Month",
+  "year": "Year"
 }
