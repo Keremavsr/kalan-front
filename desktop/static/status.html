@@ -1,0 +1,24 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self'; base-uri 'none'; form-action 'none'" />
+    <title>kalan</title>
+    <script src="status.js" defer></script>
+  </head>
+  <body>
+    <!-- Plain on purpose: the owner restyles the desktop shell later. -->
+    <main>
+      <section id="starting">
+        <p data-text="starting">Starting kalan…</p>
+      </section>
+      <section id="error" hidden>
+        <h1 data-text="stopped">The kalan back end stopped.</h1>
+        <p id="message"></p>
+        <p><button id="restart" type="button" data-text="restart">Restart</button></p>
+        <p data-text="log">Last log lines:</p>
+        <pre id="stderr"></pre>
+      </section>
+    </main>
+  </body>
+</html>

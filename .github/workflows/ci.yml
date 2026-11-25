@@ -5,6 +5,10 @@ on:
     branches: [main]
   pull_request:
 
+env:
+  # CI only compiles and unit-tests the desktop shell; it never launches Electron.
+  ELECTRON_SKIP_BINARY_DOWNLOAD: 1
+
 permissions:
   contents: read
 
@@ -22,6 +26,7 @@ jobs:
       - run: npm run typecheck
       - run: npm test
       - run: npm run build
+      - run: npm run desktop:compile
 
   e2e:
     runs-on: ubuntu-latest

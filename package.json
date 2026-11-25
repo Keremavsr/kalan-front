@@ -1,7 +1,10 @@
 {
   "name": "kalan-front",
+  "productName": "kalan",
   "version": "0.1.0",
   "description": "kalan front end: installment-first credit card tracker",
+  "author": "kalan contributors",
+  "main": "desktop/dist/main.js",
   "scripts": {
     "dev": "vite",
     "dev:mock": "cross-env VITE_KALAN_MOCK=1 vite",
@@ -9,11 +12,16 @@
     "build:mock": "tsc -b && vite build --mode mock",
     "preview": "vite preview",
     "lint": "eslint .",
-    "typecheck": "tsc -b --noEmit",
+    "typecheck": "tsc -b --noEmit && tsc -p desktop/tsconfig.json",
     "test": "vitest run",
     "test:watch": "vitest",
     "test:e2e": "playwright test",
-    "shots": "node scripts/shots.mjs"
+    "shots": "node scripts/shots.mjs",
+    "desktop:compile": "tsc -p desktop/tsconfig.build.json",
+    "desktop:dev": "node scripts/desktop-dev.mjs",
+    "desktop:dev:mock": "cross-env VITE_KALAN_MOCK=1 node scripts/desktop-dev.mjs",
+    "desktop:build": "npm run build && npm run desktop:compile && electron-builder --config desktop/electron-builder.yml --win nsis",
+    "desktop:fetch-back": "node scripts/fetch-back.mjs"
   },
   "license": "MIT",
   "type": "module",
@@ -41,6 +49,8 @@
     "@types/react-dom": "^19.3.0",
     "@vitejs/plugin-react": "^6.3.0",
     "cross-env": "^10.1.0",
+    "electron": "^45.5.0",
+    "electron-builder": "^26.18.0",
     "eslint": "^10.15.0",
     "eslint-plugin-react-hooks": "^7.1.1",
     "eslint-plugin-react-refresh": "^0.5.8",
@@ -52,5 +62,9 @@
     "vite": "^8.3.8",
     "vitest": "^5.1.2"
   },
-  "private": true
+  "private": true,
+  "allowScripts": {
+    "electron": true,
+    "electron-winstaller": false
+  }
 }

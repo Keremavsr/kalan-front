@@ -1,0 +1,50 @@
+# electron-builder config for the kalan desktop app. Run through `npm run desktop:build` (Windows NSIS, unsigned).
+# mac and linux targets are configured here but not built on this machine.
+appId: io.github.kalan
+productName: kalan
+copyright: Copyright (c) kalan contributors
+directories:
+  output: release
+  buildResources: desktop/build
+files:
+  - package.json
+  - dist/**/*
+  - desktop/dist/**/*
+  - desktop/static/**/*
+  - "!**/node_modules/**/*"
+  - "!desktop/dist/**/*.test.*"
+extraResources:
+  # Bundled back end (PyInstaller binary from the back repo), copied in by scripts/fetch-back.mjs.
+  - from: desktop/resources/kalan-back
+    to: kalan-back
+    filter:
+      - kalan
+      - kalan.exe
+asar: true
+electronLanguages:
+  - en-US
+  - tr
+win:
+  target:
+    - target: nsis
+      arch: [x64]
+  # Unsigned for now: signing is skipped, exe name and version metadata are still written.
+  signExecutable: false
+nsis:
+  oneClick: false
+  perMachine: false
+  allowToChangeInstallationDirectory: true
+  artifactName: kalan-setup-${version}.${ext}
+mac:
+  category: public.app-category.finance
+  target:
+    - target: dmg
+      arch: [x64, arm64]
+  hardenedRuntime: true
+linux:
+  category: Finance
+  target:
+    - AppImage
+    - deb
+  maintainer: kalan contributors
+publish: null

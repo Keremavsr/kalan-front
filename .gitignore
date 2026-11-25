@@ -4,3 +4,7 @@ dist
 test-results
 playwright-report
 .env.local
+release
+desktop/dist
+desktop/resources/kalan-back/kalan
+desktop/resources/kalan-back/kalan.exe
