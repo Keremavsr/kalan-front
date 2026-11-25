@@ -190,5 +190,27 @@
   "diagnoseNone": "none found",
   "diagnoseText": "Report",
   "diagnoseTextHint": "Read it once before sending. If a line still looks personal, delete it.",
-  "diagnoseCopy": "Copy the report"
+  "diagnoseCopy": "Copy the report",
+  "commentary": {
+    "title": "Commentary",
+    "analyze": "Comment",
+    "again": "Comment again",
+    "pending": "Writing the commentary. This can take 10 to 60 seconds.",
+    "elapsed": "{{seconds}} s",
+    "failed": "I could not get the commentary: {{error}}",
+    "none": "I have not commented on this statement yet.",
+    "noProvider": "Choose an AI tool in Settings first.",
+    "goSetup": "Go to settings",
+    "items": "Points to watch",
+    "meta": "Written with {{provider}}, {{date}}.",
+    "done": "The commentary is ready.",
+    "sent": "The tool receives only the date, description, amount, currency and type of each transaction in this statement."
+  },
+  "missing": {
+    "title_one": "A statement is missing",
+    "title_other": "Missing statements",
+    "row_one": "{{card}}: the {{range}} statement is missing.",
+    "row_other": "{{card}}: the {{range}} statements are missing.",
+    "how": "Download the PDF statements for those months from your bank’s app or website and drop them below. Without them, installment and spending totals for those months are incomplete."
+  }
 }

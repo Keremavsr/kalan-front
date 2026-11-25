@@ -45,6 +45,10 @@ export const keys = {
   subscriptions: ['subscriptions'] as const,
   alerts: ['alerts'] as const,
   analysis: (id: string) => ['analysis', id] as const,
+  analysisRun: ['analysis-all'] as const,
+  cards: ['cards'] as const,
+  suggestions: ['suggestions'] as const,
+  frequentPlaces: ['frequent-places'] as const,
   insights: {
     all: ['insights'] as const,
     rules: ['insights', 'rules'] as const,
@@ -79,7 +83,28 @@ export const invalidation = {
     keys.subscriptions,
     keys.alerts,
     keys.insights.all,
+    keys.cards,
+    keys.suggestions,
+    keys.frequentPlaces,
   ],
+  /** What the run over every statement changes: categories, commentary, suggestions. */
+  analysisRun: [
+    keys.statements,
+    ['analysis'],
+    ['transactions'],
+    ['monthly'],
+    keys.subscriptions,
+    keys.alerts,
+    keys.insights.all,
+    keys.suggestions,
+    keys.frequentPlaces,
+  ],
+  /** Closing or reopening a plan moves the schedule, the forecast and the alerts. */
+  plans: [['schedule'], ['simulation'], keys.alerts, keys.insights.all, keys.suggestions],
+  /** A new expected amount moves the forecast and the subscription list. */
+  expected: [keys.subscriptions, keys.alerts, keys.insights.all, keys.suggestions],
+  /** A card name shows on every screen. */
+  cards: [keys.cards, keys.statements, ['transactions'], ['schedule'], keys.alerts, keys.subscriptions, keys.insights.all],
   /** Fixed costs: the schedule's `fixed` series, forecast and fixed-cost matching. */
   fixedCosts: [keys.fixedCosts, ['schedule'], ['simulation'], keys.alerts, keys.insights.all],
   /** A category rule recategorises stored rows. */
@@ -508,4 +533,75 @@ export function useFixedCostMatches() {
 export function useExport() {
   const api = useApi();
   return useMutation({ mutationFn: (query: ExportQuery) => api.exportData(query) });
+}
+
+// -- task 6: cards, plans, suggestions, the run over every statement ------------------------------
+
+export function useCards() {
+  const api = useApi();
+  return useQuery({ queryKey: keys.cards, queryFn: () => api.listCards() });
+}
+
+export function useRenameCard() {
+  const api = useApi();
+  const refresh = useInvalidate(invalidation.cards);
+  return useMutation({
+    mutationFn: ({ id, name }: { id: string; name: string | null }) => api.renameCard(id, name),
+    onSuccess: refresh,
+  });
+}
+
+export function useClosePlan() {
+  const api = useApi();
+  const refresh = useInvalidate(invalidation.plans);
+  return useMutation({
+    mutationFn: async ({ planId, close }: { planId: string; close: boolean }) => {
+      if (close) await api.closePlan(planId);
+      else await api.reopenPlan(planId);
+    },
+    onSuccess: refresh,
+  });
+}
+
+export function useSetSubscriptionExpected() {
+  const api = useApi();
+  const refresh = useInvalidate(invalidation.expected);
+  return useMutation({
+    mutationFn: async ({ id, amount }: { id: string; amount: number | null }) => {
+      if (amount === null) await api.clearSubscriptionExpected(id);
+      else await api.setSubscriptionExpected(id, amount);
+    },
+    onSuccess: refresh,
+  });
+}
+
+/** Suggestion texts come in tr or en; es and pt are written on this side from `kind` and `params`. */
+export function useSuggestions(locale: string) {
+  const api = useApi();
+  const asked = locale === 'tr' ? 'tr' : 'en';
+  return useQuery({ queryKey: [...keys.suggestions, asked], queryFn: () => api.getSuggestions(asked) });
+}
+
+export function useFrequentPlaces() {
+  const api = useApi();
+  return useQuery({ queryKey: keys.frequentPlaces, queryFn: () => api.getFrequentPlaces() });
+}
+
+/** The latest run over every statement. Polls once a second while it runs. */
+export function useAnalysisRun(pollMs = JOB_POLL_MS) {
+  const api = useApi();
+  return useQuery({
+    queryKey: keys.analysisRun,
+    queryFn: () => api.getAnalysisAll(),
+    refetchInterval: (query) => (query.state.data?.status === 'pending' ? pollMs : false),
+  });
+}
+
+export function useStartAnalysisAll() {
+  const api = useApi();
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: () => api.startAnalysisAll(),
+    onSuccess: () => qc.invalidateQueries({ queryKey: keys.analysisRun }),
+  });
 }

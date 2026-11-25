@@ -120,5 +120,30 @@
     "saved": "{{file}} kaydedildi.",
     "failed": "Görseli kaydedemedim.",
     "loadError": "Kartı hazırlayamadım."
+  },
+  "plan": {
+    "paid_one": "{{total}} taksitten {{paid}} tanesi ödendi, {{count}} tanesi kaldı.",
+    "paid_other": "{{total}} taksitten {{paid}} tanesi ödendi, {{count}} tanesi kaldı.",
+    "left_one": "{{count}} taksit kaldı.",
+    "left_other": "{{count}} taksit kaldı.",
+    "next": "Sıradaki: {{month}}, {{amount}}."
+  },
+  "close": {
+    "open": "Bunu kapattım",
+    "openLabel": "{{plan}} planını kapattım",
+    "title": "Bu taksiti kapattın mı?",
+    "intro": "{{plan}}: kalan {{amount}}.",
+    "body": "Kapattığın planı takvimden, tahminden ve toplamlardan çıkarırım. Yanlışlıkla işaretlersen aşağıdaki listeden geri alırsın.",
+    "confirm": "Kapattım",
+    "done": "{{plan}} kapandı; toplamlardan çıkardım.",
+    "failed": "Planı kapatamadım. Birazdan yeniden dene.",
+    "byStatement": "Bu plan ekstrede zaten kapanmış görünüyor.",
+    "listTitle": "Kapanan taksitler",
+    "byYou": "{{date}} tarihinde kapattın",
+    "byStatementNote": "Ekstrede kapanmış",
+    "wouldHave": "kalan {{amount}} toplamlara girmiyor",
+    "undo": "Geri al",
+    "undoLabel": "{{plan}} planını yeniden aç",
+    "undone": "{{plan}} yeniden açıldı."
   }
 }

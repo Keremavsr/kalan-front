@@ -1,7 +1,7 @@
 {
   "title": "Ayarlar",
   "providerTitle": "Yorum aracı",
-  "providerIntro": "Kategoriler ve kısa yorum için bu bilgisayarda kurulu bir aracı kullanabilirim. Araç seçmezsen yalnız hesap yaparım.",
+  "providerIntro": "Bilgisayarında kurulu bir yapay zekâ aracı seçersen harcamalarını kategorilere ayırır ve tasarruf önerisi yazar. Seçmezsen taksitler, ödemeler ve kendi önerilerim yine çalışır.",
   "found": "Bu bilgisayarda bulundu",
   "notFound": "Bulunamadı",
   "saved": "{{name}} seçildi.",
@@ -54,5 +54,17 @@
   "privacy2": "Kart numarası, ad, adres, IBAN ve müşteri numarası kaydedilmeden önce siliniyor.",
   "privacy3": "Seçtiğin araca yalnız işlem tarihi, açıklaması, tutarı, para birimi ve türü ile kodun hesapladığı toplamlar gider.",
   "privacy4": "Toplamları ve taksitleri kod hesaplıyor; model sayı üretmiyor.",
-  "privacy5": "kalan açık kaynaklı (MIT lisansı). Burada yazanları kodu okuyarak doğrulayabilirsin."
+  "privacy5": "kalan açık kaynaklı (MIT lisansı). Burada yazanları kodu okuyarak doğrulayabilirsin.",
+  "providerEffect": "{{name}} seçili. Ekstrelerini sırayla okur, harcamalarını kategorilere ayırır, sonra öneri yazar. Yeni ekstre yüklediğinde onu da kendiliğinden okur; ilerlemeyi menünün altındaki şeritte görürsün.",
+  "providerSent": "Araca ekstrelerindeki işlemlerin tarihi, açıklaması, tutarı, para birimi ve türü gider; öneriler için yalnız toplamlar gider (kategori toplamları, düzenli ödemeler, sık harcama yerleri, taksit yükü).",
+  "cardsTitle": "Kartların",
+  "cardsIntro": "Ekstrelerinde gördüğüm kartlar. Bir ad verirsen her ekranda o adla gösteririm.",
+  "cardName": "Kartın adı",
+  "cardPlaceholder": "Örnek: Market kartım",
+  "cardSave": "Kaydet",
+  "cardSaved": "Artık {{label}} diye gösteriyorum.",
+  "cardCleared": "Adı kaldırdım: {{label}}.",
+  "cardFailed": "Adı kaydedemedim. Birazdan yeniden dene.",
+  "cardCount_one": "{{count}} ekstre, {{span}}",
+  "cardCount_other": "{{count}} ekstre, {{span}}"
 }

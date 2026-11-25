@@ -1,7 +1,7 @@
 {
   "title": "Settings",
   "providerTitle": "Commentary tool",
-  "providerIntro": "For categories and a short commentary I can use a tool installed on this computer. Without one I only do the arithmetic.",
+  "providerIntro": "Pick an AI tool installed on your computer and it sorts your spending into categories and writes ways to save. Without one, installments, payments and my own suggestions still work.",
   "found": "Found on this computer",
   "notFound": "Not found",
   "saved": "{{name}} selected.",
@@ -54,5 +54,17 @@
   "privacy2": "Card number, name, address, IBAN and customer number are removed before anything is stored.",
   "privacy3": "The tool you choose only receives the date, description, amount, currency and kind of each transaction, plus totals the code computed.",
   "privacy4": "Code computes totals and installments; the model does not produce figures.",
-  "privacy5": "kalan is open source (MIT licence). You can check what is written here by reading the code."
+  "privacy5": "kalan is open source (MIT licence). You can check what is written here by reading the code.",
+  "providerEffect": "{{name}} is selected. It reads your statements one by one, sorts your spending into categories, then writes suggestions. It also reads every new statement you upload; the strip under the menu shows its progress.",
+  "providerSent": "The tool receives the date, description, amount, currency and type of each transaction in your statements; for suggestions it receives only totals (category totals, regular payments, places you spend at often, installment load).",
+  "cardsTitle": "Your cards",
+  "cardsIntro": "The cards I found on your statements. Give one a name and every screen shows that name.",
+  "cardName": "Card name",
+  "cardPlaceholder": "For example: Grocery card",
+  "cardSave": "Save",
+  "cardSaved": "I now show it as {{label}}.",
+  "cardCleared": "Name removed: {{label}}.",
+  "cardFailed": "I could not save the name. Try again in a moment.",
+  "cardCount_one": "{{count}} statement, {{span}}",
+  "cardCount_other": "{{count}} statements, {{span}}"
 }

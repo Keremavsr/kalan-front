@@ -1,86 +1,96 @@
 {
   "title": "Visão geral",
-  "lead": "O que você não pode perder na sua última fatura, em um só lugar.",
-  "leadForecast": "Minha previsão para a sua fatura de {{month}} é <c>{{amount}}</c>. Desse total, <m>{{installments}}</m> já está definido pelas parcelas.",
-  "noStatementsTitle": "Nenhuma fatura ainda",
-  "noStatements": "Envie sua primeira fatura e acompanhe daqui as suas parcelas, os gastos e os pontos de atenção.",
-  "goUpload": "Enviar uma fatura",
-  "watchTitle": "Pontos de atenção",
-  "statement": "Fatura",
-  "statementOption": "{{period}}, vencimento {{due}}",
-  "analyze": "Comentar",
-  "reanalyze": "Comentar de novo",
-  "pending": "Escrevendo o comentário. Isso pode levar de 10 a 60 segundos.",
-  "elapsed": "{{seconds}} s",
-  "failed": "Não consegui obter o comentário: {{error}}",
-  "none": "Ainda não comentei esta fatura.",
-  "sentData": "Só a data, a descrição, o valor, a moeda e o tipo de cada transação vão para a ferramenta que você escolheu.",
-  "noProvider": "Escolha uma ferramenta primeiro para receber um comentário.",
-  "goSetup": "Ir para as configurações",
-  "summary": "Em resumo",
-  "items": "Pontos para observar",
-  "cites": "Transações relacionadas",
-  "noCites": "Este ponto não está ligado a uma única transação.",
-  "meta": "Escrito com {{provider}}, {{date}}.",
-  "disclaimer": "O código calcula os totais e as parcelas; o modelo só acrescenta categorias e comentários.",
-  "done": "Comentário pronto.",
-  "first": {
-    "lead": "Quando você enviar a fatura do seu cartão, eu mostro aqui a previsão da próxima, os alertas e a sua carga de parcelas.",
-    "title": "Comece em dois passos",
-    "label": "Primeiros passos",
-    "uploadTitle": "Envie sua fatura",
-    "uploadBody": "Escolha a fatura em PDF do seu banco. O código lê neste computador os valores e as parcelas.",
-    "uploadAction": "Enviar uma fatura",
-    "aiTitle": "Se quiser, escolha uma ferramenta para o comentário",
-    "aiBody": "Para categorias e comentários eu uso uma ferramenta de IA no seu computador. As parcelas e a previsão funcionam sem ela.",
-    "aiAction": "Escolher uma ferramenta",
-    "aiChosen": "Ferramenta selecionada: {{name}}.",
-    "aiChange": "Alterar",
-    "step": "Passo {{n}}"
+  "leadDue": "Your next payments on {{count}} cards come to <c>{{total}}</c>. First up, {{card}}: <m>{{amount}}</m> by {{date}}.",
+  "leadDueOne": "Your next payment is <c>{{total}}</c>: {{card}}, due {{date}}.",
+  "invite": {
+    "text": "Connect the AI tool on your computer and I will sort your spending into categories and tell you where you can save.",
+    "action": "Connect a tool"
   },
-  "forecast": {
-    "title": "Próxima fatura",
-    "description": "Previsão para a fatura de {{month}}. As parcelas são certas; conto as assinaturas pelo último valor e os gastos variáveis pela mediana dos meses anteriores.",
-    "barLabel": "Partes da previsão",
-    "total": "Previsão",
-    "installments": "Parcelas",
-    "installmentsNote": "Parcelas que caem neste mês",
-    "subscriptions": "Assinaturas",
-    "subscriptionsNote": "Pelo último valor: {{names}}",
-    "subscriptionsNone": "Nenhuma assinatura no último mês",
-    "variable": "Gastos variáveis",
-    "variableNote": "Mediana de {{from}} – {{to}}",
-    "variableNoteOne": "Gastos de {{month}}",
-    "variableNoteNone": "Nenhum mês anterior",
-    "variableKnown": "{{amount}} já lançado neste mês",
-    "fixed": "Custos fixos",
-    "fixedNote": "Custos fixos com vencimento neste mês",
-    "fixedExcluded": "Fora do total",
-    "includeFixed": "Custos fixos",
-    "includeFixedYes": "Incluídos",
-    "includeFixedNo": "Fora",
-    "openPeriod": "Gastos que você adicionou manualmente ou importou desde o corte de {{from}}: <m>{{amount}}</m>.",
-    "openPeriodNone": "Você não adicionou nenhum gasto desde o corte de {{from}}.",
-    "backtest": "Testei este método nos últimos {{count}} meses: a previsão errou em média <m>{{mae}}</m> ({{mape}} por cento), quase sempre para {{direction}}.",
-    "backtestNoPct": "Testei este método nos últimos {{count}} meses: a previsão errou em média <m>{{mae}}</m>, quase sempre para {{direction}}.",
-    "backtestLow": "baixo",
-    "backtestHigh": "alto",
-    "backtestEven": "Testei este método nos últimos {{count}} meses: a previsão errou em média <m>{{mae}}</m>.",
-    "backtestNone": "Ainda não consigo testar a previsão. Para isso são necessários pelo menos {{need}} meses de faturas.",
-    "backtestOpen": "Mês a mês",
-    "backtestCaption": "Cada mês foi previsto apenas com os dados anteriores.",
-    "colMonth": "Mês",
-    "colForecast": "Previsão",
-    "colActual": "Realizado",
-    "colError": "Desvio",
-    "loadError": "Não consegui obter a previsão. O back end pode estar fora do ar."
+  "due": {
+    "title": "What you pay",
+    "colCard": "Card",
+    "colDue": "Due date",
+    "colAmount": "Amount",
+    "total": "Total",
+    "estimated": "estimate",
+    "dueOn": "Due {{date}}",
+    "days_one": "{{count}} day left",
+    "days_other": "{{count}} days left",
+    "today": "Due today",
+    "past": "The due date has passed",
+    "statementNote": "Your statement is in. Minimum payment {{minimum}}.",
+    "statementShort": "Your statement is in.",
+    "estimatedNote": "Your statement closes on {{date}}; the amount is my estimate.",
+    "estimatedShort": "Your statement is not in yet; the amount is my estimate.",
+    "parts": "Installments {{installments}}, subscriptions {{subscriptions}}, other spending {{other}}.",
+    "fixed": "Fixed costs such as rent come to <m>{{amount}}</m> this month; they are not paid by card, so they are not in the total.",
+    "none": "There is no statement to pay right now.",
+    "loadError": "I could not get your payments. The back end may be down."
+  },
+  "left": {
+    "title": "Installments left",
+    "sentence_one": "You still owe <m>{{amount}}</m> on {{count}} installment purchase. The last installment is in {{month}}.",
+    "sentence_other": "You still owe <m>{{amount}}</m> in total on {{count}} installment purchases. The last installment is in {{month}}.",
+    "none": "You have no installments left.",
+    "chart": "Installment totals for the next 12 months"
+  },
+  "todo": {
+    "title": "To do"
+  },
+  "suggestions": {
+    "title": "Ways to save",
+    "none": "No suggestions for now.",
+    "more": "{{count}} more suggestions",
+    "less": "Show fewer",
+    "saving": "Keeps <m>{{amount}}</m> a month",
+    "fromAi": "AI suggestion",
+    "aiHint": "These come from my own calculations only. Connect the AI tool and it will look at your spending and add suggestions.",
+    "loadError": "I could not get the suggestions.",
+    "kind": {
+      "price_rise": {
+        "title": "{{merchant}} costs more now",
+        "body": "It went from <m>{{previous}}</m> to <m>{{last}}</m>. If you use it, look at a cheaper plan; if not, cancel it."
+      },
+      "duplicate_service": {
+        "title": "You have {{count}} subscriptions doing the same job",
+        "body": "{{merchants}} do the same thing. Drop one and you keep <m>{{saving}}</m> a month."
+      },
+      "card_fee": {
+        "title": "You can ask for the card fee back",
+        "body": "You paid a <m>{{amount}}</m> fee on {{card}}. Use the letter on the Rights screen to ask your bank for it."
+      },
+      "interest": {
+        "title": "You are paying interest on {{card}}",
+        "body": "The {{month}} statement has <m>{{amount}}</m> of interest and tax. Pay the full balance by the due date and it goes away."
+      },
+      "foreign_currency": {
+        "title": "You spend in foreign currency",
+        "body": "Over the last three months you spent <m>{{amount}}</m> a month in foreign currency. Use a card with no foreign transaction fee for it."
+      },
+      "frequent_place": {
+        "title": "You spend {{amount}} a month at {{merchant}}",
+        "body": "Halve this {{category}} spending and you keep <m>{{yearly}}</m> a year."
+      },
+      "installment_relief": {
+        "title": "Your installments go down in {{month}}",
+        "body": "That month your installments come to <m>{{amount}}</m>. You could set the freed amount aside."
+      }
+    }
+  },
+  "where": {
+    "title": "Where your money goes",
+    "sentence": "In {{month}} you spent <m>{{total}}</m>. Most of it on {{top}}: <m>{{amount}}</m>.",
+    "go": "All spending",
+    "none": "No spending this month.",
+    "loadError": "I could not get your spending."
+  },
+  "load": {
+    "go": "Go to installments",
+    "loadError": "I could not get the installment plan."
   },
   "alerts": {
-    "title": "Alertas",
     "none": "Nenhum alerta no momento.",
     "label": "Alertas",
-    "moreInfo": "Mostrar também {{count}} notas",
-    "lessInfo": "Ocultar as notas",
     "loadError": "Não consegui obter os alertas.",
     "unknown": "Há um alerta que esta versão não reconhece.",
     "go": {
@@ -117,8 +127,10 @@
         "detail": "Na fatura de {{month}}, os gastos em {{currencies}} somaram <m>{{total}}</m>."
       },
       "missing_statement": {
-        "title": "Falta uma fatura",
-        "detail": "Falta a fatura de {{month}} de {{card}}. Os totais de parcelas e gastos desse mês ficam incompletos."
+        "title": "{{card}}: statement missing",
+        "detail": "The {{range}} {{what}} missing. Download the PDF from your bank’s app and drop it on the Statements screen.",
+        "what_one": "statement is",
+        "what_other": "statements are"
       },
       "subscription_price_rise": {
         "title": "{{merchant}} aumentou",
@@ -137,13 +149,22 @@
         "title": "{{merchant}} cobrou depois que você cancelou",
         "detail": "Você marcou como cancelado em {{date}}; depois disso, foram cobrados <m>{{total}}</m>. Você pode contestar com o seu banco."
       }
-    }
+    },
+    "more": "Show {{count}} more",
+    "less": "Show fewer"
   },
-  "load": {
-    "title": "Parcelas ao longo de 12 meses",
-    "sentence": "Há parcelas em {{busy}} dos próximos 12 meses. O mês mais pesado é {{month}}, com <m>{{amount}}</m>.",
-    "sentenceNone": "Nenhuma parcela nos próximos 12 meses.",
-    "go": "Ir para as parcelas",
-    "loadError": "Não consegui obter o plano de parcelas."
+  "first": {
+    "lead": "Quando você enviar a fatura do seu cartão, eu mostro aqui a previsão da próxima, os alertas e a sua carga de parcelas.",
+    "title": "Comece em dois passos",
+    "label": "Primeiros passos",
+    "uploadTitle": "Envie sua fatura",
+    "uploadBody": "Escolha a fatura em PDF do seu banco. O código lê neste computador os valores e as parcelas.",
+    "uploadAction": "Enviar uma fatura",
+    "aiTitle": "Se quiser, escolha uma ferramenta para o comentário",
+    "aiBody": "Para categorias e comentários eu uso uma ferramenta de IA no seu computador. As parcelas e a previsão funcionam sem ela.",
+    "aiAction": "Escolher uma ferramenta",
+    "aiChosen": "Ferramenta selecionada: {{name}}.",
+    "aiChange": "Alterar",
+    "step": "Passo {{n}}"
   }
 }

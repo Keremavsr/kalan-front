@@ -67,8 +67,8 @@ function CardRow({ card, best }: { card: CardOption; best: boolean }) {
 
   return (
     <ListRow
-      meta={t('common.card', { last4: card.card_last4 })}
-      title={`${bankName(card.bank)} ${card.product}`}
+      meta={card.card_label ? bankName(card.bank) : t('common.card', { last4: card.card_last4 })}
+      title={card.card_label ?? `${bankName(card.bank)} ${card.product}`}
       detail={
         <>
           {t('installments.which.row', {

@@ -73,5 +73,26 @@
     "deleted": "{{pattern}} kuralını sildim. Koyduğu kategoriler yerinde kaldı.",
     "gone": "Bu kural zaten silinmiş.",
     "deleteFailed": "Kuralı silemedim. Birazdan yeniden dene."
+  },
+  "unreadable": "Adı okunamayan işyeri",
+  "uncategorized": {
+    "count_one": "Kategorisiz {{count}} işlem var.",
+    "count_other": "Kategorisiz {{count}} işlem var.",
+    "hint": "Göster, sonra her satırın kategorisine tıklayıp seç; aynı işyerinin sonraki harcamaları da o kategoriye girer.",
+    "hintAi": "İstersen hepsini yapay zekâ aracına ayırtırım; kendi seçtiklerin her zaman önce gelir.",
+    "show": "Göster",
+    "showAll": "Hepsini göster",
+    "ai": "Yapay zekâya ayırt",
+    "running": "Ayırıyor",
+    "started": "Kategorisiz işlemleri araca gönderdim. Bitince listeyi yenilerim.",
+    "failed": "Aracı başlatamadım.",
+    "connect": "Yapay zekâ aracını bağla"
+  },
+  "places": {
+    "title": "Sık harcadığın yerler",
+    "intro": "Son {{count}} ayda düzenli gittiğin yerler. Bunlar abonelik değil; ne kadar harcadığın sana kalmış.",
+    "visits_one": "{{months}} ayda {{count}} kez",
+    "visits_other": "{{months}} ayda {{count}} kez",
+    "average": "Ayda ortalama <m>{{amount}}</m>"
   }
 }

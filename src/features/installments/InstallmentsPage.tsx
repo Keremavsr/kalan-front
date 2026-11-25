@@ -1,12 +1,15 @@
 import { useState, type ReactNode } from 'react';
 import { Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
-import { useEarlyPayoffOverview, useSchedule, useSettings, useSimulateInstallment } from '../../api/queries';
+import { useClosePlan, useEarlyPayoffOverview, useSchedule, useSettings, useSimulateInstallment } from '../../api/queries';
 import type { ClosedEarly, Schedule, SchedulePlan, Simulation, SimulationRequest } from '../../api/types';
 import { PencilLink } from '../../components/pencil';
 import {
+  Button,
   Card,
   EmptyState,
+  Modal,
+  Notice,
   Money,
   PageHeader,
   QueryState,
@@ -24,8 +27,11 @@ import {
   Tr,
   buttonClass,
   useMoneyFormatter,
+  useToast,
 } from '../../components/ui';
-import { formatMonth, formatMonthName } from '../../lib/format';
+import { useErrorText } from '../../components/ui/errorText';
+import { CardFilter } from '../cards/CardFilter';
+import { formatDate, formatMonth, formatMonthName } from '../../lib/format';
 import { SERIES_CLASS } from '../../lib/series';
 import { useIntlLocale } from '../../lib/useLocale';
 import { cx } from '../../lib/cx';
@@ -89,7 +95,7 @@ export function InstallmentsPage() {
                 </div>
               </CommitmentChart>
               <PlanTable schedule={schedule.data} />
-              {schedule.data.plans
+              {openPlans(schedule.data)
                 .filter((p) => p.kind === 'cash_advance' && p.breakdown)
                 .map((p) => (
                   <CashAdvanceParts key={p.plan_id} plan={p} schedule={schedule.data} />
@@ -171,9 +177,10 @@ function CommitmentChart({ schedule, sim, children }: { schedule: Schedule; sim:
     return { ...m, purchase: s?.purchase ?? 0, shown: s ? s.with : m.total };
   });
   const max = Math.max(1, ...columns.map((m) => m.shown));
-  const planIndex = new Map(schedule.plans.map((p, i) => [p.plan_id, i]));
-  const planById = new Map(schedule.plans.map((p) => [p.plan_id, p]));
-  const hasTax = schedule.plans.some((p) => p.breakdown);
+  const plans = openPlans(schedule);
+  const planIndex = new Map(plans.map((p, i) => [p.plan_id, i]));
+  const planById = new Map(plans.map((p) => [p.plan_id, p]));
+  const hasTax = plans.some((p) => p.breakdown);
   const hasSim = columns.some((m) => m.purchase > 0);
 
   return (
@@ -195,7 +202,7 @@ function CommitmentChart({ schedule, sim, children }: { schedule: Schedule; sim:
               >
                 {m.items.map((item, i) => {
                   const plan = planById.get(item.plan_id);
-                  const series = plan ? seriesFor(plan, planIndex.get(item.plan_id) ?? 0, schedule.plans) : 'prusya';
+                  const series = plan ? seriesFor(plan, planIndex.get(item.plan_id) ?? 0, plans) : 'prusya';
                   const extra = item.breakdown ? extraOf(item.breakdown) : 0;
                   return (
                     <div
@@ -229,9 +236,9 @@ function CommitmentChart({ schedule, sim, children }: { schedule: Schedule; sim:
         </div>
         <figcaption className="mt-6 flex flex-wrap gap-x-6 gap-y-2 text-meta text-ink">
           <span className="sr-only">{t('installments.legend')}</span>
-          {schedule.plans.map((p, i) => (
+          {plans.map((p, i) => (
             <span key={p.plan_id} className="inline-flex items-center gap-2">
-              <Swatch series={seriesFor(p, i, schedule.plans)} />
+              <Swatch series={seriesFor(p, i, plans)} />
               {p.description}
             </span>
           ))}
@@ -254,27 +261,63 @@ function CommitmentChart({ schedule, sim, children }: { schedule: Schedule; sim:
   );
 }
 
-/** Plan rows by month. The table scrolls inside its card; the plan column stays put. */
+/** Open plans in the back end's order; closed ones come after them in `plans` and are listed apart. */
+function openPlans(schedule: Schedule): SchedulePlan[] {
+  return schedule.plans.filter((p) => !p.closed);
+}
+
+/** "3 taksitten 2 tanesi ödendi, 1 tanesi kaldı. Sıradaki: Kasım 2026, 1.234,56 TL." */
+function usePlanSentence() {
+  const { t } = useTranslation();
+  const fmt = useMoneyFormatter();
+  const locale = useIntlLocale();
+  return (plan: SchedulePlan, currency: string) => {
+    const next =
+      plan.next_month && plan.next_amount
+        ? t('installments.plan.next', { month: formatMonth(plan.next_month, locale), amount: fmt(plan.next_amount, currency) })
+        : '';
+    const head =
+      plan.total_count && plan.paid_count !== null && plan.paid_count !== undefined
+        ? t('installments.plan.paid', { total: plan.total_count, paid: plan.paid_count, count: plan.remaining_count })
+        : t('installments.plan.left', { count: plan.remaining_count });
+    return next ? `${head} ${next}` : head;
+  };
+}
+
+/**
+ * Plan rows by month. The table scrolls inside its card; the plan column stays put and says the plan in a sentence.
+ * With more than one card a filter narrows the rows; the monthly totals then stay off, since they cover every card.
+ */
 function PlanTable({ schedule }: { schedule: Schedule }) {
   const { t } = useTranslation();
   const locale = useIntlLocale();
-  const fmt = useMoneyFormatter();
+  const sentence = usePlanSentence();
   const overview = useEarlyPayoffOverview();
   const [payoffPlan, setPayoffPlan] = useState<SchedulePlan | null>(null);
+  const [closing, setClosing] = useState<SchedulePlan | null>(null);
+  const [card, setCard] = useState('');
   const c = schedule.currency;
   const cells = new Map<string, { amount: number; index: number; count: number }>();
   for (const m of schedule.months) for (const it of m.items) cells.set(`${it.plan_id}|${m.month}`, it);
+  const open = openPlans(schedule);
+  const shown = card ? open.filter((p) => p.card_id === card) : open;
+  const closedPlans = schedule.plans.filter((p) => p.closed && (!card || p.card_id === card));
   const closed = overview.data?.closed_early ?? [];
   const closedIds = new Set(closed.map((x) => x.plan_id));
   const planIds = new Set(schedule.plans.map((p) => p.plan_id));
   const closedElsewhere = closed.filter((x) => !planIds.has(x.plan_id));
 
   return (
-    <Card title={t('installments.planTitle')} description={t('installments.planCaption')} flush>
+    <Card
+      title={t('installments.planTitle')}
+      description={t('installments.planCaption')}
+      actions={<CardFilter value={card} onChange={setCard} className="w-64 max-w-full" />}
+      flush
+    >
       <Table caption={t('installments.planTitle')} captionHidden tableClassName="min-w-max" className="mt-1">
         <THead>
           <Tr>
-            <Th sticky className="w-64 min-w-64">
+            <Th sticky className="w-72 min-w-72">
               {t('installments.colPlan')}
             </Th>
             {schedule.months.map((m, i) => (
@@ -288,32 +331,41 @@ function PlanTable({ schedule }: { schedule: Schedule }) {
           </Tr>
         </THead>
         <TBody>
-          {schedule.plans.map((plan, pi) => {
-            const series = seriesFor(plan, pi, schedule.plans);
+          {shown.map((plan) => {
+            const series = seriesFor(plan, open.indexOf(plan), open);
             return (
               <Tr key={plan.plan_id}>
-                <Th scope="row" sticky className="w-64 min-w-64 font-normal">
+                <Th scope="row" sticky className="w-72 min-w-72 font-normal">
                   <span className="flex items-start gap-2.5">
                     <Swatch series={series} className="mt-1.5" />
                     <span className="min-w-0">
                       <span className="block font-semibold">{plan.description}</span>
                       <span className="block text-meta text-muted">
-                        {t(`installments.kind.${plan.kind}`)} · {t('common.left', { count: plan.remaining_count })}
+                        {plan.card_label ? `${plan.card_label} · ` : ''}
+                        {t(`installments.kind.${plan.kind}`)}
                       </span>
-                      <span className="block text-meta text-muted">
-                        <Rich i18nKey="installments.remainingTotal" values={{ amount: fmt(plan.total_remaining, c) }} />
-                      </span>
+                      <span className="mt-1 block text-meta whitespace-normal text-ink">{sentence(plan, c)}</span>
                       {closedIds.has(plan.plan_id) ? (
                         <span className="block text-meta font-semibold text-ink">{t('installments.payoff.closed')}</span>
                       ) : null}
-                      <TextButton
-                        className="mt-2 text-meta"
-                        seed={plan.plan_id}
-                        aria-label={t('installments.payoff.openLabel', { plan: plan.description })}
-                        onClick={() => setPayoffPlan(plan)}
-                      >
-                        {t('installments.payoff.open')}
-                      </TextButton>
+                      <span className="mt-2 flex flex-wrap gap-x-4 gap-y-1">
+                        <TextButton
+                          className="text-meta"
+                          seed={`${plan.plan_id}-close`}
+                          aria-label={t('installments.close.openLabel', { plan: plan.description })}
+                          onClick={() => setClosing(plan)}
+                        >
+                          {t('installments.close.open')}
+                        </TextButton>
+                        <TextButton
+                          className="text-meta"
+                          seed={plan.plan_id}
+                          aria-label={t('installments.payoff.openLabel', { plan: plan.description })}
+                          onClick={() => setPayoffPlan(plan)}
+                        >
+                          {t('installments.payoff.open')}
+                        </TextButton>
+                      </span>
                     </span>
                   </span>
                 </Th>
@@ -341,22 +393,125 @@ function PlanTable({ schedule }: { schedule: Schedule }) {
             );
           })}
         </TBody>
-        <TFoot>
-          <Tr>
-            <Th scope="row" sticky className="font-bold">
-              {t('installments.totalRow')}
-            </Th>
-            {schedule.months.map((m) => (
-              <Td key={m.month} numeric className="px-2 font-bold">
-                {m.total ? <Money minor={m.total} currency={c} bare /> : <span className="text-muted">–</span>}
-              </Td>
-            ))}
-          </Tr>
-        </TFoot>
+        {card ? null : (
+          <TFoot>
+            <Tr>
+              <Th scope="row" sticky className="font-bold">
+                {t('installments.totalRow')}
+              </Th>
+              {schedule.months.map((m) => (
+                <Td key={m.month} numeric className="px-2 font-bold">
+                  {m.total ? <Money minor={m.total} currency={c} bare /> : <span className="text-muted">–</span>}
+                </Td>
+              ))}
+            </Tr>
+          </TFoot>
+        )}
       </Table>
+      {closedPlans.length ? <ClosedPlans plans={closedPlans} currency={c} /> : null}
       {closedElsewhere.length ? <ClosedEarlyList items={closedElsewhere} /> : null}
       <EarlyPayoffDialog plan={payoffPlan} months={schedule.months.map((m) => m.month)} onClose={() => setPayoffPlan(null)} />
+      <ClosePlanDialog plan={closing} currency={c} onClose={() => setClosing(null)} />
     </Card>
+  );
+}
+
+/** Asks before taking a plan out of every total; the plan stays listed below and can be opened again. */
+function ClosePlanDialog({ plan, currency, onClose }: { plan: SchedulePlan | null; currency: string; onClose: () => void }) {
+  const { t } = useTranslation();
+  const toast = useToast();
+  const errorText = useErrorText();
+  const close = useClosePlan();
+  const fmt = useMoneyFormatter();
+  const [kept, setKept] = useState<SchedulePlan | null>(plan);
+  if (plan && plan !== kept) setKept(plan);
+  const shown = plan ?? kept;
+
+  function confirm() {
+    if (!shown) return;
+    close.mutate(
+      { planId: shown.plan_id, close: true },
+      {
+        onSuccess: () => {
+          toast.show(t('installments.close.done', { plan: shown.description }), 'positive');
+          onClose();
+        },
+      },
+    );
+  }
+
+  return (
+    <Modal
+      open={Boolean(plan)}
+      onClose={() => {
+        close.reset();
+        onClose();
+      }}
+      title={t('installments.close.title')}
+      description={shown ? t('installments.close.intro', { plan: shown.description, amount: fmt(shown.total_remaining, currency) }) : undefined}
+      footer={
+        <>
+          <Button variant="ghost" onClick={onClose}>
+            {t('common.cancel')}
+          </Button>
+          <Button variant="primary" onClick={confirm} loading={close.isPending}>
+            {t('installments.close.confirm')}
+          </Button>
+        </>
+      }
+    >
+      <p className="text-body text-ink">{t('installments.close.body')}</p>
+      {close.isError ? (
+        <Notice tone="critical" role="alert" className="mt-4 -mx-5">
+          {errorText(close.error, t('installments.close.failed'), { closed_by_statement: t('installments.close.byStatement') })}
+        </Notice>
+      ) : null}
+    </Modal>
+  );
+}
+
+/** Closed plans, faded at the bottom: the user's ones can be opened again; a statement's ones only say so. */
+function ClosedPlans({ plans, currency }: { plans: SchedulePlan[]; currency: string }) {
+  const { t } = useTranslation();
+  const locale = useIntlLocale();
+  const fmt = useMoneyFormatter();
+  const toast = useToast();
+  const reopen = useClosePlan();
+  return (
+    <div className="mx-6 mt-2 mb-6 border-t border-ink pt-4">
+      <h3 className="text-meta font-semibold text-ink">{t('installments.close.listTitle')}</h3>
+      <ul className="mt-2" aria-label={t('installments.close.listTitle')}>
+        {plans.map((p) => (
+          <li key={p.plan_id} className="flex flex-wrap items-baseline gap-x-4 gap-y-1 border-b border-line py-3 text-table text-muted">
+            <span className="font-semibold">{p.description}</span>
+            {p.card_label ? <span className="text-meta">{p.card_label}</span> : null}
+            <span className="text-meta">
+              {p.closed === 'statement'
+                ? t('installments.close.byStatementNote')
+                : t('installments.close.byYou', { date: p.closed_at ? formatDate(p.closed_at, locale) : '' })}
+              {' · '}
+              {t('installments.close.wouldHave', { amount: fmt(p.total_remaining, currency) })}
+            </span>
+            {p.closed === 'user' ? (
+              <TextButton
+                className="ml-auto text-meta"
+                seed={`${p.plan_id}-undo`}
+                aria-label={t('installments.close.undoLabel', { plan: p.description })}
+                disabled={reopen.isPending}
+                onClick={() =>
+                  reopen.mutate(
+                    { planId: p.plan_id, close: false },
+                    { onSuccess: () => toast.show(t('installments.close.undone', { plan: p.description }), 'positive') },
+                  )
+                }
+              >
+                {t('installments.close.undo')}
+              </TextButton>
+            ) : null}
+          </li>
+        ))}
+      </ul>
+    </div>
   );
 }
 

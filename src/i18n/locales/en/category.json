@@ -17,5 +17,11 @@
   "taxes": "Taxes",
   "cash": "Cash",
   "transfers": "Payments and transfers",
-  "none": "Uncategorised"
+  "none": "Uncategorised",
+  "fuel": "Fuel",
+  "telecom": "Internet and phone",
+  "utilities": "Utilities",
+  "shopping": "Online shopping",
+  "insurance": "Insurance",
+  "uncategorized": "Uncategorised"
 }

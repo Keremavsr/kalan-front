@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { ChevronLeft, ChevronRight, PencilLine } from 'lucide-react';
 import { useQueries } from '@tanstack/react-query';
-import { Link, Navigate, useNavigate, useParams, useSearchParams } from 'react-router-dom';
+import { Link, Navigate, useLocation, useNavigate, useParams, useSearchParams } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { useApi } from '../../api/context';
 import { keys, useMonthlySummary, useStatements, useTransactions } from '../../api/queries';
@@ -38,13 +38,20 @@ import { Scribble } from '../../components/pencil';
 import { SectionState } from '../../components/ui/SectionState';
 import { CategoryRuleModal } from './CategoryRuleModal';
 import { CategoryRules } from './CategoryRules';
-import { useCategoryName } from './categoryName';
+import { isUncategorized, useCategoryName } from './categoryName';
+import { CardFilter } from '../cards/CardFilter';
+import { FrequentPlaces } from './FrequentPlaces';
+import { UncategorizedBar } from './UncategorizedBar';
+
+/** Category filter value for rows with no category. */
+const NO_CATEGORY = '__none';
 
 const SOURCES: TransactionSource[] = ['statement', 'manual', 'import'];
 
 export function SpendingPage() {
   const { t } = useTranslation();
   const { month } = useParams();
+  const { search } = useLocation();
   const statements = useStatements();
   const months = useMemo(
     () => [...new Set((statements.data?.items ?? []).map((s) => monthOf(s.period_end)))].sort(),
@@ -79,7 +86,7 @@ export function SpendingPage() {
         </>
       );
     }
-    return <Navigate to={`/spending/${latest}`} replace />;
+    return <Navigate to={`/spending/${latest}${search}`} replace />;
   }
   return <MonthView month={month} months={months} />;
 }
@@ -196,6 +203,7 @@ function MonthBody({ summary }: { summary: MonthlySummary }) {
       <SectionState query={transactions} failed={t('spending.transactionsFailed')}>
         {() => <TransactionsTable transactions={transactions.data?.items ?? []} />}
       </SectionState>
+      <FrequentPlaces />
       <CategoryRules />
     </div>
   );
@@ -284,7 +292,7 @@ function CategoryCard({ summary, statements }: { summary: MonthlySummary; statem
                   ),
                 },
                 { k: 'S', label: t('spending.due'), value: formatDate(st.due_date, locale) },
-                { k: 'K', label: t('statements.card'), value: `•••• ${st.card_last4}` },
+                { k: 'K', label: t('statements.card'), value: st.card_label ?? `•••• ${st.card_last4}` },
               ]}
             />
           ))}
@@ -300,8 +308,9 @@ function TransactionsTable({ transactions }: { transactions: Transaction[] }) {
   const name = useCategoryName();
   const [params, setParams] = useSearchParams();
   const highlight = params.get('tx');
-  const [query, setQuery] = useState('');
+  const [query, setQuery] = useState(() => params.get('merchant') ?? '');
   const [category, setCategory] = useState('');
+  const [card, setCard] = useState('');
   const [kind, setKind] = useState('');
   const [source, setSource] = useState('');
   const [editing, setEditing] = useState<Transaction | null>(null);
@@ -321,22 +330,31 @@ function TransactionsTable({ transactions }: { transactions: Transaction[] }) {
       (!needle ||
         foldForSearch(tx.description, locale).includes(needle) ||
         foldForSearch(tx.merchant ?? '', locale).includes(needle)) &&
-      (!category || tx.category === category) &&
+      (!category || (category === NO_CATEGORY ? isUncategorized(tx.category) : tx.category === category)) &&
       (!kind || tx.kind === kind) &&
-      (!source || tx.source === source),
+      (!source || tx.source === source) &&
+      (!card || tx.card_id === card),
   );
-  const filtered = Boolean(needle || category || kind || source);
+  const filtered = Boolean(needle || category || kind || source || card);
+  const uncategorized = transactions.filter(
+    (tx) => isUncategorized(tx.category) && tx.direction === 'debit' && (tx.kind === 'purchase' || tx.kind === 'installment' || tx.kind === 'other'),
+  );
+  const hasUncategorized = transactions.some((tx) => isUncategorized(tx.category));
 
   function clear() {
     setQuery('');
     setCategory('');
     setKind('');
     setSource('');
-    if (highlight) setParams({}, { replace: true });
+    setCard('');
+    if (highlight || params.get('merchant')) setParams({}, { replace: true });
   }
 
   return (
     <Card title={t('spending.transactions')} description={t('spending.categoryHint')} flush>
+      {uncategorized.length ? (
+        <UncategorizedBar count={uncategorized.length} active={category === NO_CATEGORY} onShow={() => setCategory(category === NO_CATEGORY ? '' : NO_CATEGORY)} />
+      ) : null}
       <div className="flex flex-wrap items-end gap-3 px-6 pt-5 pb-4">
         <TextField
           label={t('spending.search')}
@@ -351,8 +369,13 @@ function TransactionsTable({ transactions }: { transactions: Transaction[] }) {
           value={category}
           onChange={(e) => setCategory(e.target.value)}
           fieldClassName="w-44"
-          options={[{ value: '', label: t('spending.all') }, ...categories.map((c) => ({ value: c, label: name(c) }))]}
+          options={[
+            { value: '', label: t('spending.all') },
+            ...categories.filter((c) => !isUncategorized(c)).map((c) => ({ value: c, label: name(c) })),
+            ...(hasUncategorized ? [{ value: NO_CATEGORY, label: name(null) }] : []),
+          ]}
         />
+        <CardFilter value={card} onChange={setCard} className="w-56" />
         <SelectField
           label={t('spending.filterKind')}
           value={kind}
@@ -394,6 +417,8 @@ function TransactionsTable({ transactions }: { transactions: Transaction[] }) {
             {shown.map((tx) => {
               const isHighlighted = tx.id === highlight;
               const notes = [
+                tx.card_label ?? null,
+                tx.merchant_unreadable ? t('spending.unreadable') : null,
                 tx.installment ? t('common.left', { count: tx.installment.remaining_count }) : null,
                 tx.source === 'manual' ? t('common.manual') : null,
                 tx.source === 'import' ? t('spending.source.importedRow') : null,

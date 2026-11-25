@@ -17,5 +17,11 @@
   "taxes": "Vergi",
   "cash": "Nakit",
   "transfers": "Ödeme ve transfer",
-  "none": "Kategorisiz"
+  "none": "Kategorisiz",
+  "fuel": "Akaryakıt",
+  "telecom": "İnternet ve telefon",
+  "utilities": "Fatura",
+  "shopping": "Online alışveriş",
+  "insurance": "Sigorta",
+  "uncategorized": "Kategorisiz"
 }

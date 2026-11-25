@@ -1,61 +1,29 @@
-import { useEffect, useState } from 'react';
 import { ArrowRight } from 'lucide-react';
 import { Link } from 'react-router-dom';
-import { keepPreviousData, useQuery, useQueryClient } from '@tanstack/react-query';
-import { useApi } from '../../api/context';
 import { useTranslation } from 'react-i18next';
-import {
-  keys,
-  useAnalysis,
-  useAnalyze,
-  useProviders,
-  useStatement,
-  useStatements,
-} from '../../api/queries';
-import { ApiError, type Analysis, type Statement, type StatementSummary } from '../../api/types';
-import { Scribble } from '../../components/pencil';
-import {
-  Button,
-  Card,
-  List,
-  ListRow,
-  Money,
-  Notice,
-  PageHeader,
-  QueryState,
-  Rich,
-  Section,
-  SelectField,
-  buttonClass,
-  useMoneyFormatter,
-  useToast,
-} from '../../components/ui';
-import { formatDate, formatDateTime, formatDayMonth, formatMonth } from '../../lib/format';
+import { useForecast, useMonthlySummary, useProviders, useSchedule, useStatements } from '../../api/queries';
+import type { Forecast, ForecastCard, Schedule } from '../../api/types';
+import { PencilLink } from '../../components/pencil';
+import { Button, Notice, PageHeader, QueryState, Rich, Section, buttonClass, useMoneyFormatter } from '../../components/ui';
+import { formatDate, formatMonth, formatMonthName } from '../../lib/format';
 import { monthOf } from '../../lib/month';
 import { useIntlLocale } from '../../lib/useLocale';
+import { useCategoryName } from '../spending/categoryName';
 import { AlertsBody } from './Alerts';
 import { FirstRun } from './FirstRun';
-import { ForecastBody, type FixedChoice } from './Forecast';
-import { LoadStrip } from './LoadStrip';
+import { SuggestionsBody } from './Suggestions';
 
 /**
- * Özet, top to bottom: 1. the next statement forecast, 2. alerts, 3. the 12-month installment strip,
- * 4. the model's commentary and the things to watch. Before the first statement it is one flow
- * that leads to Ekstreler and the AI tool choice.
+ * Özet answers three questions, top to bottom: what do I pay now, card by card; how much installment debt is left
+ * and when it ends; where does my money go and where can I save. Before the first statement it is the first-run flow.
  */
 export function OverviewPage() {
   const { t } = useTranslation();
   const statements = useStatements();
-  const [chosen, setChosen] = useState<string | null>(null);
-  const [includeFixed, setIncludeFixed] = useState<FixedChoice>('yes');
+  const forecast = useForecast(true);
   const items = statements.data?.items ?? [];
-  const selected = items.find((s) => s.id === chosen) ?? items[0];
-  const forecast = useForecastKept(includeFixed === 'yes');
-  const f = forecast.data?.forecast;
-  const fmt = useMoneyFormatter();
-  const locale = useIntlLocale();
 
-  if (statements.isSuccess && !selected) {
+  if (statements.isSuccess && !items.length) {
     return (
       <>
         <PageHeader title={t('overview.title')}>
@@ -69,254 +37,310 @@ export function OverviewPage() {
   return (
     <>
       <PageHeader title={t('overview.title')}>
-        {selected ? (
-          <p>
-            {f ? (
-              <Rich
-                i18nKey="overview.leadForecast"
-                values={{ month: formatMonth(f.month, locale), amount: fmt(f.total, f.currency), installments: fmt(f.parts.installments, f.currency) }}
-              />
-            ) : forecast.isPending ? null : (
-              t('overview.lead')
-            )}
-          </p>
-        ) : null}
+        {forecast.data ? <Lead forecast={forecast.data} /> : null}
       </PageHeader>
       <QueryState query={statements}>
-        {() =>
-          selected ? (
-            <div className="grid gap-12">
-              <Section
-                id="forecast"
-                title={t('overview.forecast.title')}
-                description={f ? t('overview.forecast.description', { month: formatMonth(f.month, locale) }) : undefined}
-              >
-                {forecast.isPending ? (
-                  <p className="text-body text-muted" role="status">
-                    {t('common.loading')}
-                  </p>
-                ) : forecast.isError ? (
-                  <Notice
-                    tone="warning"
-                    title={t('overview.forecast.loadError')}
-                    actions={
-                      <Button variant="secondary" size="sm" onClick={() => void forecast.refetch()}>
-                        {t('common.retry')}
-                      </Button>
-                    }
-                  />
-                ) : forecast.data.forecast ? (
-                  <ForecastBody data={forecast.data} includeFixed={includeFixed} onIncludeFixed={setIncludeFixed} />
-                ) : (
-                  <p className="text-body text-ink">{t('overview.forecast.backtestNone', { need: forecast.data.backtest.min_history + 1 })}</p>
-                )}
-              </Section>
-              <Section id="alerts" title={t('overview.alerts.title')}>
-                <AlertsBody />
-              </Section>
-              <Section id="load" title={t('overview.load.title')}>
-                <LoadStrip />
-              </Section>
-              <Section id="watch" title={t('overview.watchTitle')}>
-                <WatchBody key={selected.id} statements={items} selected={selected} onSelect={setChosen} />
-              </Section>
-            </div>
-          ) : null
-        }
+        {() => (
+          <div className="grid gap-14">
+            <AiInvite />
+            <Section id="due" title={t('overview.due.title')}>
+              <DueBody query={forecast} />
+            </Section>
+            <Section id="left" title={t('overview.left.title')}>
+              <InstallmentsLeft />
+            </Section>
+            <Section id="todo" title={t('overview.todo.title')}>
+              <AlertsBody limit={3} />
+            </Section>
+            <Section id="suggestions" title={t('overview.suggestions.title')}>
+              <SuggestionsBody />
+            </Section>
+            <Section id="where" title={t('overview.where.title')}>
+              <WhereMoneyGoes month={items[0] ? monthOf(items[0].period_end) : undefined} />
+            </Section>
+          </div>
+        )}
       </QueryState>
     </>
   );
 }
 
-/**
- * The forecast query of `useForecast`, but switching fixed costs in or out keeps the last answer on screen
- * until the new one arrives, so the section does not collapse into a loading line and back.
- */
-function useForecastKept(includeFixed: boolean) {
-  const api = useApi();
-  return useQuery({
-    queryKey: keys.insights.forecast(includeFixed),
-    queryFn: () => api.getForecast(includeFixed),
-    placeholderData: keepPreviousData,
-  });
-}
-
-interface BodyProps {
-  statements: StatementSummary[];
-  selected: StatementSummary;
-  onSelect: (id: string) => void;
-}
-
-function WatchBody({ statements, selected, onSelect }: BodyProps) {
-  const { t } = useTranslation();
+/** The page's first line is the answer to "what do I pay next": the total, ringed, and the nearest due date. */
+function Lead({ forecast }: { forecast: Forecast }) {
+  const fmt = useMoneyFormatter();
   const locale = useIntlLocale();
-  const qc = useQueryClient();
-  const toast = useToast();
+  const cards = forecast.cards ?? [];
+  const first = cards[0];
+  if (!first || forecast.total === undefined) return null;
+  const c = forecast.currency ?? 'TRY';
+  return (
+    <p>
+      <Rich
+        i18nKey={cards.length > 1 ? 'overview.leadDue' : 'overview.leadDueOne'}
+        values={{
+          total: fmt(forecast.total, c),
+          count: cards.length,
+          card: first.card_label,
+          date: formatDate(first.due_date, locale, 'long'),
+          amount: fmt(first.amount, c),
+        }}
+      />
+    </p>
+  );
+}
+
+/** One line when no AI tool is chosen: what it would add, and the way to Settings. */
+function AiInvite() {
+  const { t } = useTranslation();
   const providers = useProviders();
-  const analyze = useAnalyze();
-  const [startedAt, setStartedAt] = useState<number | null>(null);
-  const [elapsed, setElapsed] = useState(0);
-  const status = selected.analysis_status;
-  const pending = analyze.isPending || status === 'pending';
-  const analysis = useAnalysis(selected.id, status === 'done' && !analyze.isPending);
-  const statement = useStatement(status === 'done' ? selected.id : undefined);
-  const hasProvider = Boolean(providers.data?.selected);
+  if (!providers.isSuccess || providers.data.selected) return null;
+  return (
+    <div className="flex flex-wrap items-center justify-between gap-x-6 gap-y-3 border-y border-line py-4">
+      <p className="max-w-measure text-body text-ink">{t('overview.invite.text')}</p>
+      <Link to="/settings" className={buttonClass('secondary', 'sm')}>
+        {t('overview.invite.action')}
+      </Link>
+    </div>
+  );
+}
 
-  useEffect(() => {
-    if (!analyze.isPending || startedAt === null) return;
-    const timer = setInterval(() => setElapsed(Math.round((Date.now() - startedAt) / 1000)), 1000);
-    return () => clearInterval(timer);
-  }, [analyze.isPending, startedAt]);
+type ForecastQuery = ReturnType<typeof useForecast>;
 
-  // A job started before a reload: poll the list until it settles.
-  useEffect(() => {
-    if (status !== 'pending' || analyze.isPending) return;
-    const timer = setInterval(() => void qc.invalidateQueries({ queryKey: keys.statements }), 2000);
-    return () => clearInterval(timer);
-  }, [status, analyze.isPending, qc]);
-
-  function start() {
-    setElapsed(0);
-    setStartedAt(Date.now());
-    analyze.mutate(selected.id, {
-      onSuccess: () => toast.show(t('overview.done'), 'positive'),
-      onSettled: () => setStartedAt(null),
-    });
-  }
+/** "Ödeyeceklerin": one row per card, the nearest due first, then the total the back end added up. */
+function DueBody({ query }: { query: ForecastQuery }) {
+  const { t } = useTranslation();
+  const fmt = useMoneyFormatter();
+  if (query.isPending) return <p className="text-body text-muted" role="status">{t('common.loading')}</p>;
+  if (query.isError)
+    return (
+      <Notice
+        tone="warning"
+        title={t('overview.due.loadError')}
+        actions={
+          <Button variant="secondary" size="sm" onClick={() => void query.refetch()}>
+            {t('common.retry')}
+          </Button>
+        }
+      />
+    );
+  const f = query.data;
+  const cards = f.cards ?? [];
+  const c = f.currency ?? 'TRY';
+  if (!cards.length) return <p className="text-body text-ink">{t('overview.due.none')}</p>;
 
   return (
-    <div className="grid grid-cols-1 gap-6">
-      <div className="flex flex-wrap items-end gap-3">
-        <SelectField
-          label={t('overview.statement')}
-          value={selected.id}
-          onChange={(e) => onSelect(e.target.value)}
-          fieldClassName="w-md max-w-full"
-          disabled={pending}
-          options={statements.map((s) => ({
-            value: s.id,
-            label: t('overview.statementOption', {
-              period: `${formatDate(s.period_start, locale)} – ${formatDate(s.period_end, locale)}`,
-              due: formatDate(s.due_date, locale),
-            }),
-          }))}
-        />
-        <Button
-          variant={status === 'done' ? 'secondary' : 'primary'}
-          dot={status === 'done' ? undefined : <ArrowRight aria-hidden className="size-4" />}
-          onClick={start}
-          loading={pending}
-          disabled={!hasProvider}
-        >
-          {status === 'done' ? t('overview.reanalyze') : t('overview.analyze')}
-        </Button>
-      </div>
-
-      {pending ? (
-        <div className="enter rounded-card bg-paper px-6 py-5" role="status">
-          <div className="flex items-baseline justify-between gap-4 text-body">
-            <span className="font-semibold text-ink">{t('overview.pending')}</span>
-            {analyze.isPending ? <span className="text-meta text-ink">{t('overview.elapsed', { seconds: elapsed })}</span> : null}
-          </div>
-          <div className="mt-4 h-1.5 overflow-hidden rounded-pill bg-ground-alt" aria-hidden>
-            <div className="indeterminate h-full w-1/3 rounded-pill bg-ink" />
-          </div>
-          <p className="mt-3 text-meta text-muted">{t('overview.sentData')}</p>
-        </div>
-      ) : null}
-
-      {!hasProvider && providers.isSuccess ? (
-        <Notice
-          tone="warning"
-          title={t('overview.noProvider')}
-          actions={
-            <Link to="/settings" className={buttonClass('secondary', 'sm')}>
-              {t('overview.goSetup')}
-            </Link>
-          }
-        />
-      ) : null}
-
-      {analyze.isError ? (
-        <Notice tone="critical" role="alert">
-          {t('overview.failed', { error: analyze.error instanceof ApiError ? analyze.error.message : String(analyze.error) })}
-        </Notice>
-      ) : null}
-
-      {status === 'done' ? (
-        <QueryState query={analysis}>
-          {() => (analysis.data ? <Commentary analysis={analysis.data} statement={statement.data} /> : null)}
-        </QueryState>
-      ) : status === 'failed' ? (
-        <Notice tone="critical" title={t('overview.failed', { error: '' })} />
-      ) : !pending ? (
-        <Notice title={t('overview.none')}>{t('overview.sentData')}</Notice>
+    <div className="grid gap-3">
+      <table className="w-full border-t border-ink text-left">
+        <caption className="sr-only">{t('overview.due.title')}</caption>
+        <thead className="sr-only">
+          <tr>
+            <th scope="col">{t('overview.due.colCard')}</th>
+            <th scope="col">{t('overview.due.colDue')}</th>
+            <th scope="col">{t('overview.due.colAmount')}</th>
+          </tr>
+        </thead>
+        <tbody>
+          {cards.map((card) => (
+            <DueRow key={card.card_id} card={card} currency={c} />
+          ))}
+        </tbody>
+        {f.total !== undefined && cards.length > 1 ? (
+          <tfoot>
+            <tr className="border-b border-ink">
+              <th scope="row" colSpan={2} className="py-4 text-body font-bold text-ink">
+                {t('overview.due.total')}
+              </th>
+              <td className="py-4 text-right text-lead font-bold whitespace-nowrap text-ink">{fmt(f.total, c)}</td>
+            </tr>
+          </tfoot>
+        ) : null}
+      </table>
+      {f.fixed ? (
+        <p className="text-meta text-muted">
+          <Rich i18nKey="overview.due.fixed" values={{ amount: fmt(f.fixed, c) }} />
+        </p>
       ) : null}
     </div>
   );
 }
 
-function Commentary({ analysis, statement }: { analysis: Analysis; statement: Statement | undefined }) {
+function DueRow({ card, currency }: { card: ForecastCard; currency: string }) {
   const { t } = useTranslation();
+  const fmt = useMoneyFormatter();
   const locale = useIntlLocale();
-  const providers = useProviders();
-  const providerName = providers.data?.providers.find((p) => p.id === analysis.provider)?.name ?? analysis.provider;
-  const txById = new Map((statement?.transactions ?? []).map((tx) => [tx.id, tx]));
-  const month = statement ? monthOf(statement.period_end) : null;
+  const days = card.days_left;
+  const when = days < 0 ? t('overview.due.past') : days === 0 ? t('overview.due.today') : t('overview.due.days', { count: days });
+  const next = card.next_statement;
+  const parts = card.estimated && card.parts ? card.parts : null;
 
   return (
-    <div className="enter grid grid-cols-1 gap-8 lg:grid-cols-[minmax(0,5fr)_minmax(0,3fr)] lg:items-start">
-      <section aria-labelledby="watch-items" className="min-w-0">
-        <h3 id="watch-items" className="mb-3 text-meta font-semibold text-ink">
-          {t('overview.items')}
-        </h3>
-        <List>
-          {analysis.commentary.watch_items.map((item, i) => (
-            <ListRow key={item.title} narrowMeta meta={<span className="font-bold">{i + 1}.</span>} title={item.title} detail={item.detail}>
-              {item.transaction_ids.length ? (
-                <div className="mt-3">
-                  <p className="text-meta text-muted">{t('overview.cites')}</p>
-                  <ul className="mt-1 grid gap-0.5">
-                    {item.transaction_ids.map((id) => {
-                      const tx = txById.get(id);
-                      return (
-                        <li key={id}>
-                          <Link
-                            to={month ? `/spending/${month}?tx=${encodeURIComponent(id)}` : '/spending'}
-                            className="scribble-host group inline-flex max-w-full items-baseline gap-3 rounded-sm py-0.5 text-table"
-                          >
-                            {tx ? (
-                              <>
-                                <span className="w-14 shrink-0 text-meta text-ink">{formatDayMonth(tx.date, locale)}</span>
-                                <span className="relative min-w-0 font-semibold underline decoration-1 underline-offset-4 group-hover:decoration-transparent">
-                                  {tx.description}
-                                  <Scribble seed={id} />
-                                </span>
-                                <Money minor={tx.amount} currency={tx.currency} className="text-ink" />
-                              </>
-                            ) : (
-                              <span>{id}</span>
-                            )}
-                          </Link>
-                        </li>
-                      );
-                    })}
-                  </ul>
-                </div>
-              ) : (
-                <p className="mt-2 text-meta text-muted">{t('overview.noCites')}</p>
-              )}
-            </ListRow>
-          ))}
-        </List>
-      </section>
-      <Card title={t('overview.summary')} className="lg:sticky lg:top-(--header-height)">
-        <p className="text-body text-ink">{analysis.commentary.summary}</p>
-        <p className="mt-4 border-t border-line pt-3 text-meta text-muted">
-          {t('overview.meta', { provider: providerName, date: formatDateTime(analysis.created_at, locale) })}{' '}
-          {t('overview.disclaimer')}
+    <tr className="border-b border-line align-baseline">
+      <th scope="row" className="py-5 pr-6 text-left font-normal">
+        <span className="block text-lead leading-snug font-bold text-ink">{card.card_label}</span>
+        <span className="mt-1 block max-w-measure text-meta text-muted">
+          {card.estimated
+            ? next
+              ? t('overview.due.estimatedNote', { date: formatDate(next.cut_off, locale, 'long') })
+              : t('overview.due.estimatedShort')
+            : card.minimum_payment !== null
+              ? t('overview.due.statementNote', { minimum: fmt(card.minimum_payment, currency) })
+              : t('overview.due.statementShort')}
+          {parts ? (
+            <>
+              {' '}
+              {t('overview.due.parts', {
+                installments: fmt(parts.installments, currency),
+                subscriptions: fmt(parts.subscriptions, currency),
+                other: fmt(parts.other, currency),
+              })}
+            </>
+          ) : null}
+        </span>
+      </th>
+      <td className="py-5 pr-6 text-body whitespace-nowrap text-ink">
+        <span className="block font-semibold">{t('overview.due.dueOn', { date: formatDate(card.due_date, locale, 'long') })}</span>
+        <span className="block text-meta text-muted">{when}</span>
+      </td>
+      <td className="py-5 text-right whitespace-nowrap">
+        {card.estimated ? <span className="mr-2 text-meta font-semibold text-ink">{t('overview.due.estimated')}</span> : null}
+        <span className="text-lead font-bold text-ink">{fmt(card.amount, currency)}</span>
+      </td>
+    </tr>
+  );
+}
+
+/** "Kalan taksitlerin": the back end's summary in one sentence, then the next 12 months as labelled columns. */
+function InstallmentsLeft() {
+  const { t } = useTranslation();
+  const schedule = useSchedule(12);
+  if (schedule.isPending) return <p className="text-body text-muted" role="status">{t('common.loading')}</p>;
+  if (schedule.isError)
+    return (
+      <Notice
+        tone="warning"
+        title={t('overview.load.loadError')}
+        actions={
+          <Button variant="secondary" size="sm" onClick={() => void schedule.refetch()}>
+            {t('common.retry')}
+          </Button>
+        }
+      />
+    );
+  return <LeftBody schedule={schedule.data} />;
+}
+
+function LeftBody({ schedule }: { schedule: Schedule }) {
+  const { t } = useTranslation();
+  const locale = useIntlLocale();
+  const fmt = useMoneyFormatter();
+  const c = schedule.currency;
+  const s = schedule.summary;
+  const max = Math.max(1, ...schedule.months.map((m) => m.total));
+  const sentence =
+    s && s.plan_count > 0 ? (
+      <Rich
+        i18nKey="overview.left.sentence"
+        count={s.plan_count}
+        values={{ count: s.plan_count, amount: fmt(s.total_remaining, c), month: s.last_month ? formatMonth(s.last_month, locale) : '' }}
+      />
+    ) : (
+      t('overview.left.none')
+    );
+
+  return (
+    <div className="grid gap-5">
+      <div className="flex flex-wrap items-baseline justify-between gap-x-6 gap-y-2">
+        <p className="max-w-measure text-body text-ink">{sentence}</p>
+        <PencilLink to="/installments" className="text-meta font-semibold">
+          {t('overview.load.go')}
+        </PencilLink>
+      </div>
+      {s && s.plan_count > 0 ? (
+        <figure className="grid gap-1.5">
+          <figcaption className="sr-only">{t('overview.left.chart')}</figcaption>
+          <ol className="flex h-28 items-end gap-1 border-b border-ink">
+            {schedule.months.map((m) => (
+              <li key={m.month} className="flex h-full min-w-0 flex-1 flex-col items-center justify-end">
+                <span className="sr-only">
+                  {formatMonth(m.month, locale)}: {fmt(m.total, c)}
+                </span>
+                {m.total ? (
+                  <span aria-hidden className="mb-1 truncate text-meta font-semibold text-ink">
+                    {fmt(m.total, c, { bare: true })}
+                  </span>
+                ) : null}
+                <span
+                  aria-hidden
+                  className={m.total ? 'bar-y w-full rounded-t-bar bg-series-ink' : 'w-full'}
+                  style={{ height: `${(m.total / max) * 60}%` }}
+                />
+              </li>
+            ))}
+          </ol>
+          <div aria-hidden className="flex gap-1">
+            {schedule.months.map((m) => (
+              <span key={m.month} className="min-w-0 flex-1 truncate text-center text-meta text-muted">
+                {formatMonthName(m.month, locale)}
+              </span>
+            ))}
+          </div>
+        </figure>
+      ) : null}
+    </div>
+  );
+}
+
+/** "Paran nereye gidiyor": the latest month's five biggest categories as flat bars, in the back end's order. */
+function WhereMoneyGoes({ month }: { month: string | undefined }) {
+  const { t } = useTranslation();
+  const summary = useMonthlySummary(month);
+  const fmt = useMoneyFormatter();
+  const locale = useIntlLocale();
+  const name = useCategoryName();
+  if (!month) return null;
+  if (summary.isPending) return <p className="text-body text-muted" role="status">{t('common.loading')}</p>;
+  if (summary.isError)
+    return (
+      <Notice
+        tone="warning"
+        title={t('overview.where.loadError')}
+        actions={
+          <Button variant="secondary" size="sm" onClick={() => void summary.refetch()}>
+            {t('common.retry')}
+          </Button>
+        }
+      />
+    );
+  const data = summary.data;
+  const top = data.by_category.slice(0, 5);
+  if (!top.length) return <p className="text-body text-ink">{t('overview.where.none')}</p>;
+  const max = Math.max(1, ...top.map((x) => x.amount));
+  const c = data.currency;
+  return (
+    <div className="grid gap-5">
+      <div className="flex flex-wrap items-baseline justify-between gap-x-6 gap-y-2">
+        <p className="max-w-measure text-body text-ink">
+          <Rich
+            i18nKey="overview.where.sentence"
+            values={{ month: formatMonth(data.month, locale), total: fmt(data.total_spend, c), top: name(top[0]!.category), amount: fmt(top[0]!.amount, c) }}
+          />
         </p>
-      </Card>
+        <Link to={`/spending/${data.month}`} className={buttonClass('ghost', 'sm', 'gap-1.5')}>
+          {t('overview.where.go')}
+          <ArrowRight aria-hidden className="size-3.5" />
+        </Link>
+      </div>
+      <ul className="grid gap-3" aria-label={t('overview.where.title')}>
+        {top.map((x) => (
+          <li key={x.category} className="grid grid-cols-[11rem_minmax(0,1fr)_8rem] items-center gap-4">
+            <span className="truncate text-body font-semibold text-ink">{name(x.category)}</span>
+            <span aria-hidden className="h-6 min-w-0">
+              <span className="bar-x block h-full rounded-bar bg-series-ink" style={{ width: `${(x.amount / max) * 100}%` }} />
+            </span>
+            <span className="text-right text-body whitespace-nowrap text-ink">{fmt(x.amount, c)}</span>
+          </li>
+        ))}
+      </ul>
     </div>
   );
 }

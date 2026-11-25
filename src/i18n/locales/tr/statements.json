@@ -190,5 +190,27 @@
   "diagnoseNone": "bulunamadı",
   "diagnoseText": "Rapor",
   "diagnoseTextHint": "Göndermeden önce bir kez oku. Kişisel görünen bir satır kalmışsa sil.",
-  "diagnoseCopy": "Raporu kopyala"
+  "diagnoseCopy": "Raporu kopyala",
+  "commentary": {
+    "title": "Yorum",
+    "analyze": "Yorumla",
+    "again": "Yeniden yorumla",
+    "pending": "Yorum hazırlanıyor. Bu 10 ile 60 saniye sürebilir.",
+    "elapsed": "{{seconds}} sn",
+    "failed": "Yorumu alamadım: {{error}}",
+    "none": "Bu ekstreyi henüz yorumlamadım.",
+    "noProvider": "Yorum için önce Ayarlar’dan bir yapay zekâ aracı seç.",
+    "goSetup": "Ayarlara git",
+    "items": "İzlenecek noktalar",
+    "meta": "{{provider}} ile hazırlandı, {{date}}.",
+    "done": "Yorum hazır.",
+    "sent": "Seçtiğin araca bu ekstredeki işlemlerin yalnız tarihi, açıklaması, tutarı, para birimi ve türü gider."
+  },
+  "missing": {
+    "title_one": "Bir ekstre eksik",
+    "title_other": "Eksik ekstreler",
+    "row_one": "{{card}} için {{range}} ekstresi yok.",
+    "row_other": "{{card}} için {{range}} ekstreleri yok.",
+    "how": "Bankanın uygulamasından ya da internet şubesinden o ayların PDF ekstresini indirip aşağıya bırak. Eksik aylarda taksit ve harcama toplamları eksik kalır."
+  }
 }

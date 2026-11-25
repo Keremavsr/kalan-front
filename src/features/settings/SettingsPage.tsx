@@ -2,7 +2,10 @@ import { useState, type FormEvent } from 'react';
 import { Check } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import {
+  useCards,
   useForgetPdfPassword,
+  useRenameCard,
+  useStartAnalysisAll,
   useInsightRules,
   usePdfPasswords,
   useProviders,
@@ -11,13 +14,13 @@ import {
   useUpdateInsightRules,
   useUpdateSettings,
 } from '../../api/queries';
-import type { Provider, RuleOverrides, Settings } from '../../api/types';
+import type { CardInfo, Provider, RuleOverrides, Settings } from '../../api/types';
 import { Button, Card, List, ListRow, Notice, PageHeader, QueryState, Segmented, TextField, useToast } from '../../components/ui';
 import { SourceText } from '../../components/ui/ExternalLink';
 import { INTL_LOCALE } from '../../i18n';
 import { LANGUAGES, type Language } from '../../i18n/resources';
 import { bankName } from '../../lib/banks';
-import { formatDate, formatMoney } from '../../lib/format';
+import { formatDate, formatMoney, formatMonth } from '../../lib/format';
 import { useIntlLocale } from '../../lib/useLocale';
 import { cx } from '../../lib/cx';
 import { OVERRIDE_KEYS, fromField, isRate, ruleDefaults, toField, type OverrideKey } from './rules';
@@ -36,6 +39,7 @@ export function SettingsPage() {
       <div className="grid grid-cols-1 gap-8 xl:grid-cols-[minmax(0,3fr)_minmax(0,2fr)] xl:items-start">
         <div className="grid grid-cols-1 gap-8">
           <ProviderSection />
+          <CardsSection />
           <LocaleSection />
           <RatesSection />
         </div>
@@ -53,11 +57,19 @@ function ProviderSection() {
   const toast = useToast();
   const providers = useProviders();
   const select = useSelectProvider();
+  const start = useStartAnalysisAll();
   const pendingId = select.isPending ? select.variables : null;
+  const chosen = providers.data?.providers.find((p) => p.id === providers.data?.selected);
 
+  /** Choosing a tool starts the run over every statement at once, so the choice shows its effect. */
   function choose(p: Provider) {
     if (!p.available || p.id === providers.data?.selected) return;
-    select.mutate(p.id, { onSuccess: () => toast.show(t('settings.saved', { name: p.name }), 'positive') });
+    select.mutate(p.id, {
+      onSuccess: () => {
+        toast.show(t('settings.saved', { name: p.name }), 'positive');
+        start.mutate();
+      },
+    });
   }
 
   return (
@@ -112,11 +124,87 @@ function ProviderSection() {
                   {select.error.code === 'provider_unavailable' ? t('settings.providerUnavailable') : select.error.message}
                 </Notice>
               ) : null}
+              {chosen ? (
+                <div className="mt-3 border-t border-ink pt-4" role="status">
+                  <p className="max-w-measure text-body text-ink">{t('settings.providerEffect', { name: chosen.name })}</p>
+                  <p className="mt-1.5 max-w-measure text-meta text-muted">{t('settings.providerSent')}</p>
+                </div>
+              ) : null}
             </fieldset>
           )}
         </QueryState>
       </div>
     </Card>
+  );
+}
+
+/** Cards seen on the stored statements; a name the user gives shows everywhere instead of bank and product. */
+function CardsSection() {
+  const { t } = useTranslation();
+  const cards = useCards();
+  const items = cards.data?.items ?? [];
+  if (cards.isSuccess && !items.length) return null;
+  return (
+    <Card title={t('settings.cardsTitle')} description={t('settings.cardsIntro')} flush>
+      <div className="px-6 pb-4">
+        <QueryState query={cards}>
+          {() => (
+            <ul className="divide-y divide-line" aria-label={t('settings.cardsTitle')}>
+              {items.map((card) => (
+                <CardRow key={`${card.id}-${card.name ?? ''}`} card={card} />
+              ))}
+            </ul>
+          )}
+        </QueryState>
+      </div>
+    </Card>
+  );
+}
+
+function CardRow({ card }: { card: CardInfo }) {
+  const { t } = useTranslation();
+  const toast = useToast();
+  const rename = useRenameCard();
+  const locale = useIntlLocale();
+  const [name, setName] = useState(card.name ?? '');
+  const changed = name.trim() !== (card.name ?? '');
+  const span = card.first_month === card.last_month ? formatMonth(card.first_month, locale, 'short') : `${formatMonth(card.first_month, locale, 'short')} – ${formatMonth(card.last_month, locale, 'short')}`;
+
+  function save(e: FormEvent) {
+    e.preventDefault();
+    const next = name.trim();
+    rename.mutate(
+      { id: card.id, name: next || null },
+      { onSuccess: (saved) => toast.show(t(next ? 'settings.cardSaved' : 'settings.cardCleared', { label: saved.label }), 'positive') },
+    );
+  }
+
+  return (
+    <li className="py-4">
+      <p className="font-semibold text-ink">{card.label}</p>
+      <p className="text-meta text-muted">
+        {card.name ? `${[card.bank_name, card.product].filter(Boolean).join(' ')} ··${card.card_last4} · ` : ''}
+        {t('settings.cardCount', { count: card.statement_count, span })}
+      </p>
+      <form onSubmit={save} className="mt-3 flex flex-wrap items-end gap-3">
+        <TextField
+          label={t('settings.cardName')}
+          value={name}
+          maxLength={40}
+          placeholder={t('settings.cardPlaceholder')}
+          onChange={(e) => setName(e.target.value)}
+          fieldClassName="w-72 max-w-full"
+        />
+        <Button type="submit" variant="secondary" size="sm" className="mb-1" disabled={!changed} loading={rename.isPending}>
+          {t('settings.cardSave')}
+        </Button>
+      </form>
+      {rename.isError ? (
+        <Notice tone="critical" role="alert" className="mt-3">
+          {t('settings.cardFailed')}
+        </Notice>
+      ) : null}
+    </li>
   );
 }
 

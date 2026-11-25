@@ -17,5 +17,11 @@
   "taxes": "Impostos",
   "cash": "Dinheiro",
   "transfers": "Pagamentos e transferências",
-  "none": "Sem categoria"
+  "none": "Sem categoria",
+  "fuel": "Combustível",
+  "telecom": "Internet e telefone",
+  "utilities": "Contas de consumo",
+  "shopping": "Compras online",
+  "insurance": "Seguros",
+  "uncategorized": "Sem categoria"
 }

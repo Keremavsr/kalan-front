@@ -64,6 +64,7 @@ import {
   sampleCategoryRule,
   statementAiFallback,
   statementCard2,
+  statementCard2Jul,
   templateDraftYaml,
 } from './fixtures-v03';
 import {
@@ -85,6 +86,7 @@ import {
   simulate,
 } from './mock-calc';
 import { shareSvg } from './mock-share-svg';
+import { extendMock, type V03Api } from './mock-v04';
 import { addMonths, monthOf, monthsBetween } from '../lib/month';
 
 export type MockPreset = 'empty' | 'basic' | 'full';
@@ -145,7 +147,7 @@ export function createMockApi(options: MockOptions = {}): KalanApi {
     statements: (options.preset === 'empty'
       ? []
       : full
-        ? [statement08, statement09, statement10, statementAiFallback, statementCard2]
+        ? [statement08, statement09, statement10, statementCard2Jul, statementAiFallback, statementCard2]
         : [statement08, statement09]
     ).map((s) => clone(s)),
     manualTransactions: [] as Transaction[],
@@ -511,7 +513,7 @@ export function createMockApi(options: MockOptions = {}): KalanApi {
       }
     }
 
-    for (const sub of subscriptions().filter((s) => s.amount_last > s.amount_previous)) {
+    for (const sub of subscriptions().filter((s) => s.amount_previous !== null && s.amount_last > s.amount_previous)) {
       add({
         id: `al_subscription_price_rise_${fold(sub.merchant)}`,
         kind: 'subscription_price_rise',
@@ -711,7 +713,7 @@ export function createMockApi(options: MockOptions = {}): KalanApi {
       const variable = median(earlier.map(variableSpend));
       const subsTotal = subscriptions()
         .filter((s) => s.months_seen.includes(earlier.at(-1)!))
-        .reduce((s, x) => s + x.amount_previous, 0);
+        .reduce((s, x) => s + (x.amount_previous ?? x.amount_last), 0);
       const fixed = includeFixed ? 0 : 0;
       const forecast = installments + variable + subsTotal + fixed;
       const actual = spendOf(monthTransactions(month).txs);
@@ -896,7 +898,18 @@ export function createMockApi(options: MockOptions = {}): KalanApi {
 
   // -- the adapter --------------------------------------------------------------------------------
 
-  return {
+  function finishAnalysis(id: string, provider: ProviderId) {
+    const st = findStatement(id);
+    if (!st) return;
+    const texts = analysisTexts[id];
+    const commentary = texts
+      ? clone(texts[state.settings.locale === 'tr' ? 'tr' : 'en'])
+      : { locale: state.settings.locale, summary: '', watch_items: [] };
+    state.analyses.set(id, { categories_applied: true, commentary, provider, created_at: new Date().toISOString() });
+    st.analysis_status = 'done';
+  }
+
+  const api: V03Api = {
     health: () => wait({ status: 'ok', version: '0.1.0-mock' }),
     getProviders: () => wait(providersResponse()),
     selectProvider: (id) => {
@@ -1140,12 +1153,7 @@ export function createMockApi(options: MockOptions = {}): KalanApi {
       st.analysis_status = 'pending';
       state.jobs.set(jobId, { status: 'pending', error: null });
       setTimeout(() => {
-        const texts = analysisTexts[id];
-        const commentary = texts
-          ? clone(texts[state.settings.locale === 'tr' ? 'tr' : 'en'])
-          : { locale: state.settings.locale, summary: '', watch_items: [] };
-        state.analyses.set(id, { categories_applied: true, commentary, provider, created_at: new Date().toISOString() });
-        st.analysis_status = 'done';
+        finishAnalysis(id, provider);
         state.jobs.set(jobId, { status: 'done', error: null });
       }, analysisMs);
       return wait({ job_id: jobId, status: 'pending' as const });
@@ -1373,4 +1381,13 @@ export function createMockApi(options: MockOptions = {}): KalanApi {
         return { text, filename: `kalan-${what}.${ext}`, contentType: EXPORT_MEDIA[query.format], skippedRows: skipped };
       }),
   };
+
+  return extendMock(api, {
+    state,
+    today,
+    finishAnalysis,
+    providerAvailable: (id) => Boolean(fixtureProviders.find((p) => p.id === id)?.available),
+    stepMs: Math.max(20, Math.round(analysisMs / 4)),
+    latency,
+  });
 }

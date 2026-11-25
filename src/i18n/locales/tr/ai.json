@@ -1,0 +1,7 @@
+{
+  "tool": "Yapay zekâ aracı",
+  "reading": "{{name}} ekstrelerini okuyor: {{done}}/{{total}}",
+  "writing": "{{name}} önerilerini yazıyor",
+  "finished": "Kategoriler ve öneriler yenilendi.",
+  "failed": "Yapay zekâ aracı işi bitiremedi; kendi hesaplarım yerinde."
+}

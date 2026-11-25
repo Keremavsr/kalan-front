@@ -4,6 +4,7 @@ import { PageHeader, Section } from '../../components/ui';
 import { DiagnoseSection, type DiagnoseRequest } from './DiagnoseSection';
 import { ExportSection } from './ExportSection';
 import { ImportsSection } from './ImportsSection';
+import { MissingStatements } from './MissingStatements';
 import { StoredStatements } from './StoredStatements';
 import { UploadPanel } from './UploadPanel';
 
@@ -22,6 +23,7 @@ export function StatementsPage() {
       </PageHeader>
 
       <div className="grid grid-cols-1 gap-12">
+        <MissingStatements />
         <UploadPanel onDiagnose={(file, password) => setDiagnose({ file, password, key: Date.now() })} />
         <StoredStatements />
         <Section id="files" band title={t('statements.filesTitle')} description={t('statements.filesIntro')}>

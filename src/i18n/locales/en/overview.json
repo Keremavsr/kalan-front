@@ -1,86 +1,96 @@
 {
   "title": "Overview",
-  "lead": "What you should not miss in your latest statement, in one place.",
-  "leadForecast": "My forecast for your {{month}} statement is <c>{{amount}}</c>. Of that, <m>{{installments}}</m> is already fixed by installments.",
-  "noStatementsTitle": "No statements yet",
-  "noStatements": "Upload your first statement and follow your installments, spending and the things to watch from here.",
-  "goUpload": "Upload a statement",
-  "watchTitle": "Things to watch",
-  "statement": "Statement",
-  "statementOption": "{{period}}, due {{due}}",
-  "analyze": "Comment",
-  "reanalyze": "Comment again",
-  "pending": "Writing the commentary. This can take 10 to 60 seconds.",
-  "elapsed": "{{seconds}} s",
-  "failed": "I couldn’t get the commentary: {{error}}",
-  "none": "I haven’t commented on this statement yet.",
-  "sentData": "Only the date, description, amount, currency and type of each transaction go to the tool you chose.",
-  "noProvider": "Choose a tool first to get a commentary.",
-  "goSetup": "Go to settings",
-  "summary": "In short",
-  "items": "Points to watch",
-  "cites": "Related transactions",
-  "noCites": "This point is not tied to one transaction.",
-  "meta": "Written with {{provider}}, {{date}}.",
-  "disclaimer": "Code computes the totals and installments; the model only adds categories and commentary.",
-  "done": "Commentary ready.",
-  "first": {
-    "lead": "Once you upload a card statement, I show the forecast for the next one, the alerts and your installment load here.",
-    "title": "Start in two steps",
-    "label": "Getting started",
-    "uploadTitle": "Upload your statement",
-    "uploadBody": "Pick the bank’s PDF statement. Code on this computer reads the amounts and installments.",
-    "uploadAction": "Upload a statement",
-    "aiTitle": "If you like, pick a tool for commentary",
-    "aiBody": "For categories and commentary I use an AI tool on your computer. Installments and the forecast work without one.",
-    "aiAction": "Pick a tool",
-    "aiChosen": "Selected tool: {{name}}.",
-    "aiChange": "Change",
-    "step": "Step {{n}}"
+  "leadDue": "Your next payments on {{count}} cards come to <c>{{total}}</c>. First up, {{card}}: <m>{{amount}}</m> by {{date}}.",
+  "leadDueOne": "Your next payment is <c>{{total}}</c>: {{card}}, due {{date}}.",
+  "invite": {
+    "text": "Connect the AI tool on your computer and I will sort your spending into categories and tell you where you can save.",
+    "action": "Connect a tool"
   },
-  "forecast": {
-    "title": "Next statement",
-    "description": "Forecast for the {{month}} statement. Installments are certain; I count subscriptions at their last amount and variable spend at the median of earlier months.",
-    "barLabel": "Parts of the forecast",
-    "total": "Forecast",
-    "installments": "Installments",
-    "installmentsNote": "Installments that fall in this month",
-    "subscriptions": "Subscriptions",
-    "subscriptionsNote": "At their last amount: {{names}}",
-    "subscriptionsNone": "No subscriptions in the last month",
-    "variable": "Variable spend",
-    "variableNote": "Median of {{from}} – {{to}}",
-    "variableNoteOne": "Spend of {{month}}",
-    "variableNoteNone": "No earlier month",
-    "variableKnown": "{{amount}} already entered this month",
-    "fixed": "Fixed costs",
-    "fixedNote": "Fixed costs due this month",
-    "fixedExcluded": "Not in the total",
-    "includeFixed": "Fixed costs",
-    "includeFixedYes": "Included",
-    "includeFixedNo": "Left out",
-    "openPeriod": "Spend you added by hand or by import since the {{from}} cut-off: <m>{{amount}}</m>.",
-    "openPeriodNone": "You haven’t added any spend since the {{from}} cut-off.",
-    "backtest": "I tested this method on {{count}} past months: the forecast was off by <m>{{mae}}</m> on average ({{mape}} percent), mostly too {{direction}}.",
-    "backtestNoPct": "I tested this method on {{count}} past months: the forecast was off by <m>{{mae}}</m> on average, mostly too {{direction}}.",
-    "backtestLow": "low",
-    "backtestHigh": "high",
-    "backtestEven": "I tested this method on {{count}} past months: the forecast was off by <m>{{mae}}</m> on average.",
-    "backtestNone": "I can’t test the forecast yet. That needs at least {{need}} months of statements.",
-    "backtestOpen": "Month by month",
-    "backtestCaption": "Each month was forecast from earlier data only.",
-    "colMonth": "Month",
-    "colForecast": "Forecast",
-    "colActual": "Actual",
-    "colError": "Error",
-    "loadError": "I couldn’t get the forecast. The back end may be off."
+  "due": {
+    "title": "What you pay",
+    "colCard": "Card",
+    "colDue": "Due date",
+    "colAmount": "Amount",
+    "total": "Total",
+    "estimated": "estimate",
+    "dueOn": "Due {{date}}",
+    "days_one": "{{count}} day left",
+    "days_other": "{{count}} days left",
+    "today": "Due today",
+    "past": "The due date has passed",
+    "statementNote": "Your statement is in. Minimum payment {{minimum}}.",
+    "statementShort": "Your statement is in.",
+    "estimatedNote": "Your statement closes on {{date}}; the amount is my estimate.",
+    "estimatedShort": "Your statement is not in yet; the amount is my estimate.",
+    "parts": "Installments {{installments}}, subscriptions {{subscriptions}}, other spending {{other}}.",
+    "fixed": "Fixed costs such as rent come to <m>{{amount}}</m> this month; they are not paid by card, so they are not in the total.",
+    "none": "There is no statement to pay right now.",
+    "loadError": "I could not get your payments. The back end may be down."
+  },
+  "left": {
+    "title": "Installments left",
+    "sentence_one": "You still owe <m>{{amount}}</m> on {{count}} installment purchase. The last installment is in {{month}}.",
+    "sentence_other": "You still owe <m>{{amount}}</m> in total on {{count}} installment purchases. The last installment is in {{month}}.",
+    "none": "You have no installments left.",
+    "chart": "Installment totals for the next 12 months"
+  },
+  "todo": {
+    "title": "To do"
+  },
+  "suggestions": {
+    "title": "Ways to save",
+    "none": "No suggestions for now.",
+    "more": "{{count}} more suggestions",
+    "less": "Show fewer",
+    "saving": "Keeps <m>{{amount}}</m> a month",
+    "fromAi": "AI suggestion",
+    "aiHint": "These come from my own calculations only. Connect the AI tool and it will look at your spending and add suggestions.",
+    "loadError": "I could not get the suggestions.",
+    "kind": {
+      "price_rise": {
+        "title": "{{merchant}} costs more now",
+        "body": "It went from <m>{{previous}}</m> to <m>{{last}}</m>. If you use it, look at a cheaper plan; if not, cancel it."
+      },
+      "duplicate_service": {
+        "title": "You have {{count}} subscriptions doing the same job",
+        "body": "{{merchants}} do the same thing. Drop one and you keep <m>{{saving}}</m> a month."
+      },
+      "card_fee": {
+        "title": "You can ask for the card fee back",
+        "body": "You paid a <m>{{amount}}</m> fee on {{card}}. Use the letter on the Rights screen to ask your bank for it."
+      },
+      "interest": {
+        "title": "You are paying interest on {{card}}",
+        "body": "The {{month}} statement has <m>{{amount}}</m> of interest and tax. Pay the full balance by the due date and it goes away."
+      },
+      "foreign_currency": {
+        "title": "You spend in foreign currency",
+        "body": "Over the last three months you spent <m>{{amount}}</m> a month in foreign currency. Use a card with no foreign transaction fee for it."
+      },
+      "frequent_place": {
+        "title": "You spend {{amount}} a month at {{merchant}}",
+        "body": "Halve this {{category}} spending and you keep <m>{{yearly}}</m> a year."
+      },
+      "installment_relief": {
+        "title": "Your installments go down in {{month}}",
+        "body": "That month your installments come to <m>{{amount}}</m>. You could set the freed amount aside."
+      }
+    }
+  },
+  "where": {
+    "title": "Where your money goes",
+    "sentence": "In {{month}} you spent <m>{{total}}</m>. Most of it on {{top}}: <m>{{amount}}</m>.",
+    "go": "All spending",
+    "none": "No spending this month.",
+    "loadError": "I could not get your spending."
+  },
+  "load": {
+    "go": "Go to installments",
+    "loadError": "I could not get the installment plan."
   },
   "alerts": {
-    "title": "Alerts",
-    "none": "No alerts right now.",
+    "none": "Nothing to do right now.",
     "label": "Alerts",
-    "moreInfo": "Also show {{count}} notes",
-    "lessInfo": "Hide the notes",
     "loadError": "I couldn’t get the alerts.",
     "unknown": "There is an alert this version does not know.",
     "go": {
@@ -117,8 +127,10 @@
         "detail": "On the {{month}} statement, spend in {{currencies}} came to <m>{{total}}</m>."
       },
       "missing_statement": {
-        "title": "A statement is missing",
-        "detail": "The {{month}} statement of {{card}} is missing. Installment and spend totals for that month are incomplete."
+        "title": "{{card}}: statement missing",
+        "detail": "The {{range}} {{what}} missing. Download the PDF from your bank’s app and drop it on the Statements screen.",
+        "what_one": "statement is",
+        "what_other": "statements are"
       },
       "subscription_price_rise": {
         "title": "{{merchant}} went up",
@@ -137,13 +149,22 @@
         "title": "{{merchant}} charged after you cancelled",
         "detail": "You marked it cancelled on {{date}}; <m>{{total}}</m> was charged after that. You can dispute it with your bank."
       }
-    }
+    },
+    "more": "Show {{count}} more",
+    "less": "Show fewer"
   },
-  "load": {
-    "title": "Installments over 12 months",
-    "sentence": "Installments fall in {{busy}} of the next 12 months. The heaviest month is {{month}}, at <m>{{amount}}</m>.",
-    "sentenceNone": "No installments in the next 12 months.",
-    "go": "Go to installments",
-    "loadError": "I couldn’t get the installment plan."
+  "first": {
+    "lead": "Once you upload a card statement, I show the forecast for the next one, the alerts and your installment load here.",
+    "title": "Start in two steps",
+    "label": "Getting started",
+    "uploadTitle": "Upload your statement",
+    "uploadBody": "Pick the bank’s PDF statement. Code on this computer reads the amounts and installments.",
+    "uploadAction": "Upload a statement",
+    "aiTitle": "If you like, pick a tool for commentary",
+    "aiBody": "For categories and commentary I use an AI tool on your computer. Installments and the forecast work without one.",
+    "aiAction": "Pick a tool",
+    "aiChosen": "Selected tool: {{name}}.",
+    "aiChange": "Change",
+    "step": "Step {{n}}"
   }
 }

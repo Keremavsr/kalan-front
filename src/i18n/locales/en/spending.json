@@ -73,5 +73,26 @@
     "deleted": "I deleted the {{pattern}} rule. The categories it set stay as they are.",
     "gone": "This rule was already deleted.",
     "deleteFailed": "I could not delete the rule. Try again in a moment."
+  },
+  "unreadable": "Unreadable merchant",
+  "uncategorized": {
+    "count_one": "{{count}} transaction has no category.",
+    "count_other": "{{count}} transactions have no category.",
+    "hint": "Show them, then pick a category on each row; later spending at the same place goes there too.",
+    "hintAi": "I can have the AI tool sort them all; the categories you picked always come first.",
+    "show": "Show",
+    "showAll": "Show all",
+    "ai": "Sort with AI",
+    "running": "Sorting",
+    "started": "I sent the uncategorised transactions to the tool. I will refresh the list when it is done.",
+    "failed": "I could not start the tool.",
+    "connect": "Connect an AI tool"
+  },
+  "places": {
+    "title": "Places you spend at often",
+    "intro": "Places you went to regularly over the last {{count}} months. They are not subscriptions; how much you spend is up to you.",
+    "visits_one": "{{count}} time in {{months}} months",
+    "visits_other": "{{count}} times in {{months}} months",
+    "average": "<m>{{amount}}</m> a month on average"
   }
 }

@@ -54,5 +54,17 @@
   "privacy2": "Número do cartão, nome, endereço, IBAN e número de cliente são removidos antes de qualquer coisa ser armazenada.",
   "privacy3": "A ferramenta que você escolher recebe apenas a data, a descrição, o valor, a moeda e o tipo de cada transação, além dos totais calculados pelo código.",
   "privacy4": "O código calcula totais e parcelas; o modelo não produz números.",
-  "privacy5": "O kalan é de código aberto (licença MIT). Você pode verificar o que está escrito aqui lendo o código."
+  "privacy5": "O kalan é de código aberto (licença MIT). Você pode verificar o que está escrito aqui lendo o código.",
+  "providerEffect": "{{name}} is selected. It reads your statements one by one, sorts your spending into categories, then writes suggestions. It also reads every new statement you upload; the strip under the menu shows its progress.",
+  "providerSent": "The tool receives the date, description, amount, currency and type of each transaction in your statements; for suggestions it receives only totals (category totals, regular payments, places you spend at often, installment load).",
+  "cardsTitle": "Your cards",
+  "cardsIntro": "The cards I found on your statements. Give one a name and every screen shows that name.",
+  "cardName": "Card name",
+  "cardPlaceholder": "For example: Grocery card",
+  "cardSave": "Save",
+  "cardSaved": "I now show it as {{label}}.",
+  "cardCleared": "Name removed: {{label}}.",
+  "cardFailed": "I could not save the name. Try again in a moment.",
+  "cardCount_one": "{{count}} statement, {{span}}",
+  "cardCount_other": "{{count}} statements, {{span}}"
 }

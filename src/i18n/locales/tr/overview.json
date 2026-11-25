@@ -1,86 +1,96 @@
 {
   "title": "Özet",
-  "lead": "Son ekstrende gözünden kaçmaması gerekenleri burada topluyorum.",
-  "leadForecast": "{{month}} ekstren için tahminim <c>{{amount}}</c>. Bunun <m>{{installments}}</m> kadarı şimdiden taksit olarak belli.",
-  "noStatementsTitle": "Henüz ekstre yok",
-  "noStatements": "İlk ekstreni yüklediğinde taksitlerini, harcamalarını ve dikkat etmen gerekenleri buradan izlersin.",
-  "goUpload": "Ekstre yükle",
-  "watchTitle": "Dikkat edilecekler",
-  "statement": "Ekstre",
-  "statementOption": "{{period}}, son ödeme {{due}}",
-  "analyze": "Yorumla",
-  "reanalyze": "Yeniden yorumla",
-  "pending": "Yorum hazırlanıyor. Bu 10 ile 60 saniye sürebilir.",
-  "elapsed": "{{seconds}} sn",
-  "failed": "Yorumu alamadım: {{error}}",
-  "none": "Bu ekstreyi henüz yorumlamadım.",
-  "sentData": "Seçtiğin araca yalnız işlem tarihi, açıklaması, tutarı, para birimi ve türü gider.",
-  "noProvider": "Yorum için önce bir araç seç.",
-  "goSetup": "Ayarlara git",
-  "summary": "Kısaca",
-  "items": "İzlenecek noktalar",
-  "cites": "İlgili işlemler",
-  "noCites": "Bu nokta tek bir işleme bağlı değil.",
-  "meta": "{{provider}} ile hazırlandı, {{date}}.",
-  "disclaimer": "Toplamları ve taksitleri kod hesaplıyor; model yalnız kategori ve yorum ekliyor.",
-  "done": "Yorum hazır.",
-  "first": {
-    "lead": "Kartının ekstresini yüklediğinde gelecek ekstrenin tahminini, uyarıları ve taksit yükünü burada gösteririm.",
-    "title": "İki adımda başla",
-    "label": "Başlangıç adımları",
-    "uploadTitle": "Ekstreni yükle",
-    "uploadBody": "Bankanın PDF ekstresini seç. Tutarları ve taksitleri bu bilgisayarda kod okur.",
-    "uploadAction": "Ekstre yükle",
-    "aiTitle": "İstersen yorum için bir araç seç",
-    "aiBody": "Kategori ve yorum için bilgisayarındaki bir yapay zekâ aracını kullanırım. Seçmezsen de taksitler ve tahmin çalışır.",
-    "aiAction": "Araç seç",
-    "aiChosen": "Seçili araç: {{name}}.",
-    "aiChange": "Değiştir",
-    "step": "Adım {{n}}"
+  "leadDue": "{{count}} kartına sıradaki ödemelerin toplam <c>{{total}}</c>. İlki {{card}}: {{date}} tarihine kadar <m>{{amount}}</m>.",
+  "leadDueOne": "Sıradaki ödemen <c>{{total}}</c>: {{card}}, son ödeme {{date}}.",
+  "invite": {
+    "text": "Bilgisayarındaki yapay zekâ aracını bağlarsan harcamalarını kategorilere ayırır, nerede tasarruf edebileceğini söylerim.",
+    "action": "Aracı bağla"
   },
-  "forecast": {
-    "title": "Gelecek ekstre",
-    "description": "{{month}} ekstresi için tahmin. Taksitler kesin; abonelikleri son tutarlarıyla, değişken harcamayı önceki ayların ortancasıyla sayıyorum.",
-    "barLabel": "Tahminin parçaları",
-    "total": "Tahmin",
-    "installments": "Taksitler",
-    "installmentsNote": "Planlarda bu aya düşen taksitler",
-    "subscriptions": "Abonelikler",
-    "subscriptionsNote": "Son tutarlarıyla: {{names}}",
-    "subscriptionsNone": "Son ayda abonelik görmedim",
-    "variable": "Değişken harcama",
-    "variableNote": "{{from}} – {{to}} arası ortanca",
-    "variableNoteOne": "{{month}} harcaması",
-    "variableNoteNone": "Önceki ay yok",
-    "variableKnown": "Bu ay şimdiden {{amount}} girildi",
-    "fixed": "Sabit giderler",
-    "fixedNote": "Bu ay ödenecek sabit giderler",
-    "fixedExcluded": "Toplama katmadım",
-    "includeFixed": "Sabit giderler",
-    "includeFixedYes": "Dahil",
-    "includeFixedNo": "Hariç",
-    "openPeriod": "{{from}} kesiminden beri elle ya da içe aktararak eklediğin harcama: <m>{{amount}}</m>.",
-    "openPeriodNone": "{{from}} kesiminden beri eklediğin harcama yok.",
-    "backtest": "Bu yöntemi geçmişteki {{count}} ayda sınadım: tahmin ortalama <m>{{mae}}</m> saptı (yüzde {{mape}}), çoğunlukla {{direction}} kaldı.",
-    "backtestNoPct": "Bu yöntemi geçmişteki {{count}} ayda sınadım: tahmin ortalama <m>{{mae}}</m> saptı, çoğunlukla {{direction}} kaldı.",
-    "backtestLow": "düşük",
-    "backtestHigh": "yüksek",
-    "backtestEven": "Bu yöntemi geçmişteki {{count}} ayda sınadım: tahmin ortalama <m>{{mae}}</m> saptı.",
-    "backtestNone": "Tahmini henüz sınayamadım. Bunun için en az {{need}} aylık ekstre gerekiyor.",
-    "backtestOpen": "Ay ay sınama",
-    "backtestCaption": "Her ay yalnız kendinden önceki verilerle tahmin edildi.",
-    "colMonth": "Ay",
-    "colForecast": "Tahmin",
-    "colActual": "Gerçekleşen",
-    "colError": "Sapma",
-    "loadError": "Tahmini alamadım. Arka uç kapalı olabilir."
+  "due": {
+    "title": "Ödeyeceklerin",
+    "colCard": "Kart",
+    "colDue": "Son ödeme",
+    "colAmount": "Tutar",
+    "total": "Toplam",
+    "estimated": "tahmin",
+    "dueOn": "Son ödeme {{date}}",
+    "days_one": "{{count}} gün kaldı",
+    "days_other": "{{count}} gün kaldı",
+    "today": "Son gün bugün",
+    "past": "Son ödeme günü geçti",
+    "statementNote": "Ekstren geldi. Asgari ödeme {{minimum}}.",
+    "statementShort": "Ekstren geldi.",
+    "estimatedNote": "Ekstren {{date}} tarihinde kesilecek; tutar benim tahminim.",
+    "estimatedShort": "Ekstren henüz gelmedi; tutar benim tahminim.",
+    "parts": "Taksit {{installments}}, abonelik {{subscriptions}}, diğer harcamalar {{other}}.",
+    "fixed": "Kira gibi sabit giderlerin bu ay <m>{{amount}}</m>; karttan çıkmadığı için toplama katmadım.",
+    "none": "Şu an ödemen gereken bir ekstre yok.",
+    "loadError": "Ödemelerini alamadım. Arka uç kapalı olabilir."
+  },
+  "left": {
+    "title": "Kalan taksitlerin",
+    "sentence_one": "Süren {{count}} taksitli harcamandan <m>{{amount}}</m> borcun kaldı. Son taksit {{month}} ayında.",
+    "sentence_other": "Süren {{count}} taksitli harcamandan toplam <m>{{amount}}</m> borcun kaldı. Son taksit {{month}} ayında.",
+    "none": "Kalan taksitin yok.",
+    "chart": "Önümüzdeki 12 ayın taksit toplamları"
+  },
+  "todo": {
+    "title": "Yapman gerekenler"
+  },
+  "suggestions": {
+    "title": "Tasarruf önerileri",
+    "none": "Şimdilik bir önerim yok.",
+    "more": "{{count}} öneri daha",
+    "less": "Daha az göster",
+    "saving": "Ayda <m>{{amount}}</m> kalır",
+    "fromAi": "Yapay zekâ önerisi",
+    "aiHint": "Bu öneriler yalnız kendi hesaplarımdan. Yapay zekâ aracını bağlarsan harcamalarına bakıp başka öneriler de yazar.",
+    "loadError": "Önerileri alamadım.",
+    "kind": {
+      "price_rise": {
+        "title": "{{merchant}} ücreti arttı",
+        "body": "<m>{{previous}}</m> olan ücret <m>{{last}}</m> oldu. Kullanıyorsan daha ucuz bir plana bak, kullanmıyorsan iptal et."
+      },
+      "duplicate_service": {
+        "title": "Aynı işi gören {{count}} aboneliğin var",
+        "body": "{{merchants}} aynı işi yapıyor. Birini bırakırsan ayda <m>{{saving}}</m> kalır."
+      },
+      "card_fee": {
+        "title": "Kart aidatını geri isteyebilirsin",
+        "body": "{{card}} için <m>{{amount}}</m> aidat ödedin. Haklarım ekranındaki dilekçeyle bankandan geri iste."
+      },
+      "interest": {
+        "title": "{{card}} kartında faiz ödüyorsun",
+        "body": "{{month}} ekstresinde <m>{{amount}}</m> faiz ve vergi var. Borcun tamamını son ödeme gününe kadar ödersen bu tutar çıkmaz."
+      },
+      "foreign_currency": {
+        "title": "Döviz harcamaların var",
+        "body": "Son üç ayda ayda ortalama <m>{{amount}}</m> döviz harcaması yaptın. Bu harcamalar için yurt dışı işlem ücreti almayan bir kart seç."
+      },
+      "frequent_place": {
+        "title": "{{merchant}} için ayda ortalama {{amount}} harcıyorsun",
+        "body": "{{category}} harcamasını yarıya indirirsen yılda <m>{{yearly}}</m> kalır."
+      },
+      "installment_relief": {
+        "title": "{{month}} ayında taksitlerin azalıyor",
+        "body": "O ay taksit toplamın <m>{{amount}}</m> oluyor. Boşalan tutarı birikime ayırabilirsin."
+      }
+    }
+  },
+  "where": {
+    "title": "Paran nereye gidiyor",
+    "sentence": "{{month}} ayında <m>{{total}}</m> harcadın. En çok {{top}}: <m>{{amount}}</m>.",
+    "go": "Bütün harcamalar",
+    "none": "Bu ay harcama yok.",
+    "loadError": "Harcamaları alamadım."
+  },
+  "load": {
+    "go": "Taksitlere git",
+    "loadError": "Taksit planını alamadım."
   },
   "alerts": {
-    "title": "Uyarılar",
-    "none": "Şu an bir uyarı yok.",
+    "none": "Şu an yapman gereken bir şey yok.",
     "label": "Uyarılar",
-    "moreInfo": "{{count}} bilgi notunu da göster",
-    "lessInfo": "Bilgi notlarını gizle",
     "loadError": "Uyarıları alamadım.",
     "unknown": "Bir uyarı var ama bu sürüm onu tanımıyor.",
     "go": {
@@ -117,8 +127,10 @@
         "detail": "{{month}} ekstresinde {{currencies}} cinsinden harcamaların karşılığı <m>{{total}}</m>."
       },
       "missing_statement": {
-        "title": "Bir ekstre eksik",
-        "detail": "{{card}} için {{month}} ekstresi yok. Bu ayın taksit ve harcama toplamları eksik kalır."
+        "title": "{{card}}: eksik ekstre",
+        "detail": "{{range}} {{what}} yok. Bankanın uygulamasından PDF olarak indirip Ekstreler ekranına bırak.",
+        "what_one": "ekstresi",
+        "what_other": "ekstreleri"
       },
       "subscription_price_rise": {
         "title": "{{merchant}} ücreti arttı",
@@ -137,13 +149,22 @@
         "title": "{{merchant}} iptalden sonra çekim yaptı",
         "detail": "{{date}} tarihinde iptal ettiğini işaretledin; sonrasında <m>{{total}}</m> çekildi. Bankana itiraz edebilirsin."
       }
-    }
+    },
+    "more": "{{count}} tane daha göster",
+    "less": "Daha az göster"
   },
-  "load": {
-    "title": "12 aylık taksit yükü",
-    "sentence": "Önümüzdeki 12 ayın {{busy}} ayında taksit var. En yüksek ay {{month}}, <m>{{amount}}</m>.",
-    "sentenceNone": "Önümüzdeki 12 ayda taksit yok.",
-    "go": "Taksitlere git",
-    "loadError": "Taksit planını alamadım."
+  "first": {
+    "lead": "Kartının ekstresini yüklediğinde gelecek ekstrenin tahminini, uyarıları ve taksit yükünü burada gösteririm.",
+    "title": "İki adımda başla",
+    "label": "Başlangıç adımları",
+    "uploadTitle": "Ekstreni yükle",
+    "uploadBody": "Bankanın PDF ekstresini seç. Tutarları ve taksitleri bu bilgisayarda kod okur.",
+    "uploadAction": "Ekstre yükle",
+    "aiTitle": "İstersen yorum için bir araç seç",
+    "aiBody": "Kategori ve yorum için bilgisayarındaki bir yapay zekâ aracını kullanırım. Seçmezsen de taksitler ve tahmin çalışır.",
+    "aiAction": "Araç seç",
+    "aiChosen": "Seçili araç: {{name}}.",
+    "aiChange": "Değiştir",
+    "step": "Adım {{n}}"
   }
 }

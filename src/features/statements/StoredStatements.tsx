@@ -9,6 +9,7 @@ import { MarginMark } from '../../components/pencil';
 import { bankName } from '../../lib/banks';
 import { formatDate } from '../../lib/format';
 import { useIntlLocale } from '../../lib/useLocale';
+import { StatementCommentary } from './Commentary';
 import { TemplateDraftPanel } from './TemplateDraftPanel';
 import { ReconciliationNotice, ReviewNotice, StatementFacts } from './UploadPanel';
 
@@ -51,13 +52,14 @@ export function StoredStatements() {
                       aria-current={s.id === openId ? 'true' : undefined}
                       className="underline decoration-transparent decoration-1 underline-offset-4 transition-[text-decoration-color] duration-(--duration-1) hover:decoration-ink aria-[current=true]:decoration-ink"
                     >
-                      {bankName(s.bank)} {s.product}
+                      {s.card_label ?? `${bankName(s.bank)} ${s.product}`}
                     </Link>
                   }
                   detail={
                     <span className="text-meta text-muted">
                       {formatDate(s.period_start, locale)} – {formatDate(s.period_end, locale)} ·{' '}
-                      {t('statements.listDue', { date: formatDate(s.due_date, locale) })} · •••• {s.card_last4}
+                      {t('statements.listDue', { date: formatDate(s.due_date, locale) })}
+                      {s.card_label ? null : <> · •••• {s.card_last4}</>}
                       {!r ? <> · {t('statements.reconNone')}</> : r.status === 'ok' ? null : <> · {t('statements.reconMismatch')}</>}
                       {s.needs_review ? <> · {t('statements.needsReview')}</> : null}
                     </span>
@@ -109,7 +111,7 @@ function StatementDetail({ id }: { id: string }) {
         </Notice>
       ) : (
         <Card
-          title={s ? `${bankName(s.bank)} ${s.product} · •••• ${s.card_last4}` : t('statements.detailTitle')}
+          title={s ? (s.card_label ?? `${bankName(s.bank)} ${s.product} · •••• ${s.card_last4}`) : t('statements.detailTitle')}
           description={t('statements.detailTitle')}
           actions={
             <>
@@ -132,6 +134,7 @@ function StatementDetail({ id }: { id: string }) {
                   <ReviewNotice statement={s} />
                   <StatementFacts statement={s} />
                   {s.parser_id === AI_FALLBACK_PARSER ? <TemplateDraftPanel statementId={s.id} /> : null}
+                  <StatementCommentary statement={s} />
                 </div>
               ) : null
             }

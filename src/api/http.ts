@@ -215,6 +215,17 @@ export function createHttpApi(baseUrl: string, fetchImpl: typeof fetch = fetch.b
     analyzeStatement: (id) => request('POST', `/statements/${seg(id)}/analyze`),
     getJob: (jobId) => request('GET', `/jobs/${seg(jobId)}`),
     getAnalysis: (id) => request('GET', `/statements/${seg(id)}/analysis`),
+    startAnalysisAll: () => request('POST', '/analysis/all'),
+    getAnalysisAll: () => request('GET', '/analysis/all'),
+
+    listCards: () => request('GET', '/cards'),
+    renameCard: (id, name) => request('PUT', `/cards/${seg(id)}`, { name }),
+    closePlan: (planId) => request('POST', `/plans/${seg(planId)}/close`),
+    reopenPlan: (planId) => request('DELETE', `/plans/${seg(planId)}/close`),
+    setSubscriptionExpected: (id, amount) => request('PUT', `/subscriptions/${seg(id)}/expected`, { amount }),
+    clearSubscriptionExpected: (id) => request('DELETE', `/subscriptions/${seg(id)}/expected`),
+    getSuggestions: (locale) => request('GET', `/suggestions${queryString({ locale })}`),
+    getFrequentPlaces: (months) => request('GET', `/insights/frequent-places${queryString({ months })}`),
 
     getInsightRules: () => request('GET', '/insights/rules'),
     putInsightRules: (overrides) => request('PUT', '/insights/rules', overrides),

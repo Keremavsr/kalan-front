@@ -2,13 +2,14 @@ import { useEffect, useState, type ReactNode } from 'react';
 import { Plus, Settings } from 'lucide-react';
 import { Link, NavLink } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
-import { useProviders, useStatements } from '../../api/queries';
+import { useProviders } from '../../api/queries';
 import { Logo } from '../brand/Logo';
 import { Scribble } from '../pencil';
 import { Button, buttonClass } from '../ui';
 import { ManualEntryModal } from '../../features/manual/ManualEntryModal';
 import { cx } from '../../lib/cx';
 import { useTour } from '../../features/tour/Tour';
+import { AnalysisStrip } from '../../features/ai/AnalysisStrip';
 
 /** Main menu, in reading order. Settings sits apart as an icon. */
 const NAV = [
@@ -34,8 +35,6 @@ function useScrolled() {
 export function AppShell({ children }: { children: ReactNode }) {
   const { t } = useTranslation();
   const providers = useProviders();
-  const statements = useStatements();
-  const latest = statements.data?.items[0];
   const selected = providers.data?.providers.find((p) => p.id === providers.data?.selected);
   const isMock = import.meta.env.VITE_KALAN_MOCK === '1';
   const scrolled = useScrolled();
@@ -90,6 +89,7 @@ export function AppShell({ children }: { children: ReactNode }) {
             </NavLink>
           </div>
         </div>
+        <AnalysisStrip />
       </header>
 
       <main id="main" tabIndex={-1} className="w-full flex-1 focus:outline-none">
@@ -99,7 +99,6 @@ export function AppShell({ children }: { children: ReactNode }) {
       <footer className="mx-auto w-full max-w-content px-(--space-gutter) pb-6">
         <p className="flex flex-wrap gap-x-5 gap-y-1 border-t border-line pt-4 text-meta text-muted">
           <span>{selected ? t('nav.providerSelected', { name: selected.name }) : t('nav.providerNone')}</span>
-          {latest ? <span>{t('common.card', { last4: latest.card_last4 })}</span> : null}
           {isMock ? <span>{t('common.demoData')}</span> : null}
           <button
             type="button"

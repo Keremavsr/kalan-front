@@ -105,6 +105,9 @@ export interface StatementSummary {
   reconciliation: Reconciliation;
   analysis_status: AnalysisStatus;
   needs_review: boolean;
+  /** Task 6: the card this statement belongs to and its display label ("Garanti Bonus ··1234"). */
+  card_id?: string | null;
+  card_label?: string | null;
   /** Soft save-gate findings; empty for a clean statement. */
   review: GateIssue[];
 }
@@ -164,7 +167,15 @@ export interface Transaction {
   original_currency: string | null;
   points: string | null;
   detail: string | null;
+  /** v0.4.0: null for manual and imported rows. */
+  card_id?: string | null;
+  card_label?: string | null;
+  category_source?: CategorySource | null;
+  /** The merchant name was only an address; show "adı okunamayan işyeri". */
+  merchant_unreadable?: boolean;
 }
+
+export type CategorySource = 'rule' | 'model' | 'user';
 
 export interface PrintedSummary {
   previous_balance: Minor;
@@ -419,6 +430,8 @@ export interface ScheduleItem {
   index: number;
   count: number;
   breakdown?: InstallmentBreakdown | null;
+  card_id?: string | null;
+  card_label?: string | null;
 }
 
 export interface ScheduleMonth {
@@ -439,6 +452,27 @@ export interface SchedulePlan {
   source?: TransactionSource;
   /** Back end extra, not in the contract text. */
   last_statement_id?: string | null;
+  card_id?: string | null;
+  card_label?: string | null;
+  /** Task 6: the whole plan, for "3 taksitin 2'si ödendi, 1 kaldı". */
+  total_count?: number | null;
+  paid_count?: number | null;
+  next_month?: IsoMonth | null;
+  next_amount?: Minor | null;
+  /** null: open. "user": the user said it is paid off. "statement": a newer statement shows it is gone. */
+  closed?: PlanClosed | null;
+  closed_at?: IsoDate | null;
+  /** For `closed: "statement"`: the newer statement without the plan's row. */
+  statement_id?: string | null;
+}
+
+export type PlanClosed = 'user' | 'statement';
+
+/** Open plans only; computed by the back end. */
+export interface ScheduleSummary {
+  total_remaining: Minor;
+  plan_count: number;
+  last_month: IsoMonth | null;
 }
 
 export interface FixedScheduleItem {
@@ -462,6 +496,7 @@ export interface Schedule {
   fixed?: FixedSchedule;
   /** First schedule month (back end extra, not in the contract text). */
   start_month?: IsoMonth;
+  summary?: ScheduleSummary;
 }
 
 export interface CategoryShare {
@@ -480,10 +515,25 @@ export interface MonthlySummary {
   statement_ids: string[];
 }
 
+export type RecurringKind = 'subscription' | 'bill';
+
 export interface Subscription {
+  /** Task 6: id for the expected amount and the cancel mark. */
+  id?: string;
+  kind?: RecurringKind;
+  /** The amount the user said it changed to; null when not set. */
+  expected_amount?: Minor | null;
+  expected_since?: IsoDate | null;
+  /** expected_amount when set, else amount_last. */
+  monthly_amount?: Minor;
+  last_date?: IsoDate;
+  category?: string | null;
+  card_id?: string | null;
+  card_label?: string | null;
   merchant: string;
   amount_last: Minor;
-  amount_previous: Minor;
+  /** null when there is no earlier amount (v0.4.0). */
+  amount_previous: Minor | null;
   currency: string;
   months_seen: IsoMonth[];
   price_change: Ratio | null;
@@ -547,6 +597,16 @@ export interface Alert {
   message_key: string;
   params: Record<string, string | number | string[] | null>;
   refs: { statement_ids: string[]; transaction_ids: string[]; plan_ids: string[] };
+  card_id?: string | null;
+  card_label?: string | null;
+  /** v0.4.0: the back end's sentence in tr/en; set for missing_statement. */
+  text?: string | null;
+}
+
+export interface SubscriptionsResponse {
+  items: Subscription[];
+  /** v0.4.0: monthly_amount added up per kind. */
+  totals?: { currency: string; subscription: Minor; bill: Minor }[];
 }
 
 // -- model analysis -------------------------------------------------------------------------------
@@ -554,6 +614,126 @@ export interface Alert {
 export interface Job {
   status: 'pending' | 'done' | 'failed';
   error: string | null;
+  /** v0.4.0 */
+  job_id?: string;
+  kind?: 'statement' | 'analysis_all';
+  statement_id?: string | null;
+  phase?: AnalysisPhase | null;
+  done?: number;
+  total?: number;
+  failed?: number;
+}
+
+export type AnalysisPhase = 'statements' | 'suggestions' | 'done';
+
+/** The batch over every statement not yet read, then AI suggestions (POST /analysis/all). */
+export interface AnalysisRun extends Job {
+  job_id: string;
+}
+
+// -- cards and suggestions (task 6) -----------------------------------------------------------------
+
+export interface CardInfo {
+  id: string;
+  bank: string;
+  bank_name: string;
+  product: string | null;
+  card_last4: string;
+  /** The name the user gave; null when not named. */
+  name: string | null;
+  /** What screens show: "<name> ··0000", else "<bank> <product> ··0000". */
+  label: string;
+  statement_count: number;
+  first_month: IsoMonth;
+  last_month: IsoMonth;
+  latest_statement_id: string;
+}
+
+export type SuggestionSource = 'rules' | 'ai';
+
+export type SuggestionKind =
+  | 'duplicate_service'
+  | 'price_rise'
+  | 'card_fee'
+  | 'interest'
+  | 'foreign_currency'
+  | 'frequent_place'
+  | 'installment_relief'
+  | 'ai';
+
+export interface Suggestion {
+  id: string;
+  kind: SuggestionKind | (string & {});
+  title: string;
+  body: string;
+  monthly_saving: Minor | null;
+  yearly_saving: Minor | null;
+  currency: string;
+  card_id: string | null;
+  card_label: string | null;
+  source: SuggestionSource;
+  /** In-app path, e.g. "/recurring?id=sb_..". */
+  link: string | null;
+  message_key: string | null;
+  params: Record<string, unknown>;
+}
+
+export interface SuggestionsResponse {
+  items: Suggestion[];
+  ai: { status: AnalysisStatus; provider: ProviderId | null; created_at: string | null; job_id: string | null };
+}
+
+export interface FrequentPlace {
+  merchant: string;
+  kind: 'frequent_place';
+  category: string | null;
+  months_seen: number;
+  visits: number;
+  total: Minor;
+  monthly_average: Minor;
+  last_date: IsoDate;
+  card_ids: string[];
+}
+
+export interface FrequentPlaces {
+  currency: string;
+  window: { months: IsoMonth[]; count: number };
+  items: FrequentPlace[];
+}
+
+export interface CardParts {
+  installments: Minor;
+  subscriptions: Minor;
+  other: Minor;
+}
+
+/** One card's row under "Bu ay ödeyeceklerin": its next unpaid due payment. */
+export interface ForecastCard {
+  card_id: string;
+  card_label: string;
+  bank: string;
+  card_last4: string;
+  due_date: IsoDate;
+  amount: Minor;
+  /** true: the forecast of the next statement. false: the stored statement's printed total. */
+  estimated: boolean;
+  statement_id: string | null;
+  minimum_payment: Minor | null;
+  days_left: number;
+  parts: CardParts | null;
+  next_statement: {
+    month: IsoMonth;
+    cut_off: IsoDate;
+    due_date: IsoDate;
+    dates: 'printed' | 'estimated';
+    total: Minor;
+    parts: CardParts;
+    installment_items: ScheduleItem[];
+    subscriptions: { id: string; merchant: string; amount: Minor }[];
+    note: string;
+    note_key: string;
+    note_params: Record<string, string | number>;
+  } | null;
 }
 
 export interface WatchItem {
@@ -689,6 +869,9 @@ export interface CardFeeDraft {
 }
 
 export interface CardOption {
+  /** v0.4.0 */
+  card_id?: string;
+  card_label?: string;
   bank: string;
   product: string;
   card_last4: string;
@@ -765,6 +948,11 @@ export interface Forecast {
     subscriptions: { merchant: string; amount: Minor }[];
   } | null;
   backtest: BacktestSummary;
+  /** v0.4.0: what to pay next, card by card; `total` adds the rows, `fixed` is not in it. */
+  currency?: string;
+  total?: Minor;
+  fixed?: Minor;
+  cards?: ForecastCard[];
 }
 
 export interface BacktestQuery {
@@ -996,7 +1184,7 @@ export interface KalanApi {
   // calculations
   getSchedule(months: number): Promise<Schedule>;
   getMonthlySummary(month: IsoMonth): Promise<MonthlySummary>;
-  getSubscriptions(): Promise<{ items: Subscription[] }>;
+  getSubscriptions(): Promise<SubscriptionsResponse>;
   simulateInstallment(body: SimulationRequest): Promise<Simulation>;
   getAlerts(): Promise<{ items: Alert[] }>;
 
@@ -1004,6 +1192,20 @@ export interface KalanApi {
   analyzeStatement(id: string): Promise<{ job_id: string; status: 'pending' }>;
   getJob(jobId: string): Promise<Job>;
   getAnalysis(id: string): Promise<Analysis>;
+  /** Reads every statement not yet read, then writes suggestions. */
+  startAnalysisAll(): Promise<{ job_id: string; kind: 'analysis_all'; status: 'pending'; total: number }>;
+  /** The latest run over every statement, or null. */
+  getAnalysisAll(): Promise<AnalysisRun | null>;
+
+  // cards, plans, suggestions (task 6)
+  listCards(): Promise<{ items: CardInfo[] }>;
+  renameCard(id: string, name: string | null): Promise<CardInfo>;
+  closePlan(planId: string): Promise<SchedulePlan>;
+  reopenPlan(planId: string): Promise<void>;
+  setSubscriptionExpected(id: string, amount: Minor): Promise<Subscription>;
+  clearSubscriptionExpected(id: string): Promise<void>;
+  getSuggestions(locale?: string): Promise<SuggestionsResponse>;
+  getFrequentPlaces(months?: number): Promise<FrequentPlaces>;
 
   // insights
   getInsightRules(): Promise<InsightRules>;

@@ -33,6 +33,22 @@ export const statementCard2 = buildStatement(
     { date: '2026-10-15', description: 'Kart aidatı', amount: 600, kind: 'fee', category: 'fees' },
     { date: '2026-10-20', description: 'Kart aidatı iadesi', amount: 600, kind: 'fee', category: 'fees', direction: 'credit' },
     { date: '2026-10-24', description: 'ORNEK MARKET', amount: 1234.56, kind: 'purchase', category: 'groceries', merchant: 'ORNEK MARKET' },
+    { date: '2026-10-08', description: 'ORNEK ELEKTRIK DAGITIM', amount: 734.1, kind: 'purchase', category: 'utilities', merchant: 'ORNEK ELEKTRIK' },
+    { date: '2026-10-09', description: 'ORNEK YEMEK SIPARIS', amount: 412.5, kind: 'purchase', category: 'dining', merchant: 'ORNEK YEMEK' },
+    { date: '2026-10-22', description: 'ORNEK YEMEK SIPARIS', amount: 388, kind: 'purchase', category: 'dining', merchant: 'ORNEK YEMEK' },
+  ]),
+);
+
+/**
+ * The second card's July statement (preset "full" only). August is not stored, so the card has a gap:
+ * the missing_statement alert names August 2026.
+ */
+export const statementCard2Jul = buildStatement(
+  { ...CARD2_BASE, id: 'st_k2_07', period_start: '2026-07-01', period_end: '2026-07-31', due_date: '2026-08-10', analysis_status: 'none' },
+  buildTransactions('k2_07', [
+    { date: '2026-07-08', description: 'ORNEK ELEKTRIK DAGITIM', amount: 588.9, kind: 'purchase', category: 'utilities', merchant: 'ORNEK ELEKTRIK' },
+    { date: '2026-07-16', description: 'ORNEK YEMEK SIPARIS', amount: 356.75, kind: 'purchase', category: 'dining', merchant: 'ORNEK YEMEK' },
+    { date: '2026-07-27', description: 'ORNEK KAFE', amount: 145, kind: 'purchase', category: null, merchant: 'ORNEK KAFE' },
   ]),
 );
 
@@ -64,6 +80,8 @@ export const statementAiFallback = buildStatement(
     { date: '2026-09-05', description: 'ORNEK KIRTASIYE', amount: 300, kind: 'purchase', category: null, merchant: 'ORNEK KIRTASIYE' },
     { date: '2026-09-12', description: 'ORNEK TEKNOLOJI 2/4', amount: 2500, kind: 'installment', category: 'electronics', merchant: 'ORNEK TEKNOLOJI', installment: { remaining_count: 2, each: 2500, plan_id: 'pl_ai_01' } },
     { date: '2026-09-20', description: 'ORNEK ECZANE', amount: 450, kind: 'purchase', category: 'health', merchant: 'ORNEK ECZANE' },
+    { date: '2026-09-08', description: 'ORNEK ELEKTRIK DAGITIM', amount: 612.4, kind: 'purchase', category: 'utilities', merchant: 'ORNEK ELEKTRIK' },
+    { date: '2026-09-14', description: 'ORNEK YEMEK SIPARIS', amount: 467.25, kind: 'purchase', category: 'dining', merchant: 'ORNEK YEMEK' },
   ]),
   tl(100),
 );

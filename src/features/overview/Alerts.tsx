@@ -63,7 +63,7 @@ function useAlertText() {
     const p = alert.params;
     const c = str(p.currency);
     const money = (key: string) => fmt(num(p[key]), c);
-    const card = `${bankName(str(p.bank))}, ${t('common.card', { last4: str(p.card_last4) })}`;
+    const card = alert.card_label ?? `${bankName(str(p.bank))}, ${t('common.card', { last4: str(p.card_last4) })}`;
     const month = formatMonth(alert.month, locale);
     const base = `overview.alerts.kind.${alert.kind}`;
     switch (alert.kind) {
@@ -86,8 +86,16 @@ function useAlertText() {
           title: t(`${base}.title`),
           values: { month, total: money('total'), currencies: (Array.isArray(p.currencies) ? p.currencies : [str(p.currencies)]).join(', ') },
         };
-      case 'missing_statement':
-        return { title: t(`${base}.title`), values: { card, month } };
+      case 'missing_statement': {
+        const from = str(p.from) || alert.month;
+        const to = str(p.to) || from;
+        const count = num(p.months) || 1;
+        const range = from === to ? formatMonth(from, locale) : `${formatMonth(from, locale)}–${formatMonth(to, locale)}`;
+        return {
+          title: t(`${base}.title`, { card }),
+          values: { range, count: String(count), what: t(`${base}.what`, { count }) },
+        };
+      }
       case 'subscription_price_rise':
         return {
           title: t(`${base}.title`, { merchant: str(p.merchant) }),
@@ -110,16 +118,16 @@ function useAlertText() {
 }
 
 /**
- * Alerts computed by the back end, critical first. How much one matters is drawn by the pencil:
+ * Alerts computed by the back end, critical first, as things to do. How much one matters is drawn by the pencil:
  * critical gets the margin mark and the word, a warning gets its title underlined, a note gets nothing.
- * Notes (info) fold away behind one button so the urgent rows stay on top.
+ * Only the first `limit` rows show; the rest open behind one button.
  */
-export function AlertsBody() {
+export function AlertsBody({ limit = 3 }: { limit?: number }) {
   const { t } = useTranslation();
   const alerts = useAlerts();
   const text = useAlertText();
   const locale = useIntlLocale();
-  const [showInfo, setShowInfo] = useState(false);
+  const [showAll, setShowAll] = useState(false);
 
   if (alerts.isPending) return <p className="text-body text-muted" role="status">{t('common.loading')}</p>;
   if (alerts.isError)
@@ -139,9 +147,8 @@ export function AlertsBody() {
 
   const items = alerts.data.items;
   if (!items.length) return <p className="text-body text-ink">{t('overview.alerts.none')}</p>;
-  const urgent = items.filter((a) => a.severity !== 'info');
-  const info = items.filter((a) => a.severity === 'info');
-  const shown = showInfo || !urgent.length ? items : urgent;
+  const shown = showAll ? items : items.slice(0, limit);
+  const rest = items.length - limit;
 
   return (
     <div>
@@ -153,7 +160,16 @@ export function AlertsBody() {
           return (
             <ListRow
               key={alert.id}
-              meta={formatMonth(alert.month, locale, 'short')}
+              meta={
+                alert.card_label ? (
+                  <span className="grid gap-0.5">
+                    <span>{alert.card_label}</span>
+                    <span className="text-muted">{formatMonth(alert.month, locale, 'short')}</span>
+                  </span>
+                ) : (
+                  formatMonth(alert.month, locale, 'short')
+                )
+              }
               mark={alert.severity === 'critical' ? <MarginMark className="mt-1" /> : undefined}
               title={
                 alert.severity === 'critical' ? (
@@ -182,9 +198,9 @@ export function AlertsBody() {
           );
         })}
       </List>
-      {urgent.length && info.length ? (
-        <TextButton className="mt-5 text-meta" onClick={() => setShowInfo((v) => !v)} aria-expanded={showInfo}>
-          {showInfo ? t('overview.alerts.lessInfo') : t('overview.alerts.moreInfo', { count: info.length })}
+      {rest > 0 ? (
+        <TextButton className="mt-5 text-meta" onClick={() => setShowAll((v) => !v)} aria-expanded={showAll}>
+          {showAll ? t('overview.alerts.less') : t('overview.alerts.more', { count: rest })}
         </TextButton>
       ) : null}
     </div>
