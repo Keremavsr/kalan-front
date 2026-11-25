@@ -82,9 +82,9 @@ import {
   parseCsv,
   ratio,
   shareSentence,
-  shareSvg,
   simulate,
 } from './mock-calc';
+import { shareSvg } from './mock-share-svg';
 import { addMonths, monthOf, monthsBetween } from '../lib/month';
 
 export type MockPreset = 'empty' | 'basic' | 'full';
@@ -1267,14 +1267,19 @@ export function createMockApi(options: MockOptions = {}): KalanApi {
           ...(amounts ? { total: m.total } : {}),
         }));
         const sentence = shareSentence(sched, locale, amounts);
-        return { locale, show_amounts: amounts, sentence, months, ...(amounts ? { currency: sched.currency } : {}), svg: shareSvg(months, sentence) };
+        return { locale, show_amounts: amounts, sentence, months, ...(amounts ? { currency: sched.currency } : {}), svg: shareSvg(months, sentence, locale) };
       }),
     getShareCardSvg: (query = {}) =>
       later(() => {
         const sched = schedule(12);
         const peak = Math.max(0, ...sched.months.map((m) => m.total));
-        const months = sched.months.map((m) => ({ month: m.month, share: ratio(peak ? m.total / peak : 0) }));
-        return shareSvg(months, shareSentence(sched, query.locale ?? 'tr', query.amounts ?? false));
+        const amounts = query.amounts ?? false;
+        const months = sched.months.map((m) => ({
+          month: m.month,
+          share: ratio(peak ? m.total / peak : 0),
+          ...(amounts ? { total: m.total } : {}),
+        }));
+        return shareSvg(months, shareSentence(sched, query.locale ?? 'tr', amounts), query.locale ?? 'tr');
       }),
     getForecast: (includeFixed = true) =>
       later(() => {

@@ -230,23 +230,6 @@ export function shareSentence(schedule: Schedule, locale: Locale, amounts: boole
   return `Installments fall in ${busy} of the next 12 months; the busiest is ${peak.month}${amounts ? ` (${rounded})` : ''}.`;
 }
 
-export function shareSvg(months: { month: IsoMonth; share: string }[], sentence: string): string {
-  const width = 1200;
-  const height = 630;
-  const barWidth = 70;
-  const gap = 20;
-  const baseY = 520;
-  const bars = months
-    .map((m, i) => {
-      const h = Math.round(Number(m.share) * 320);
-      const x = 90 + i * (barWidth + gap);
-      return `<rect x="${x}" y="${baseY - h}" width="${barWidth}" height="${h}" fill="steelblue"/><text x="${x + barWidth / 2}" y="${baseY + 30}" font-size="18" text-anchor="middle" fill="dimgray">${m.month.slice(5)}</text>`;
-    })
-    .join('');
-  const safe = sentence.replace(/&/g, '&amp;').replace(/</g, '&lt;');
-  return `<svg xmlns="http://www.w3.org/2000/svg" width="${width}" height="${height}" viewBox="0 0 ${width} ${height}" font-family="system-ui, sans-serif"><rect width="100%" height="100%" fill="ivory"/><text x="90" y="110" font-size="34" fill="black">${safe}</text>${bars}</svg>`;
-}
-
 // -- fixed-cost matching --------------------------------------------------------------------------
 
 export const FIXED_TOLERANCE = { amount: 0.075, days: 2 };
