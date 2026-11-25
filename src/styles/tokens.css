@@ -1,0 +1,97 @@
+/*
+ * kalan design tokens. This is the only file that holds colour, font, radius,
+ * shadow and motion values. Components use the role names below through
+ * Tailwind utilities (bg-paper, text-ink, font-display, ...) or var(--token).
+ * Tailwind's default palette and font stacks are switched off on purpose, so a
+ * raw colour like bg-blue-500 does not exist in this project.
+ */
+@theme {
+  --color-*: initial;
+  --font-*: initial;
+  --shadow-*: initial;
+  --radius-*: initial;
+  --ease-*: initial;
+
+  /* Surfaces */
+  --color-paper: oklch(0.976 0.005 85);
+  --color-surface: oklch(0.995 0.002 85);
+  --color-sunken: oklch(0.952 0.007 85);
+  --color-line: oklch(0.885 0.008 85);
+  --color-line-strong: oklch(0.78 0.01 85);
+  --color-control: oklch(0.6 0.012 85); /* form field borders, 3:1 against surface */
+
+  /* Text */
+  --color-ink: oklch(0.23 0.014 255);
+  --color-ink-muted: oklch(0.44 0.014 255);
+  --color-on-accent: oklch(0.985 0.004 85);
+
+  /* Action */
+  --color-accent: oklch(0.41 0.075 238);
+  --color-accent-strong: oklch(0.34 0.075 238);
+  --color-focus: oklch(0.52 0.16 250);
+
+  /* Status: used for text, icons and borders only, never as a tinted fill */
+  --color-positive: oklch(0.44 0.09 155);
+  --color-negative: oklch(0.47 0.15 28);
+  --color-caution: oklch(0.48 0.1 65);
+
+  /* Chart series (non-text, each at least 3:1 against paper) */
+  --color-series-1: oklch(0.4 0.07 238);
+  --color-series-2: oklch(0.53 0.07 190);
+  --color-series-3: oklch(0.6 0.1 75);
+  --color-series-4: oklch(0.5 0.035 290);
+  --color-series-cash: oklch(0.5 0.12 35);
+  --color-series-tax: oklch(0.36 0.09 35);
+  --color-track: oklch(0.925 0.008 85);
+  --color-scrim: oklch(0.2 0.015 255 / 0.36);
+
+  /* Type */
+  --font-display: 'Source Serif 4', 'Iowan Old Style', Georgia, serif;
+  --font-body: 'IBM Plex Sans', system-ui, sans-serif;
+  --font-mono: 'IBM Plex Mono', ui-monospace, 'Cascadia Mono', monospace;
+
+  --text-micro: 11px;
+  --text-micro--line-height: 1.35;
+
+  /* Radius */
+  --radius-xs: 2px;
+  --radius-sm: 3px;
+  --radius-md: 5px;
+  --radius-lg: 8px;
+  --radius-full: 999px;
+
+  /* Shadow */
+  --shadow-mark: inset 3px 0 0 var(--color-accent);
+  --shadow-raised: 0 1px 2px oklch(0.2 0.02 255 / 0.06);
+  --shadow-overlay: 0 12px 32px oklch(0.2 0.02 255 / 0.16), 0 2px 6px oklch(0.2 0.02 255 / 0.08);
+
+  /* Motion easings */
+  --ease-out: cubic-bezier(0.23, 1, 0.32, 1);
+  --ease-in-out: cubic-bezier(0.77, 0, 0.175, 1);
+  --ease-standard: cubic-bezier(0.25, 0.1, 0.25, 1);
+
+  /* Layout */
+  --spacing: 0.25rem;
+  --container-content: 76rem;
+  --container-sidebar: 13rem;
+}
+
+/* Motion durations and distances (not a Tailwind namespace, used via var()) */
+:root {
+  --duration-press: 120ms;
+  --duration-fast: 160ms;
+  --duration-base: 220ms;
+  --duration-exit: 140ms;
+  --press-scale: 0.97;
+  --enter-offset: 6px;
+  --enter-scale: 0.98;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  :root {
+    /* Opacity and colour changes stay; movement goes. */
+    --press-scale: 1;
+    --enter-offset: 0px;
+    --enter-scale: 1;
+  }
+}
