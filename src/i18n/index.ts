@@ -1,9 +1,9 @@
 import i18n from 'i18next';
 import { initReactI18next } from 'react-i18next';
-import { resources } from './resources';
+import { LANGUAGES, resources } from './resources';
 
-/** Locales the UI offers today. pt and es have their key files ready but no text yet. */
-export const UI_LOCALES = ['tr', 'en'] as const;
+/** Locales the UI offers: every language with locale files. */
+export const UI_LOCALES = LANGUAGES;
 export type UiLocale = (typeof UI_LOCALES)[number];
 
 /** BCP 47 tags used for Intl formatting. */
@@ -14,7 +14,7 @@ export const STORAGE_KEY = 'kalan.locale';
 function initialLanguage(): UiLocale {
   try {
     const stored = globalThis.localStorage?.getItem(STORAGE_KEY);
-    if (stored === 'tr' || stored === 'en') return stored;
+    if ((UI_LOCALES as readonly string[]).includes(stored ?? '')) return stored as UiLocale;
   } catch {
     /* storage unavailable */
   }

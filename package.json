@@ -8,6 +8,7 @@
   "scripts": {
     "dev": "vite",
     "dev:mock": "cross-env VITE_KALAN_MOCK=1 vite",
+    "dev:mock:full": "cross-env VITE_KALAN_MOCK=1 VITE_KALAN_MOCK_PRESET=full vite",
     "build": "tsc -b && vite build",
     "build:mock": "tsc -b && vite build --mode mock",
     "preview": "vite preview",

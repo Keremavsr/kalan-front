@@ -3,6 +3,8 @@
 interface ImportMetaEnv {
   readonly VITE_KALAN_MOCK?: string;
   readonly VITE_KALAN_API?: string;
+  /** `full` starts the mock with every scenario stored (dev:mock:full). */
+  readonly VITE_KALAN_MOCK_PRESET?: string;
 }
 
 interface ImportMeta {
