@@ -12,5 +12,10 @@
   "interest_tax": "Interest and tax",
   "fees": "Fees",
   "other": "Other",
+  "clothing": "Clothing",
+  "entertainment": "Entertainment",
+  "taxes": "Taxes",
+  "cash": "Cash",
+  "transfers": "Payments and transfers",
   "none": "Uncategorised"
 }

@@ -12,5 +12,10 @@
   "interest_tax": "Faiz ve vergi",
   "fees": "Ücret ve aidat",
   "other": "Diğer",
+  "clothing": "Giyim",
+  "entertainment": "Eğlence",
+  "taxes": "Vergi",
+  "cash": "Nakit",
+  "transfers": "Ödeme ve transfer",
   "none": "Kategorisiz"
 }

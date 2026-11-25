@@ -75,7 +75,7 @@ describe('statement upload answers', () => {
     expect(await screen.findByText('Seçtiğin araçla', {}, { timeout: 3000 })).toBeInTheDocument();
     expect(screen.getByText('Kontrol etmen gereken yerler')).toBeInTheDocument();
     await user.click(screen.getByRole('button', { name: 'Şablon taslağı iste' }));
-    const yaml = (await screen.findByLabelText('Şablon (YAML)')) as HTMLTextAreaElement;
+    const yaml = await screen.findByLabelText<HTMLTextAreaElement>('Şablon (YAML)');
     expect(yaml.value).toContain('id: tr_denemebank_kart');
     expect(screen.getByText('Taslak doğrulandı')).toBeInTheDocument();
   });

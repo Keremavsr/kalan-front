@@ -23,7 +23,10 @@ export interface ProvidersResponse {
   selected: ProviderId | null;
 }
 
-export type Locale = 'tr' | 'en';
+/** Languages the back end accepts in settings (`kalan.models.Locale`). The UI ships tr, en, es and pt. */
+export type Locale = 'tr' | 'en' | 'es' | 'pt' | 'he';
+/** The shareable card is drawn in Turkish or English only. */
+export type CardLocale = 'tr' | 'en';
 
 export interface Settings {
   locale: Locale;
@@ -711,12 +714,12 @@ export interface WhichCard {
 }
 
 export interface ShareCardQuery {
-  locale?: Locale;
+  locale?: CardLocale;
   amounts?: boolean;
 }
 
 export interface ShareCard {
-  locale: Locale;
+  locale: CardLocale;
   show_amounts: boolean;
   sentence: string;
   /** `total` only with `amounts=true`. */

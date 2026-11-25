@@ -352,7 +352,7 @@ function UploadResult({ answer, askedRemember, onAgain }: { answer: UploadAnswer
 
   return (
     <div className="enter grid gap-6">
-      <ReconciliationNotice reconciliation={statement.reconciliation as Reconciliation | null} currency={statement.currency} alert />
+      <ReconciliationNotice reconciliation={statement.reconciliation} currency={statement.currency} alert />
       <ReviewNotice statement={statement} />
       {askedRemember ? (
         answer.passwordRemembered ? (

@@ -22,9 +22,9 @@ describe('rights', () => {
     await user.click(within(list).getByRole('button', { name: /aidatı için dilekçe hazırla/ }));
 
     expect(await screen.findByText('Tüketici Hakem Heyeti')).toBeInTheDocument();
-    expect(screen.getByText(/altı hakem heyetine gider/).textContent!.replace(/s/g, ' ')).toMatch(/^2026 için 186.000,00 TL altı hakem heyetine gider/);
+    expect(screen.getByText(/altı hakem heyetine gider/).textContent.replace(/\s/g, ' ')).toMatch(/^2026 için 186\.000,00 TL altı hakem heyetine gider/);
     expect(screen.getByText('Örnek dayanak (mock)')).toBeInTheDocument();
-    expect(screen.getAllByText('kaynak doğrulanmadı').length).toBeGreaterThan(0);
+    expect(screen.getAllByText(/kaynak doğrulanmadı/).length).toBeGreaterThan(0);
     // Without a tool the prompt can still be copied; the letter cannot be written here.
     expect(screen.getByRole('button', { name: 'İstemi kopyala' })).toBeInTheDocument();
     expect(screen.queryByRole('button', { name: /ile yaz$/ })).not.toBeInTheDocument();
@@ -39,7 +39,7 @@ describe('rights', () => {
     await user.click(within(list).getByRole('button', { name: /dilekçe hazırla/ }));
     await user.click(await screen.findByRole('button', { name: 'Claude Code ile yaz' }));
 
-    const letter = (await screen.findByLabelText('Dilekçe')) as HTMLTextAreaElement;
+    const letter = await screen.findByLabelText<HTMLTextAreaElement>('Dilekçe');
     expect(letter.value).toContain('kart aidatının iadesini talep ederim');
     const missing = screen.getByText('Taslakta eksik alanlar var').closest('[data-tone]') as HTMLElement;
     expect(missing.textContent).toContain('[TELEFON]');

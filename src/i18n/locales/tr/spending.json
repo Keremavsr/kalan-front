@@ -43,13 +43,6 @@
     "importedRow": "İçe aktarıldı"
   },
   "changeCategoryFor": "Kategoriyi değiştir: {{merchant}}, şimdi {{category}}",
-  "categoryNames": {
-    "clothing": "Giyim",
-    "entertainment": "Eğlence",
-    "taxes": "Vergi",
-    "cash": "Nakit",
-    "transfers": "Ödeme ve transfer"
-  },
   "rule": {
     "title": "Kategoriyi değiştir",
     "merchant": "İşyeri",

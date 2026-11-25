@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { Download } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { useShareCard } from '../../api/queries';
-import type { Locale } from '../../api/types';
+import type { CardLocale } from '../../api/types';
 import { Button, Notice, Segmented, useToast } from '../../components/ui';
 
 type AmountChoice = 'hidden' | 'shown';
@@ -47,7 +47,7 @@ export function ShareCardBody() {
   const { t, i18n } = useTranslation();
   const toast = useToast();
   const [amounts, setAmounts] = useState<AmountChoice>('hidden');
-  const locale: Locale = i18n.language.startsWith('tr') ? 'tr' : 'en';
+  const locale: CardLocale = i18n.language.startsWith('tr') ? 'tr' : 'en';
   const card = useShareCard({ locale, amounts: amounts === 'shown' });
   const name = `kalan-taksit-${amounts === 'shown' ? 'tutarli' : 'oranli'}`;
 

@@ -128,7 +128,7 @@ function StatementDetail({ id }: { id: string }) {
             {() =>
               s ? (
                 <div className="grid gap-6">
-                  <ReconciliationNotice reconciliation={s.reconciliation as Reconciliation | null} currency={s.currency} />
+                  <ReconciliationNotice reconciliation={s.reconciliation} currency={s.currency} />
                   <ReviewNotice statement={s} />
                   <StatementFacts statement={s} />
                   {s.parser_id === AI_FALLBACK_PARSER ? <TemplateDraftPanel statementId={s.id} /> : null}

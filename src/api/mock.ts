@@ -1142,7 +1142,7 @@ export function createMockApi(options: MockOptions = {}): KalanApi {
       setTimeout(() => {
         const texts = analysisTexts[id];
         const commentary = texts
-          ? clone(texts[state.settings.locale])
+          ? clone(texts[state.settings.locale === 'tr' ? 'tr' : 'en'])
           : { locale: state.settings.locale, summary: '', watch_items: [] };
         state.analyses.set(id, { categories_applied: true, commentary, provider, created_at: new Date().toISOString() });
         st.analysis_status = 'done';

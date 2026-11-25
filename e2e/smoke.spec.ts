@@ -45,7 +45,9 @@ test('a first session on demo data', async ({ page }) => {
   await expect(page.getByRole('list', { name: 'Düzenli ödemeler' }).getByText('STREAMFLIX')).toBeVisible();
 
   await nav('Haklarım').click();
-  await expect(page.getByRole('heading', { name: 'Şimdilik itiraz edilecek bir şey yok' })).toBeVisible();
+  await expect(page.getByRole('heading', { name: 'Kart aidatı iadesi' })).toBeVisible();
+  await expect(page.getByRole('list', { name: 'Kart aidatları' })).toContainText('1.234,56 TL');
+  await expect(page.getByRole('heading', { name: 'Yalnız asgariyi ödersem' })).toBeVisible();
 
   await nav('Özet').click();
   await page.getByRole('button', { name: 'Yorumla' }).click();

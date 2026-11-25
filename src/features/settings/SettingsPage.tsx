@@ -11,7 +11,7 @@ import {
   useUpdateInsightRules,
   useUpdateSettings,
 } from '../../api/queries';
-import type { Locale, Provider, RuleOverrides, Settings } from '../../api/types';
+import type { Provider, RuleOverrides, Settings } from '../../api/types';
 import { Button, Card, List, ListRow, Notice, PageHeader, QueryState, Segmented, TextField, useToast } from '../../components/ui';
 import { SourceText } from '../../components/ui/ExternalLink';
 import { INTL_LOCALE } from '../../i18n';
@@ -150,8 +150,7 @@ function LocaleSection() {
                 <Segmented<Language>
                   label={t('settings.locale')}
                   value={(LANGUAGES as readonly string[]).includes(current.locale) ? (current.locale as Language) : 'tr'}
-                  // The back end accepts every language the interface has; the client type still says tr | en.
-                  onChange={(locale) => save({ ...current, locale: locale as Locale })}
+                  onChange={(locale) => save({ ...current, locale })}
                   options={LANGUAGES.map((l) => ({ value: l, label: LANGUAGE_NAMES[l] }))}
                 />
               </div>

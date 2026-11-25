@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useDiagnose } from '../../api/queries';
 import { isApiError, type DiagnosisReport, type PdfPasswordHint } from '../../api/types';
@@ -21,11 +21,9 @@ export interface DiagnoseRequest {
 export function DiagnoseSection({ request }: { request: DiagnoseRequest | null }) {
   const { t } = useTranslation();
   const diagnose = useDiagnose();
-  const [file, setFile] = useState<File | null>(null);
   const ref = useRef<HTMLDivElement>(null);
 
   function run(target: File, password?: string) {
-    setFile(target);
     diagnose.mutate({ file: target, options: password ? { password } : {} });
   }
 
@@ -37,6 +35,8 @@ export function DiagnoseSection({ request }: { request: DiagnoseRequest | null }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [request?.key]);
 
+  // The file of the last run comes from the mutation itself, so no state has to be set inside the effect.
+  const file = diagnose.variables?.file ?? null;
   const passwordError = isApiError(diagnose.error, 'pdf_password_required') || isApiError(diagnose.error, 'pdf_password_wrong');
   const data = diagnose.data;
 

@@ -4,7 +4,6 @@ import type {
   Analysis,
   GateIssue,
   InstallmentBreakdown,
-  Locale,
   Provider,
   ProviderId,
   Settings,
@@ -215,7 +214,8 @@ export const providers: Provider[] = [
 
 export const defaultSettings: Settings = { locale: 'tr', base_currency: 'TRY', months_ahead: 12 };
 
-type AnalysisText = Record<Locale, Analysis['commentary']>;
+/** The demo commentary exists in Turkish and English; other languages get the English text. */
+type AnalysisText = Record<'tr' | 'en', Analysis['commentary']>;
 
 export const analysisTexts: Record<string, AnalysisText> = {
   st_09: {
