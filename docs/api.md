@@ -13,6 +13,10 @@ Back end: `kalan-back` (Python, FastAPI). Listens on `127.0.0.1:8765` only. JSON
 Front end: `kalan-front` (separate repo) talks to it only over HTTP. Base URL configurable (`VITE_KALAN_API`, default `http://127.0.0.1:8765`).
 All money values are **integer minor units** (kuruş/centavos) plus `currency` (ISO 4217). Dates are ISO `YYYY-MM-DD`. Months are `YYYY-MM`.
 Errors: `{"error": {"code": "string_code", "message": "human text", "details": {}}}` with a fitting HTTP status.
+Codes used besides those listed per endpoint: `validation_error`, `not_found` (category rules), `job_not_found`,
+`analysis_not_found`, `transaction_not_found`, `import_not_found`, `not_manual`, `unknown_provider`,
+`invalid_installment`; uploads also return `not_pdf`, `invalid_pdf` and `parse_error`.
+CORS exposes `X-Kalan-Password-Remembered`, `X-Kalan-Skipped-Rows` and `Content-Disposition` to the front end.
 
 ## Health and setup
 - `GET /health` -> `{"status":"ok","version":"0.1.0"}`
@@ -181,7 +185,9 @@ however many months were imported). Do not import a period you also uploaded as 
 
 ## Manual entry
 - `POST /transactions` body: `{"date","description","amount","currency","direction","installment":{"total_count":6,"amount_each":50000}|null}` -> 201 `Transaction` (`source:"manual"`).
-- `GET /transactions?month=2026-09&source=manual|statement` (both filters optional) -> `{"items":[Transaction]}`, by date.
+- `GET /transactions?month=2026-09&source=manual|statement|import` (both filters optional) -> `{"items":[Transaction]}`, by date.
+  `month` is the statement month a row belongs to (the month of its statement's `period_end`); manual and imported
+  rows use the month of their own date. A statement row dated 28 Sep on a statement ending 25 Oct is in `2026-10`.
 - `DELETE /transactions/{id}` (manual only) -> 204
 
 ## Fixed costs (v0.2.0)
