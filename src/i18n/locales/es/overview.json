@@ -1,149 +1,149 @@
 {
-  "title": "",
-  "lead": "",
-  "leadForecast": "",
-  "noStatementsTitle": "",
-  "noStatements": "",
-  "goUpload": "",
-  "watchTitle": "",
-  "statement": "",
-  "statementOption": "",
-  "analyze": "",
-  "reanalyze": "",
-  "pending": "",
-  "elapsed": "",
-  "failed": "",
-  "none": "",
-  "sentData": "",
-  "noProvider": "",
-  "goSetup": "",
-  "summary": "",
-  "items": "",
-  "cites": "",
-  "noCites": "",
-  "meta": "",
-  "disclaimer": "",
-  "done": "",
+  "title": "Resumen",
+  "lead": "Aquí junto lo que no deberías pasar por alto en tu último estado de cuenta.",
+  "leadForecast": "Mi pronóstico para tu estado de cuenta de {{month}} es <c>{{amount}}</c>. De eso, <m>{{installments}}</m> ya está fijado por las cuotas.",
+  "noStatementsTitle": "Todavía no hay estados de cuenta",
+  "noStatements": "Sube tu primer estado de cuenta y desde aquí sigues tus cuotas, tus gastos y lo que tienes que vigilar.",
+  "goUpload": "Subir un estado de cuenta",
+  "watchTitle": "Lo que conviene vigilar",
+  "statement": "Estado de cuenta",
+  "statementOption": "{{period}}, vence el {{due}}",
+  "analyze": "Comentar",
+  "reanalyze": "Volver a comentar",
+  "pending": "Estoy escribiendo el comentario. Puede tardar entre 10 y 60 segundos.",
+  "elapsed": "{{seconds}} s",
+  "failed": "No pude obtener el comentario: {{error}}",
+  "none": "Todavía no he comentado este estado de cuenta.",
+  "sentData": "A la herramienta que elijas solo se envían la fecha, la descripción, el monto, la moneda y el tipo de cada transacción.",
+  "noProvider": "Primero elige una herramienta para obtener el comentario.",
+  "goSetup": "Ir a la configuración",
+  "summary": "En resumen",
+  "items": "Puntos a vigilar",
+  "cites": "Transacciones relacionadas",
+  "noCites": "Este punto no está ligado a una sola transacción.",
+  "meta": "Escrito con {{provider}}, {{date}}.",
+  "disclaimer": "El código calcula los totales y las cuotas; el modelo solo agrega categorías y comentario.",
+  "done": "Comentario listo.",
   "first": {
-    "lead": "",
-    "title": "",
-    "label": "",
-    "uploadTitle": "",
-    "uploadBody": "",
-    "uploadAction": "",
-    "aiTitle": "",
-    "aiBody": "",
-    "aiAction": "",
-    "aiChosen": "",
-    "aiChange": "",
-    "step": ""
+    "lead": "Cuando subas el estado de cuenta de tu tarjeta, aquí te muestro el pronóstico del siguiente, las alertas y tu carga de cuotas.",
+    "title": "Empieza en dos pasos",
+    "label": "Primeros pasos",
+    "uploadTitle": "Sube tu estado de cuenta",
+    "uploadBody": "Elige el estado de cuenta en PDF de tu banco. El código lee en este equipo los montos y las cuotas.",
+    "uploadAction": "Subir un estado de cuenta",
+    "aiTitle": "Si quieres, elige una herramienta para el comentario",
+    "aiBody": "Para las categorías y el comentario uso una herramienta de IA en tu computadora. Las cuotas y el pronóstico funcionan sin ella.",
+    "aiAction": "Elegir una herramienta",
+    "aiChosen": "Herramienta elegida: {{name}}.",
+    "aiChange": "Cambiar",
+    "step": "Paso {{n}}"
   },
   "forecast": {
-    "title": "",
-    "description": "",
-    "barLabel": "",
-    "total": "",
-    "installments": "",
-    "installmentsNote": "",
-    "subscriptions": "",
-    "subscriptionsNote": "",
-    "subscriptionsNone": "",
-    "variable": "",
-    "variableNote": "",
-    "variableNoteOne": "",
-    "variableNoteNone": "",
-    "variableKnown": "",
-    "fixed": "",
-    "fixedNote": "",
-    "fixedExcluded": "",
-    "includeFixed": "",
-    "includeFixedYes": "",
-    "includeFixedNo": "",
-    "openPeriod": "",
-    "openPeriodNone": "",
-    "backtest": "",
-    "backtestNoPct": "",
-    "backtestLow": "",
-    "backtestHigh": "",
-    "backtestEven": "",
-    "backtestNone": "",
-    "backtestOpen": "",
-    "backtestCaption": "",
-    "colMonth": "",
-    "colForecast": "",
-    "colActual": "",
-    "colError": "",
-    "loadError": ""
+    "title": "Próximo estado de cuenta",
+    "description": "Pronóstico para el estado de cuenta de {{month}}. Las cuotas son seguras; las suscripciones las cuento con su último monto y el gasto variable con la mediana de los meses anteriores.",
+    "barLabel": "Partes del pronóstico",
+    "total": "Pronóstico",
+    "installments": "Cuotas",
+    "installmentsNote": "Cuotas que caen este mes",
+    "subscriptions": "Suscripciones",
+    "subscriptionsNote": "Con su último monto: {{names}}",
+    "subscriptionsNone": "El mes pasado no vi suscripciones",
+    "variable": "Gasto variable",
+    "variableNote": "Mediana de {{from}} – {{to}}",
+    "variableNoteOne": "Gasto de {{month}}",
+    "variableNoteNone": "No hay mes anterior",
+    "variableKnown": "Este mes ya tienes {{amount}} registrados",
+    "fixed": "Gastos fijos",
+    "fixedNote": "Gastos fijos que vencen este mes",
+    "fixedExcluded": "No los incluí en el total",
+    "includeFixed": "Gastos fijos",
+    "includeFixedYes": "Incluidos",
+    "includeFixedNo": "Excluidos",
+    "openPeriod": "Gasto que agregaste a mano o por importación desde el corte del {{from}}: <m>{{amount}}</m>.",
+    "openPeriodNone": "No has agregado gastos desde el corte del {{from}}.",
+    "backtest": "Probé este método con {{count}} meses anteriores: el pronóstico se desvió en promedio <m>{{mae}}</m> ({{mape}} por ciento) y casi siempre quedó {{direction}}.",
+    "backtestNoPct": "Probé este método con {{count}} meses anteriores: el pronóstico se desvió en promedio <m>{{mae}}</m> y casi siempre quedó {{direction}}.",
+    "backtestLow": "bajo",
+    "backtestHigh": "alto",
+    "backtestEven": "Probé este método con {{count}} meses anteriores: el pronóstico se desvió en promedio <m>{{mae}}</m>.",
+    "backtestNone": "Todavía no puedo probar el pronóstico. Para eso necesito al menos {{need}} meses de estados de cuenta.",
+    "backtestOpen": "Mes por mes",
+    "backtestCaption": "Cada mes se pronosticó solo con los datos anteriores.",
+    "colMonth": "Mes",
+    "colForecast": "Pronóstico",
+    "colActual": "Real",
+    "colError": "Error",
+    "loadError": "No pude obtener el pronóstico. Puede que el servidor esté apagado."
   },
   "alerts": {
-    "title": "",
-    "none": "",
-    "label": "",
-    "moreInfo": "",
-    "lessInfo": "",
-    "loadError": "",
-    "unknown": "",
+    "title": "Alertas",
+    "none": "Ahora mismo no hay alertas.",
+    "label": "Alertas",
+    "moreInfo": "Mostrar también {{count}} notas",
+    "lessInfo": "Ocultar las notas",
+    "loadError": "No pude obtener las alertas.",
+    "unknown": "Hay una alerta que esta versión no reconoce.",
     "go": {
-      "statements": "",
-      "spending": "",
-      "recurring": "",
-      "installments": "",
-      "rights": ""
+      "statements": "Estados de cuenta",
+      "spending": "Gastos",
+      "recurring": "Pagos recurrentes",
+      "installments": "Cuotas",
+      "rights": "Mis derechos"
     },
     "kind": {
       "installment_ending": {
-        "title": "",
-        "detail": ""
+        "title": "Última cuota de {{description}}",
+        "detail": "El estado de cuenta de {{month}} trae la última cuota: <m>{{amount}}</m>. Desde el mes siguiente ya no la pagas."
       },
       "limit_high": {
-        "title": "",
-        "titleFull": "",
-        "detail": ""
+        "title": "Tu límite está por agotarse",
+        "titleFull": "Tu límite está agotado",
+        "detail": "El total del estado de cuenta es <m>{{total}}</m> y el límite de la tarjeta <m>{{limit}}</m>. Ya usaste el {{share}} por ciento."
       },
       "interest_charged": {
-        "title": "",
-        "detail": ""
+        "title": "Se cobraron intereses",
+        "detail": "El estado de cuenta de {{month}} tiene <m>{{total}}</m> de intereses."
       },
       "fee_charged": {
-        "title": "",
-        "detail": ""
+        "title": "Se cobró una comisión",
+        "detail": "El estado de cuenta de {{month}} tiene <m>{{total}}</m> de comisiones. Si es la anualidad, puedes pedir que te la devuelvan."
       },
       "tax_charged": {
-        "title": "",
-        "detail": ""
+        "title": "Se cobraron impuestos",
+        "detail": "El estado de cuenta de {{month}} tiene <m>{{total}}</m> de BSMV y KKDF."
       },
       "foreign_currency": {
-        "title": "",
-        "detail": ""
+        "title": "Gasto en moneda extranjera",
+        "detail": "En el estado de cuenta de {{month}}, el gasto en {{currencies}} llegó a <m>{{total}}</m>."
       },
       "missing_statement": {
-        "title": "",
-        "detail": ""
+        "title": "Falta un estado de cuenta",
+        "detail": "Falta el estado de cuenta de {{card}} de {{month}}. Los totales de cuotas y gastos de ese mes quedan incompletos."
       },
       "subscription_price_rise": {
-        "title": "",
-        "detail": ""
+        "title": "{{merchant}} subió de precio",
+        "detail": "El cobro pasó de <m>{{previous}}</m> a <m>{{last}}</m>, un aumento del {{change}} por ciento."
       },
       "due_soon": {
-        "title": "",
-        "detail": "",
-        "today": ""
+        "title": "Vence el {{date}}",
+        "detail": "El saldo del estado de cuenta es <m>{{total}}</m>; el pago mínimo es <m>{{minimum}}</m>.",
+        "today": "La fecha límite de pago es hoy."
       },
       "statement_overdue": {
-        "title": "",
-        "detail": ""
+        "title": "El estado de cuenta de {{card}} está atrasado",
+        "detail": "El corte debía ser el {{date}}. Cuando subas el estado de cuenta, se actualizan el pronóstico y las alertas."
       },
       "charged_after_cancel": {
-        "title": "",
-        "detail": ""
+        "title": "{{merchant}} hizo un cobro después de que cancelaste",
+        "detail": "Marcaste la cancelación el {{date}}; después se cobraron <m>{{total}}</m>. Puedes reclamarlo en tu banco."
       }
     }
   },
   "load": {
-    "title": "",
-    "sentence": "",
-    "sentenceNone": "",
-    "go": "",
-    "loadError": ""
+    "title": "Cuotas en los próximos 12 meses",
+    "sentence": "Hay cuotas en {{busy}} de los próximos 12 meses. El mes más pesado es {{month}}, con <m>{{amount}}</m>.",
+    "sentenceNone": "No hay cuotas en los próximos 12 meses.",
+    "go": "Ir a las cuotas",
+    "loadError": "No pude obtener el plan de cuotas."
   }
 }

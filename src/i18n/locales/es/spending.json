@@ -43,13 +43,6 @@
     "importedRow": "Importado"
   },
   "changeCategoryFor": "Cambiar categoría: {{merchant}}, ahora {{category}}",
-  "categoryNames": {
-    "clothing": "Ropa",
-    "entertainment": "Ocio",
-    "taxes": "Impuestos",
-    "cash": "Efectivo",
-    "transfers": "Pagos y transferencias"
-  },
   "rule": {
     "title": "Cambiar categoría",
     "merchant": "Comercio",

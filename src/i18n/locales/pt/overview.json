@@ -1,149 +1,149 @@
 {
-  "title": "",
-  "lead": "",
-  "leadForecast": "",
-  "noStatementsTitle": "",
-  "noStatements": "",
-  "goUpload": "",
-  "watchTitle": "",
-  "statement": "",
-  "statementOption": "",
-  "analyze": "",
-  "reanalyze": "",
-  "pending": "",
-  "elapsed": "",
-  "failed": "",
-  "none": "",
-  "sentData": "",
-  "noProvider": "",
-  "goSetup": "",
-  "summary": "",
-  "items": "",
-  "cites": "",
-  "noCites": "",
-  "meta": "",
-  "disclaimer": "",
-  "done": "",
+  "title": "Visão geral",
+  "lead": "O que você não pode perder na sua última fatura, em um só lugar.",
+  "leadForecast": "Minha previsão para a sua fatura de {{month}} é <c>{{amount}}</c>. Desse total, <m>{{installments}}</m> já está definido pelas parcelas.",
+  "noStatementsTitle": "Nenhuma fatura ainda",
+  "noStatements": "Envie sua primeira fatura e acompanhe daqui as suas parcelas, os gastos e os pontos de atenção.",
+  "goUpload": "Enviar uma fatura",
+  "watchTitle": "Pontos de atenção",
+  "statement": "Fatura",
+  "statementOption": "{{period}}, vencimento {{due}}",
+  "analyze": "Comentar",
+  "reanalyze": "Comentar de novo",
+  "pending": "Escrevendo o comentário. Isso pode levar de 10 a 60 segundos.",
+  "elapsed": "{{seconds}} s",
+  "failed": "Não consegui obter o comentário: {{error}}",
+  "none": "Ainda não comentei esta fatura.",
+  "sentData": "Só a data, a descrição, o valor, a moeda e o tipo de cada transação vão para a ferramenta que você escolheu.",
+  "noProvider": "Escolha uma ferramenta primeiro para receber um comentário.",
+  "goSetup": "Ir para as configurações",
+  "summary": "Em resumo",
+  "items": "Pontos para observar",
+  "cites": "Transações relacionadas",
+  "noCites": "Este ponto não está ligado a uma única transação.",
+  "meta": "Escrito com {{provider}}, {{date}}.",
+  "disclaimer": "O código calcula os totais e as parcelas; o modelo só acrescenta categorias e comentários.",
+  "done": "Comentário pronto.",
   "first": {
-    "lead": "",
-    "title": "",
-    "label": "",
-    "uploadTitle": "",
-    "uploadBody": "",
-    "uploadAction": "",
-    "aiTitle": "",
-    "aiBody": "",
-    "aiAction": "",
-    "aiChosen": "",
-    "aiChange": "",
-    "step": ""
+    "lead": "Quando você enviar a fatura do seu cartão, eu mostro aqui a previsão da próxima, os alertas e a sua carga de parcelas.",
+    "title": "Comece em dois passos",
+    "label": "Primeiros passos",
+    "uploadTitle": "Envie sua fatura",
+    "uploadBody": "Escolha a fatura em PDF do seu banco. O código lê neste computador os valores e as parcelas.",
+    "uploadAction": "Enviar uma fatura",
+    "aiTitle": "Se quiser, escolha uma ferramenta para o comentário",
+    "aiBody": "Para categorias e comentários eu uso uma ferramenta de IA no seu computador. As parcelas e a previsão funcionam sem ela.",
+    "aiAction": "Escolher uma ferramenta",
+    "aiChosen": "Ferramenta selecionada: {{name}}.",
+    "aiChange": "Alterar",
+    "step": "Passo {{n}}"
   },
   "forecast": {
-    "title": "",
-    "description": "",
-    "barLabel": "",
-    "total": "",
-    "installments": "",
-    "installmentsNote": "",
-    "subscriptions": "",
-    "subscriptionsNote": "",
-    "subscriptionsNone": "",
-    "variable": "",
-    "variableNote": "",
-    "variableNoteOne": "",
-    "variableNoteNone": "",
-    "variableKnown": "",
-    "fixed": "",
-    "fixedNote": "",
-    "fixedExcluded": "",
-    "includeFixed": "",
-    "includeFixedYes": "",
-    "includeFixedNo": "",
-    "openPeriod": "",
-    "openPeriodNone": "",
-    "backtest": "",
-    "backtestNoPct": "",
-    "backtestLow": "",
-    "backtestHigh": "",
-    "backtestEven": "",
-    "backtestNone": "",
-    "backtestOpen": "",
-    "backtestCaption": "",
-    "colMonth": "",
-    "colForecast": "",
-    "colActual": "",
-    "colError": "",
-    "loadError": ""
+    "title": "Próxima fatura",
+    "description": "Previsão para a fatura de {{month}}. As parcelas são certas; conto as assinaturas pelo último valor e os gastos variáveis pela mediana dos meses anteriores.",
+    "barLabel": "Partes da previsão",
+    "total": "Previsão",
+    "installments": "Parcelas",
+    "installmentsNote": "Parcelas que caem neste mês",
+    "subscriptions": "Assinaturas",
+    "subscriptionsNote": "Pelo último valor: {{names}}",
+    "subscriptionsNone": "Nenhuma assinatura no último mês",
+    "variable": "Gastos variáveis",
+    "variableNote": "Mediana de {{from}} – {{to}}",
+    "variableNoteOne": "Gastos de {{month}}",
+    "variableNoteNone": "Nenhum mês anterior",
+    "variableKnown": "{{amount}} já lançado neste mês",
+    "fixed": "Custos fixos",
+    "fixedNote": "Custos fixos com vencimento neste mês",
+    "fixedExcluded": "Fora do total",
+    "includeFixed": "Custos fixos",
+    "includeFixedYes": "Incluídos",
+    "includeFixedNo": "Fora",
+    "openPeriod": "Gastos que você adicionou manualmente ou importou desde o corte de {{from}}: <m>{{amount}}</m>.",
+    "openPeriodNone": "Você não adicionou nenhum gasto desde o corte de {{from}}.",
+    "backtest": "Testei este método nos últimos {{count}} meses: a previsão errou em média <m>{{mae}}</m> ({{mape}} por cento), quase sempre para {{direction}}.",
+    "backtestNoPct": "Testei este método nos últimos {{count}} meses: a previsão errou em média <m>{{mae}}</m>, quase sempre para {{direction}}.",
+    "backtestLow": "baixo",
+    "backtestHigh": "alto",
+    "backtestEven": "Testei este método nos últimos {{count}} meses: a previsão errou em média <m>{{mae}}</m>.",
+    "backtestNone": "Ainda não consigo testar a previsão. Para isso são necessários pelo menos {{need}} meses de faturas.",
+    "backtestOpen": "Mês a mês",
+    "backtestCaption": "Cada mês foi previsto apenas com os dados anteriores.",
+    "colMonth": "Mês",
+    "colForecast": "Previsão",
+    "colActual": "Realizado",
+    "colError": "Desvio",
+    "loadError": "Não consegui obter a previsão. O back end pode estar fora do ar."
   },
   "alerts": {
-    "title": "",
-    "none": "",
-    "label": "",
-    "moreInfo": "",
-    "lessInfo": "",
-    "loadError": "",
-    "unknown": "",
+    "title": "Alertas",
+    "none": "Nenhum alerta no momento.",
+    "label": "Alertas",
+    "moreInfo": "Mostrar também {{count}} notas",
+    "lessInfo": "Ocultar as notas",
+    "loadError": "Não consegui obter os alertas.",
+    "unknown": "Há um alerta que esta versão não reconhece.",
     "go": {
-      "statements": "",
-      "spending": "",
-      "recurring": "",
-      "installments": "",
-      "rights": ""
+      "statements": "Faturas",
+      "spending": "Gastos",
+      "recurring": "Recorrentes",
+      "installments": "Parcelas",
+      "rights": "Meus direitos"
     },
     "kind": {
       "installment_ending": {
-        "title": "",
-        "detail": ""
+        "title": "Última parcela de {{description}}",
+        "detail": "A fatura de {{month}} traz a última parcela: <m>{{amount}}</m>. A partir do mês seguinte, você não paga mais esse valor."
       },
       "limit_high": {
-        "title": "",
-        "titleFull": "",
-        "detail": ""
+        "title": "Seu limite está quase esgotado",
+        "titleFull": "Seu limite está esgotado",
+        "detail": "O total da fatura é <m>{{total}}</m> e o limite do cartão é <m>{{limit}}</m>. Você usou {{share}} por cento dele."
       },
       "interest_charged": {
-        "title": "",
-        "detail": ""
+        "title": "Foram cobrados juros",
+        "detail": "A fatura de {{month}} tem <m>{{total}}</m> de juros."
       },
       "fee_charged": {
-        "title": "",
-        "detail": ""
+        "title": "Foi cobrada uma tarifa",
+        "detail": "A fatura de {{month}} tem <m>{{total}}</m> de tarifas. Se for a anuidade do cartão, você pode pedir o reembolso."
       },
       "tax_charged": {
-        "title": "",
-        "detail": ""
+        "title": "Foram cobrados impostos",
+        "detail": "A fatura de {{month}} tem <m>{{total}}</m> de BSMV e KKDF."
       },
       "foreign_currency": {
-        "title": "",
-        "detail": ""
+        "title": "Gastos em moeda estrangeira",
+        "detail": "Na fatura de {{month}}, os gastos em {{currencies}} somaram <m>{{total}}</m>."
       },
       "missing_statement": {
-        "title": "",
-        "detail": ""
+        "title": "Falta uma fatura",
+        "detail": "Falta a fatura de {{month}} de {{card}}. Os totais de parcelas e gastos desse mês ficam incompletos."
       },
       "subscription_price_rise": {
-        "title": "",
-        "detail": ""
+        "title": "{{merchant}} aumentou",
+        "detail": "A cobrança passou de <m>{{previous}}</m> para <m>{{last}}</m>, um aumento de {{change}} por cento."
       },
       "due_soon": {
-        "title": "",
-        "detail": "",
-        "today": ""
+        "title": "Vencimento em {{date}}",
+        "detail": "O saldo da fatura é <m>{{total}}</m>; o pagamento mínimo é <m>{{minimum}}</m>.",
+        "today": "Vencimento hoje."
       },
       "statement_overdue": {
-        "title": "",
-        "detail": ""
+        "title": "A fatura de {{card}} está atrasada",
+        "detail": "O corte deveria ter sido em {{date}}. Quando você enviar a fatura, a previsão e os alertas são atualizados."
       },
       "charged_after_cancel": {
-        "title": "",
-        "detail": ""
+        "title": "{{merchant}} cobrou depois que você cancelou",
+        "detail": "Você marcou como cancelado em {{date}}; depois disso, foram cobrados <m>{{total}}</m>. Você pode contestar com o seu banco."
       }
     }
   },
   "load": {
-    "title": "",
-    "sentence": "",
-    "sentenceNone": "",
-    "go": "",
-    "loadError": ""
+    "title": "Parcelas ao longo de 12 meses",
+    "sentence": "Há parcelas em {{busy}} dos próximos 12 meses. O mês mais pesado é {{month}}, com <m>{{amount}}</m>.",
+    "sentenceNone": "Nenhuma parcela nos próximos 12 meses.",
+    "go": "Ir para as parcelas",
+    "loadError": "Não consegui obter o plano de parcelas."
   }
 }

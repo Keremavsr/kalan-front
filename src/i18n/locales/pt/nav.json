@@ -1,14 +1,14 @@
 {
-  "label": "",
-  "home": "",
-  "overview": "",
-  "installments": "",
-  "spending": "",
-  "recurring": "",
-  "rights": "",
-  "statements": "",
-  "settings": "",
-  "add": "",
-  "providerNone": "",
-  "providerSelected": ""
+  "label": "Principal",
+  "home": "kalan, voltar à visão geral",
+  "overview": "Visão geral",
+  "installments": "Parcelas",
+  "spending": "Gastos",
+  "recurring": "Recorrentes",
+  "rights": "Meus direitos",
+  "statements": "Faturas",
+  "settings": "Configurações",
+  "add": "Adicionar compra",
+  "providerNone": "Nenhuma ferramenta de comentários selecionada",
+  "providerSelected": "Comentários: {{name}}"
 }

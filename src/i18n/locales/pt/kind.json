@@ -1,12 +1,12 @@
 {
-  "purchase": "",
-  "installment": "",
-  "cash_advance": "",
-  "fee": "",
-  "tax": "",
-  "interest": "",
-  "payment": "",
-  "refund": "",
-  "carry_over": "",
-  "other": ""
+  "purchase": "Compra",
+  "installment": "Parcela",
+  "cash_advance": "Saque no crédito",
+  "fee": "Tarifa",
+  "tax": "Imposto",
+  "interest": "Juros",
+  "payment": "Pagamento",
+  "refund": "Estorno",
+  "carry_over": "Saldo transportado",
+  "other": "Outros"
 }

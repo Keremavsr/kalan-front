@@ -29,7 +29,7 @@
     "title": "İki adımda başla",
     "label": "Başlangıç adımları",
     "uploadTitle": "Ekstreni yükle",
-    "uploadBody": "Bankanın PDF ekstresini seç. Dosya bu bilgisayardan çıkmaz; tutarları ve taksitleri kod okur.",
+    "uploadBody": "Bankanın PDF ekstresini seç. Tutarları ve taksitleri bu bilgisayarda kod okur.",
     "uploadAction": "Ekstre yükle",
     "aiTitle": "İstersen yorum için bir araç seç",
     "aiBody": "Kategori ve yorum için bilgisayarındaki bir yapay zekâ aracını kullanırım. Seçmezsen de taksitler ve tahmin çalışır.",

@@ -29,7 +29,7 @@
     "title": "Start in two steps",
     "label": "Getting started",
     "uploadTitle": "Upload your statement",
-    "uploadBody": "Pick the bank’s PDF statement. The file stays on this computer; code reads the amounts and installments.",
+    "uploadBody": "Pick the bank’s PDF statement. Code on this computer reads the amounts and installments.",
     "uploadAction": "Upload a statement",
     "aiTitle": "If you like, pick a tool for commentary",
     "aiBody": "For categories and commentary I use an AI tool on your computer. Installments and the forecast work without one.",

@@ -43,13 +43,6 @@
     "importedRow": "Importado"
   },
   "changeCategoryFor": "Mudar categoria: {{merchant}}, agora {{category}}",
-  "categoryNames": {
-    "clothing": "Roupas",
-    "entertainment": "Lazer",
-    "taxes": "Impostos",
-    "cash": "Dinheiro",
-    "transfers": "Pagamentos e transferências"
-  },
   "rule": {
     "title": "Mudar categoria",
     "merchant": "Estabelecimento",

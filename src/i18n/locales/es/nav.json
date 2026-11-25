@@ -1,14 +1,14 @@
 {
-  "label": "",
-  "home": "",
-  "overview": "",
-  "installments": "",
-  "spending": "",
-  "recurring": "",
-  "rights": "",
-  "statements": "",
-  "settings": "",
-  "add": "",
-  "providerNone": "",
-  "providerSelected": ""
+  "label": "Principal",
+  "home": "kalan, volver al resumen",
+  "overview": "Resumen",
+  "installments": "Cuotas",
+  "spending": "Gastos",
+  "recurring": "Pagos recurrentes",
+  "rights": "Mis derechos",
+  "statements": "Estados de cuenta",
+  "settings": "Configuración",
+  "add": "Agregar compra",
+  "providerNone": "No elegiste ninguna herramienta de comentarios",
+  "providerSelected": "Comentarios: {{name}}"
 }
