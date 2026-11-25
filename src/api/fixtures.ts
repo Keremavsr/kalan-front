@@ -2,6 +2,7 @@
 // No real person, card or statement is behind any of this.
 import type {
   Analysis,
+  GateIssue,
   InstallmentBreakdown,
   Locale,
   Provider,
@@ -14,7 +15,7 @@ import type {
 
 const tl = (value: number) => Math.round(value * 100);
 
-interface RawTx {
+export interface RawTx {
   date: string;
   description: string;
   amount: number;
@@ -22,10 +23,14 @@ interface RawTx {
   category: string | null;
   merchant?: string | null;
   direction?: 'debit' | 'credit';
-  installment?: { remaining_count: number; each: number; plan_id: string };
+  installment?: { remaining_count: number; each: number; plan_id: string; component?: 'principal' };
+  original?: { amount: number; currency: string };
 }
 
-function buildTransactions(prefix: string, rows: RawTx[]): Transaction[] {
+/** Plan lengths of the invented plans; index = length - remaining count. */
+export const PLAN_COUNTS: Record<string, number> = { pl_01: 3, pl_02: 12, pl_03: 6, pl_k2_01: 3, pl_ai_01: 4 };
+
+export function buildTransactions(prefix: string, rows: RawTx[]): Transaction[] {
   return rows.map((row, i) => ({
     id: `tx_${prefix}_${String(i + 1).padStart(2, '0')}`,
     date: row.date,
@@ -40,11 +45,20 @@ function buildTransactions(prefix: string, rows: RawTx[]): Transaction[] {
           remaining_amount_each: tl(row.installment.each),
           is_last: row.installment.remaining_count === 0,
           plan_id: row.installment.plan_id,
+          index: PLAN_COUNTS[row.installment.plan_id]
+            ? PLAN_COUNTS[row.installment.plan_id]! - row.installment.remaining_count
+            : null,
+          total_count: PLAN_COUNTS[row.installment.plan_id] ?? null,
+          component: row.installment.component ?? null,
         }
       : null,
     category: row.category,
     merchant: row.merchant === undefined ? null : row.merchant,
     source: 'statement',
+    original_amount: row.original ? tl(row.original.amount) : null,
+    original_currency: row.original?.currency ?? null,
+    points: null,
+    detail: null,
   }));
 }
 
@@ -56,15 +70,31 @@ export function computeStatementTotal(transactions: Transaction[]): number {
   }, 0);
 }
 
-function buildStatement(
-  base: Omit<Statement, 'transactions' | 'statement_total' | 'reconciliation' | 'minimum_payment'>,
-  transactions: Transaction[],
-  printedDifference = 0,
-): Statement {
+export type StatementBase = Omit<
+  Statement,
+  'transactions' | 'statement_total' | 'reconciliation' | 'minimum_payment' | 'needs_review' | 'review'
+> &
+  Partial<Pick<Statement, 'needs_review' | 'review'>>;
+
+export function buildStatement(base: StatementBase, transactions: Transaction[], printedDifference = 0): Statement {
   const computed = computeStatementTotal(transactions);
   const expected = computed + printedDifference;
+  const review: GateIssue[] =
+    base.review ??
+    (printedDifference === 0
+      ? []
+      : [
+          {
+            code: 'reconciliation_mismatch',
+            severity: 'soft',
+            message: 'Rows do not add up to the printed totals.',
+            details: { difference: printedDifference, checks: ['statement_total'] },
+          },
+        ]);
   return {
     ...base,
+    needs_review: base.needs_review ?? review.length > 0,
+    review,
     statement_total: expected,
     minimum_payment: Math.round((expected * 0.2) / 100) * 100,
     reconciliation: {
@@ -85,6 +115,9 @@ const STATEMENT_BASE = {
   card_last4: '0000',
   currency: 'TRY',
   interest_rates: RATES,
+  parser_id: 'tr_ornekbank_kart',
+  credit_limit: tl(17500),
+  page_count: 2,
 } as const;
 
 export const CASH_ADVANCE_BREAKDOWN: InstallmentBreakdown = {
@@ -137,18 +170,27 @@ export const statement09 = buildStatement(
 
 /** The statement the mock "parses" on first upload. Its printed total is 149,99 TL above what was read. */
 export const statement10 = buildStatement(
-  { ...STATEMENT_BASE, id: 'st_10', period_start: '2026-09-26', period_end: '2026-10-25', due_date: '2026-11-04', analysis_status: 'none' },
+  {
+    ...STATEMENT_BASE,
+    id: 'st_10',
+    period_start: '2026-09-26',
+    period_end: '2026-10-25',
+    due_date: '2026-11-04',
+    analysis_status: 'none',
+    next_period_end: '2026-11-25',
+    next_due_date: '2026-12-04',
+  },
   buildTransactions('10', [
     { date: '2026-09-26', description: 'Önceki dönem bakiyesi', amount: 7683.17, kind: 'carry_over', category: null },
     { date: '2026-09-27', description: 'MIGROS-ORNEK ISTANBUL', amount: 1245.6, kind: 'purchase', category: 'groceries', merchant: 'MIGROS-ORNEK' },
-    { date: '2026-09-30', description: 'STREAMFLIX.COM', amount: 179.99, kind: 'purchase', category: 'subscriptions', merchant: 'STREAMFLIX' },
+    { date: '2026-09-30', description: 'STREAMFLIX.COM', amount: 179.99, kind: 'purchase', category: 'subscriptions', merchant: 'STREAMFLIX', original: { amount: 5, currency: 'USD' } },
     { date: '2026-10-02', description: 'MUZIKBOX ABONELIK', amount: 59.99, kind: 'purchase', category: 'subscriptions', merchant: 'MUZIKBOX' },
     { date: '2026-10-03', description: 'BULUTDEPO AYLIK', amount: 39.99, kind: 'purchase', category: 'subscriptions', merchant: 'BULUTDEPO' },
     { date: '2026-10-05', description: 'Ödeme, teşekkür ederiz', amount: 7683.17, kind: 'payment', category: null },
     { date: '2026-10-06', description: 'AKARYAKIT-ORNEK', amount: 1850, kind: 'purchase', category: 'transport', merchant: 'AKARYAKIT-ORNEK' },
     { date: '2026-10-09', description: 'KAFE-ORNEK', amount: 286.5, kind: 'purchase', category: 'dining', merchant: 'KAFE-ORNEK' },
     { date: '2026-10-12', description: 'MIGROS-ORNEK ISTANBUL', amount: 2104.35, kind: 'purchase', category: 'groceries', merchant: 'MIGROS-ORNEK' },
-    { date: '2026-10-14', description: 'Mobil taksitli nakit avans 1/3', amount: 3000, kind: 'cash_advance', category: 'cash_advance', installment: { remaining_count: 2, each: 3497.26, plan_id: 'pl_01' } },
+    { date: '2026-10-14', description: 'Mobil taksitli nakit avans 1/3', amount: 3000, kind: 'cash_advance', category: 'cash_advance', installment: { remaining_count: 2, each: 3497.26, plan_id: 'pl_01', component: 'principal' } },
     { date: '2026-10-14', description: 'Nakit avans faizi', amount: 382.5, kind: 'interest', category: 'interest_tax' },
     { date: '2026-10-14', description: 'BSMV', amount: 57.38, kind: 'tax', category: 'interest_tax' },
     { date: '2026-10-14', description: 'KKDF', amount: 57.38, kind: 'tax', category: 'interest_tax' },

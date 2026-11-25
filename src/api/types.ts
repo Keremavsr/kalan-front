@@ -1,10 +1,13 @@
-// Types for the kalan API contract v0.1 (docs/api.md).
+// Types for the kalan API contract v0.3.0 (docs/api.md).
 // Money is always integer minor units plus an ISO 4217 currency code.
 
 export type Minor = number;
 export type IsoDate = string; // YYYY-MM-DD
 export type IsoMonth = string; // YYYY-MM
 export type Ratio = string; // decimal as string, e.g. "0.20"
+export type Percent = string; // percent per month as string, e.g. "3.08"
+
+// -- health and setup ----------------------------------------------------------------------------
 
 export type ProviderId = 'claude-cli' | 'codex-cli' | 'agy-cli' | 'gemini-cli' | 'openai-compatible' | 'local';
 
@@ -28,14 +31,58 @@ export interface Settings {
   months_ahead: number;
 }
 
-export interface Reconciliation {
+// -- statements -----------------------------------------------------------------------------------
+
+export interface ReconciliationCheck {
+  name: string;
   status: 'ok' | 'mismatch';
   expected: Minor;
   computed: Minor;
   difference: Minor;
 }
 
+export interface Reconciliation {
+  status: 'ok' | 'mismatch';
+  expected: Minor;
+  computed: Minor;
+  difference: Minor;
+  /** Per-check results (back end extra, not in the contract text). */
+  checks?: ReconciliationCheck[];
+}
+
 export type AnalysisStatus = 'none' | 'pending' | 'done' | 'failed';
+
+/** Save-gate finding codes (contract "Save gate"). */
+export type GateIssueCode =
+  | 'duplicate_statement'
+  | 'period_invalid'
+  | 'due_before_cut_off'
+  | 'no_transactions'
+  | 'amount_scale'
+  | 'period_unusual'
+  | 'not_reconciled'
+  | 'reconciliation_mismatch'
+  | 'no_printed_summary'
+  | 'rows_after_cut_off'
+  | 'minimum_above_total'
+  | 'installment_counter'
+  | 'installment_sequence'
+  | 'installment_missing';
+
+export const HARD_GATE_CODES: readonly GateIssueCode[] = [
+  'duplicate_statement',
+  'period_invalid',
+  'due_before_cut_off',
+  'no_transactions',
+  'amount_scale',
+];
+
+export interface GateIssue {
+  code: GateIssueCode | (string & {});
+  severity: 'hard' | 'soft';
+  message: string;
+  details: Record<string, number | string | string[] | null>;
+}
 
 export interface StatementSummary {
   id: string;
@@ -48,8 +95,15 @@ export interface StatementSummary {
   currency: string;
   statement_total: Minor;
   minimum_payment: Minor;
+  /**
+   * The contract always shows an object; the back end model allows null (no reconciliation run,
+   * save-gate finding `not_reconciled`). Screens should guard for it.
+   */
   reconciliation: Reconciliation;
   analysis_status: AnalysisStatus;
+  needs_review: boolean;
+  /** Soft save-gate findings; empty for a clean statement. */
+  review: GateIssue[];
 }
 
 export type TransactionKind =
@@ -77,12 +131,19 @@ export const TRANSACTION_KINDS: readonly TransactionKind[] = [
   'other',
 ];
 
+export type InstallmentComponent = 'principal' | 'bsmv' | 'kkdf' | 'interest' | 'early_payoff';
+
 export interface InstallmentInfo {
   remaining_count: number;
   remaining_amount_each: Minor;
   is_last: boolean;
   plan_id: string;
+  index: number | null;
+  total_count: number | null;
+  component: InstallmentComponent | null;
 }
+
+export type TransactionSource = 'statement' | 'manual' | 'import';
 
 export interface Transaction {
   id: string;
@@ -95,13 +156,209 @@ export interface Transaction {
   installment: InstallmentInfo | null;
   category: string | null;
   merchant: string | null;
-  source: 'statement' | 'manual';
+  source: TransactionSource;
+  original_amount: Minor | null;
+  original_currency: string | null;
+  points: string | null;
+  detail: string | null;
+}
+
+export interface PrintedSummary {
+  previous_balance: Minor;
+  period_transactions: Minor;
+  interest_and_fees: Minor | null;
+  payments: Minor;
+  statement_total: Minor;
+  remaining_installments: Minor | null;
 }
 
 export interface Statement extends StatementSummary {
   transactions: Transaction[];
   interest_rates: Record<string, string>;
+  /** Bank parser id, template id or `ai-fallback`. */
+  parser_id?: string | null;
+  credit_limit?: Minor | null;
+  next_period_end?: IsoDate | null;
+  next_due_date?: IsoDate | null;
+  printed_summary?: PrintedSummary | null;
+  page_count?: number | null;
 }
+
+export const AI_FALLBACK_PARSER = 'ai-fallback';
+
+export interface UploadOptions {
+  onProgress?: (fraction: number) => void;
+  signal?: AbortSignal;
+  /** Opens an encrypted PDF (max 200 characters). Never stored by the client. */
+  password?: string;
+  /** Store the password in the OS keyring for the statement's bank. */
+  rememberPassword?: boolean;
+  /** Query `ai_fallback`; the back end default is true. */
+  aiFallback?: boolean;
+}
+
+export interface UploadResult {
+  statement: Statement;
+  /** Header `X-Kalan-Password-Remembered`; null when the header is absent (no remember asked). */
+  passwordRemembered: boolean | null;
+}
+
+export interface TemplateDraft {
+  provider: ProviderId;
+  yaml: string;
+  valid: boolean;
+  errors: string[];
+  detect: boolean;
+  parse_error: string | null;
+  reconciliation: Reconciliation | null;
+}
+
+export interface PdfPasswordHint {
+  bank: string;
+  hint: string;
+}
+
+export interface PdfPasswordItem {
+  bank: string;
+  hint: string | null;
+  remembered: boolean;
+}
+
+export interface PdfPasswords {
+  keyring: boolean;
+  items: PdfPasswordItem[];
+}
+
+// -- categories -----------------------------------------------------------------------------------
+
+export interface CategoryRule {
+  id: string;
+  pattern: string;
+  category: string;
+  created_at: string;
+}
+
+export interface CategoryRules {
+  items: CategoryRule[];
+  /** The allowed category list. */
+  categories: string[];
+}
+
+export interface NewCategoryRule {
+  pattern: string;
+  category: string;
+  /** Recategorise stored rows not categorised by hand; back end default true. */
+  apply?: boolean;
+}
+
+export interface CategoryRuleCreated {
+  rule: CategoryRule;
+  applied: number;
+}
+
+// -- diagnosis ------------------------------------------------------------------------------------
+
+export interface AnchorCount {
+  found: number;
+  total: number;
+  missing: string[];
+}
+
+export interface DiagnosisTemplate {
+  id: string;
+  detected: boolean;
+  anchors?: {
+    detect_all: AnchorCount;
+    detect_none_present: string[];
+    header_fields: Record<string, boolean>;
+    table_header: AnchorCount;
+    table_end: boolean;
+    summary_title: boolean;
+  } | null;
+}
+
+export interface DiagnosisReport {
+  kalan_version: string;
+  page_count: number;
+  has_text: boolean;
+  line_count: number;
+  lines_per_page: number[];
+  number_styles: Record<string, number>;
+  date_styles: Record<string, number>;
+  templates: DiagnosisTemplate[];
+  shapes: { page: number; shape: string; repeat: number }[];
+  shapes_truncated: boolean;
+}
+
+export interface Diagnosis {
+  report: DiagnosisReport;
+  /** Plain-text report for the "bank not supported" issue form. */
+  text: string;
+}
+
+export interface DiagnoseOptions {
+  password?: string;
+  signal?: AbortSignal;
+  onProgress?: (fraction: number) => void;
+}
+
+// -- imports --------------------------------------------------------------------------------------
+
+export type ImportFormat = 'csv' | 'ofx' | 'qif';
+
+export interface ImportMapping {
+  date?: string;
+  description?: string;
+  amount?: string;
+  debit?: string;
+  credit?: string;
+  installment?: string;
+  currency_column?: string;
+  currency?: string;
+  delimiter?: string;
+  decimal?: string;
+  date_format?: string;
+  sign?: 'negative_debit' | 'positive_debit';
+  template?: string;
+}
+
+export interface ImportOptions {
+  format?: ImportFormat;
+  mapping?: ImportMapping;
+  signal?: AbortSignal;
+  onProgress?: (fraction: number) => void;
+}
+
+export interface ImportDetected {
+  delimiter?: string | null;
+  decimal?: string | null;
+  amount_format?: string | null;
+  date_format?: string | null;
+  date_ambiguous?: boolean;
+  sign?: string | null;
+  columns?: Record<string, string | null>;
+  [key: string]: unknown;
+}
+
+export interface ImportSummary {
+  id: string;
+  format: ImportFormat;
+  created_at: string;
+  currency: string;
+  detected: ImportDetected;
+  months: IsoMonth[];
+  rows: number;
+  imported: number;
+  skipped_duplicates: number;
+}
+
+export interface ImportResult extends Omit<ImportSummary, 'created_at'> {
+  created_at?: string;
+  /** Only the newly stored rows. */
+  transactions: Transaction[];
+}
+
+// -- manual entry ---------------------------------------------------------------------------------
 
 export interface NewTransaction {
   date: IsoDate;
@@ -112,11 +369,39 @@ export interface NewTransaction {
   installment: { total_count: number; amount_each: Minor } | null;
 }
 
-/**
- * Proposed extension (not in contract v0.1): split of one cash advance
- * installment into principal, interest and the two taxes. The UI shows it
- * when present. See the open question in the report.
- */
+export interface TransactionFilter {
+  month?: IsoMonth;
+  source?: TransactionSource;
+}
+
+// -- fixed costs ----------------------------------------------------------------------------------
+
+export interface NewFixedCost {
+  name: string;
+  amount: Minor;
+  /** Defaults to the base currency. */
+  currency?: string | null;
+  /** 1-31, clipped to short months. */
+  day: number;
+  start: IsoMonth;
+  /** Inclusive; null = open ended. */
+  end?: IsoMonth | null;
+  category?: string | null;
+}
+
+export interface FixedCost {
+  id: string;
+  name: string;
+  amount: Minor;
+  currency: string;
+  day: number;
+  start: IsoMonth;
+  end: IsoMonth | null;
+  category: string | null;
+}
+
+// -- calculations ---------------------------------------------------------------------------------
+
 export interface InstallmentBreakdown {
   principal: Minor;
   interest: Minor;
@@ -130,7 +415,7 @@ export interface ScheduleItem {
   amount: Minor;
   index: number;
   count: number;
-  breakdown?: InstallmentBreakdown;
+  breakdown?: InstallmentBreakdown | null;
 }
 
 export interface ScheduleMonth {
@@ -147,13 +432,31 @@ export interface SchedulePlan {
   amount_each: Minor;
   ends: IsoMonth;
   total_remaining: Minor;
-  breakdown?: InstallmentBreakdown;
+  breakdown?: InstallmentBreakdown | null;
+  source?: TransactionSource;
+}
+
+export interface FixedScheduleItem {
+  fixed_cost_id: string;
+  name: string;
+  amount: Minor;
+  currency: string;
+  date: IsoDate;
+}
+
+export interface FixedSchedule {
+  kind: 'fixed';
+  months: { month: IsoMonth; total: Minor; items: FixedScheduleItem[] }[];
 }
 
 export interface Schedule {
   currency: string;
   months: ScheduleMonth[];
   plans: SchedulePlan[];
+  /** Recurring fixed costs over the same months; never added to `months[].total`. */
+  fixed?: FixedSchedule;
+  /** First schedule month (back end extra, not in the contract text). */
+  start_month?: IsoMonth;
 }
 
 export interface CategoryShare {
@@ -181,6 +484,68 @@ export interface Subscription {
   price_change: Ratio | null;
 }
 
+export interface SimulationRequest {
+  amount: Minor;
+  count: number;
+  start_month: IsoMonth;
+  /** Percent per month; null = no interest. */
+  interest_monthly?: Percent | null;
+  months?: number | null;
+}
+
+export interface SimulatedInstallment {
+  month: IsoMonth;
+  amount: Minor;
+  principal: Minor;
+  interest: Minor;
+}
+
+export interface Simulation {
+  currency: string;
+  purchase: {
+    amount: Minor;
+    count: number;
+    start_month: IsoMonth;
+    interest_monthly: Percent | null;
+    installments: SimulatedInstallment[];
+    total_cost: Minor;
+    interest_total: Minor;
+    ends: IsoMonth;
+  };
+  months: { month: IsoMonth; without: Minor; purchase: Minor; with: Minor }[];
+  peak: { without: { month: IsoMonth; total: Minor }; with: { month: IsoMonth; total: Minor } };
+}
+
+// -- alerts ---------------------------------------------------------------------------------------
+
+export type AlertKind =
+  | 'installment_ending'
+  | 'limit_high'
+  | 'interest_charged'
+  | 'fee_charged'
+  | 'tax_charged'
+  | 'foreign_currency'
+  | 'missing_statement'
+  | 'subscription_price_rise'
+  | 'due_soon'
+  | 'statement_overdue'
+  | 'charged_after_cancel';
+
+export type AlertSeverity = 'info' | 'warning' | 'critical';
+
+export interface Alert {
+  id: string;
+  kind: AlertKind;
+  severity: AlertSeverity;
+  month: IsoMonth;
+  /** `alert.<kind>`; the front end translates it with `params`. */
+  message_key: string;
+  params: Record<string, string | number | string[] | null>;
+  refs: { statement_ids: string[]; transaction_ids: string[]; plan_ids: string[] };
+}
+
+// -- model analysis -------------------------------------------------------------------------------
+
 export interface Job {
   status: 'pending' | 'done' | 'failed';
   error: string | null;
@@ -199,15 +564,362 @@ export interface Analysis {
   created_at: string;
 }
 
+// -- insights -------------------------------------------------------------------------------------
+
+export interface RuleOverrides {
+  contractual_monthly: Percent | null;
+  late_monthly: Percent | null;
+  bsmv: Ratio | null;
+  kkdf: Ratio | null;
+  minimum_ratio: Ratio | null;
+}
+
+export interface InsightRules {
+  /** Contents of `tr_card_rules.json` (dated, sourced values). */
+  rules: Record<string, unknown>;
+  overrides: RuleOverrides;
+}
+
+export type ValueSource = 'override' | 'statement' | 'rules' | 'assumption';
+
+export interface SourcedValue {
+  value: string;
+  source: ValueSource;
+  detail: string | null;
+}
+
+export interface Assumption {
+  key: string;
+  text: string;
+}
+
+export interface MinimumPaymentQuery {
+  statement_id?: string;
+  include_installments?: boolean;
+  cycles?: number;
+}
+
+export interface MinimumPaymentCycle {
+  cycle: number;
+  cut_off: IsoDate;
+  balance: Minor;
+  payment: Minor;
+  unpaid: Minor;
+  days: number;
+  interest: Minor;
+  bsmv: Minor;
+  kkdf: Minor;
+  added: Minor;
+  next_balance: Minor;
+}
+
+export interface MinimumPaymentPlan {
+  statement_id: string;
+  currency: string;
+  start_balance: Minor;
+  minimum_only: {
+    cycles: number;
+    paid_off: boolean;
+    last_payment_cut_off: IsoDate | null;
+    total_paid: Minor;
+    interest: Minor;
+    bsmv: Minor;
+    kkdf: Minor;
+    cost: Minor;
+    balance_left: Minor;
+  };
+  pay_in_full: { total_paid: Minor; cost: Minor };
+  extra_cost: Minor;
+  rates: {
+    contractual_monthly: { from_cycle: number; monthly: Percent; source: ValueSource; detail: string | null }[];
+    bsmv: SourcedValue;
+    kkdf: SourcedValue;
+    minimum_ratio: SourcedValue;
+  };
+  assumptions: Assumption[];
+  cycles: MinimumPaymentCycle[];
+}
+
+export interface CardFee {
+  transaction_id: string;
+  statement_id: string;
+  date: IsoDate;
+  description: string;
+  amount: Minor;
+  currency: string;
+  bank: string;
+  product: string;
+  card_last4: string;
+  statement_period_end: IsoDate;
+  supplementary_card: boolean;
+  refunded: boolean;
+}
+
+export type RefundRoute = 'hakem_heyeti' | 'consumer_court';
+
+export interface LegalBasis {
+  id: string;
+  title: string;
+  summary: string;
+  source: string;
+  verified: boolean | string;
+}
+
+export interface CardFeePrompt {
+  fee: CardFee;
+  route: RefundRoute;
+  hakem_heyeti: { year: number; limit_below: Minor; currency: string; source: string; apply: string };
+  legal_basis: LegalBasis[];
+  placeholders: string[];
+  prompt: string;
+  note: string;
+}
+
+export interface CardFeeDraft {
+  provider: ProviderId;
+  text: string;
+  route: RefundRoute;
+  placeholders_kept: string[];
+  placeholders_missing: string[];
+}
+
+export interface CardOption {
+  bank: string;
+  product: string;
+  card_last4: string;
+  statement_id: string;
+  cut_off: IsoDate;
+  cut_off_day: number;
+  due_offset_days: number;
+  due_date: IsoDate;
+  due_date_effective: IsoDate;
+  shifted_days: number;
+  interest_free_days: number;
+  days_until_cut_off: number;
+  first_installment_month: IsoMonth;
+  basis: 'printed' | 'projected';
+  stale: boolean;
+}
+
+export interface WhichCard {
+  date: IsoDate;
+  best: CardOption | null;
+  cards: CardOption[];
+  assumptions: Assumption[];
+}
+
+export interface ShareCardQuery {
+  locale?: Locale;
+  amounts?: boolean;
+}
+
+export interface ShareCard {
+  locale: Locale;
+  show_amounts: boolean;
+  sentence: string;
+  /** `total` only with `amounts=true`. */
+  months: { month: IsoMonth; share: Ratio; total?: Minor }[];
+  /** Only with `amounts=true`. */
+  currency?: string;
+  svg: string;
+}
+
+export interface ForecastPartsMap {
+  installments: Minor;
+  subscriptions: Minor;
+  variable: Minor;
+  fixed: Minor;
+}
+
+export interface BacktestSummary {
+  currency: string;
+  count: number;
+  mae: Minor | null;
+  mape: Ratio | null;
+  bias: Minor | null;
+  min_history: number;
+}
+
+export interface Forecast {
+  open_period: {
+    /** null when no statement is stored yet. */
+    from: IsoDate | null;
+    to: IsoDate;
+    transactions: Transaction[];
+    debit_total: Minor;
+    credit_total: Minor;
+  };
+  forecast: {
+    month: IsoMonth;
+    currency: string;
+    total: Minor;
+    parts: ForecastPartsMap;
+    include_fixed: boolean;
+    variable_basis: { months: IsoMonth[]; median: Minor; known_in_month: Minor };
+    installment_items: ScheduleItem[];
+    subscriptions: { merchant: string; amount: Minor }[];
+  } | null;
+  backtest: BacktestSummary;
+}
+
+export interface BacktestQuery {
+  include_fixed?: boolean;
+  history?: number;
+  min_history?: number;
+}
+
+export interface Backtest extends BacktestSummary {
+  months: { month: IsoMonth; forecast: Minor; actual: Minor; error: Minor; parts: ForecastPartsMap }[];
+}
+
+export interface Payoff {
+  plan_id: string;
+  description: string;
+  kind: 'purchase' | 'cash_advance';
+  source: TransactionSource;
+  currency: string;
+  payoff_month: IsoMonth;
+  remaining_count: number;
+  amount_each: Minor;
+  remaining_total: Minor;
+  discount_rule: 'unknown';
+  note: string;
+  breakdown: InstallmentBreakdown | null;
+  remaining_principal: Minor | null;
+  would_save_if_future_interest_dropped: Minor | null;
+  schedule_effect: { month: IsoMonth; without: Minor; with: Minor }[];
+}
+
+export interface ClosedEarly {
+  plan_id: string;
+  statement_id: string;
+  month: IsoMonth;
+  transaction_id: string;
+  index: number | null;
+  total_count: number | null;
+}
+
+export interface EarlyPayoffOverview {
+  currency: string;
+  start_month: IsoMonth;
+  plans: Payoff[];
+  closed_early: ClosedEarly[];
+}
+
+export interface CancelledSubscription {
+  merchant: string;
+  cancelled_on: IsoDate;
+}
+
+export interface FixedCostMatch {
+  fixed_cost_id: string;
+  month: IsoMonth;
+  transaction_id: string;
+  date: IsoDate;
+  amount: Minor;
+  amount_diff: Minor;
+  day_diff: number;
+}
+
+export interface FixedCostMatches {
+  tolerance: { amount: Ratio; days: number };
+  costs: {
+    fixed_cost_id: string;
+    name: string;
+    amount: Minor;
+    currency: string;
+    day: number;
+    matches: FixedCostMatch[];
+    missing_months: IsoMonth[];
+  }[];
+  duplicates: { fixed_cost_ids: string[]; same_name: boolean; amount_diff: Minor; day_gap: number }[];
+}
+
+export type ExportFormat = 'hledger' | 'beancount' | 'ofx' | 'csv';
+
+export interface ExportQuery {
+  format: ExportFormat;
+  what?: 'transactions' | 'plans';
+  currency?: string;
+}
+
+export interface ExportFile {
+  text: string;
+  /** From `Content-Disposition`, else `kalan-<what>.<ext>`. */
+  filename: string;
+  contentType: string;
+  /** `X-Kalan-Skipped-Rows`; null when the header cannot be read. */
+  skippedRows: number | null;
+}
+
+// -- errors ---------------------------------------------------------------------------------------
+
+export type AiFallbackReason = 'off' | 'no_provider' | 'provider_unavailable' | 'too_long';
+
+/** `details` per error code, as far as the contract and back end define them. */
+export interface ErrorDetailsByCode {
+  duplicate: { statement_id: string };
+  save_blocked: { issues: GateIssue[] };
+  pdf_password_required: { hints: PdfPasswordHint[] };
+  pdf_password_wrong: { hints: PdfPasswordHint[] };
+  unknown_format: { ai_fallback: AiFallbackReason };
+  ai_fallback_failed: { provider: ProviderId };
+  provider_failed: { provider: ProviderId };
+  provider_unavailable: { id?: ProviderId };
+  file_too_large: { max_bytes?: number };
+  duplicate_rule: { rule_id: string };
+  unknown_bank: { known: string[] };
+  statement_not_found: { id: string };
+  card_fee_not_found: { id: string };
+  plan_not_found: { id: string };
+  month_outside_schedule: { start_month: IsoMonth; months: number };
+  validation_error: { errors: { loc: (string | number)[]; msg: string }[] };
+}
+
+/** Codes without `details`. */
+export type PlainErrorCode =
+  | 'not_found'
+  | 'not_pdf'
+  | 'invalid_pdf'
+  | 'parse_error'
+  | 'no_provider'
+  | 'no_statement_text'
+  | 'keyring_unavailable'
+  | 'not_remembered'
+  | 'invalid_pattern'
+  | 'import_unreadable'
+  | 'invalid_mapping'
+  | 'invalid_period'
+  | 'fixed_cost_not_found'
+  | 'no_statements'
+  | 'cancellation_not_found'
+  | 'plans_csv_only'
+  | 'analysis_failed'
+  | 'bad_request'
+  | 'method_not_allowed'
+  | 'unsupported_media_type'
+  | 'http_error'
+  // client side only
+  | 'network'
+  | 'aborted'
+  | 'invalid_response';
+
+export type KnownErrorCode = keyof ErrorDetailsByCode | PlainErrorCode;
+export type ApiErrorCode = KnownErrorCode | (string & {});
+
+export type ErrorDetails<C extends ApiErrorCode> = C extends keyof ErrorDetailsByCode
+  ? ErrorDetailsByCode[C]
+  : Record<string, unknown>;
+
 export interface ApiErrorBody {
   error: { code: string; message: string; details?: Record<string, unknown> };
 }
 
 export class ApiError extends Error {
-  readonly code: string;
+  readonly code: ApiErrorCode;
   readonly status: number;
   readonly details: Record<string, unknown>;
-  constructor(status: number, code: string, message: string, details: Record<string, unknown> = {}) {
+  constructor(status: number, code: ApiErrorCode, message: string, details: Record<string, unknown> = {}) {
     super(message);
     this.name = 'ApiError';
     this.status = status;
@@ -216,28 +928,88 @@ export class ApiError extends Error {
   }
 }
 
-export interface UploadOptions {
-  onProgress?: (fraction: number) => void;
-  signal?: AbortSignal;
+/** Narrows an unknown error to an ApiError with `code`, typing its `details`. */
+export function isApiError<C extends KnownErrorCode>(
+  error: unknown,
+  code: C,
+): error is ApiError & { code: C; details: ErrorDetails<C> } {
+  return error instanceof ApiError && error.code === code;
 }
+
+// -- the client -----------------------------------------------------------------------------------
 
 /** Everything the UI needs from the back end. Implemented by the HTTP client and the mock. */
 export interface KalanApi {
+  // health and setup
   health(): Promise<{ status: string; version: string }>;
   getProviders(): Promise<ProvidersResponse>;
   selectProvider(id: ProviderId): Promise<ProvidersResponse>;
   getSettings(): Promise<Settings>;
   putSettings(settings: Settings): Promise<Settings>;
+
+  // statements
+  /** `POST /statements`; resolves to the statement only. */
   uploadStatement(file: File, options?: UploadOptions): Promise<Statement>;
+  /** `POST /statements` with the `X-Kalan-Password-Remembered` answer. */
+  uploadStatementDetailed(file: File, options?: UploadOptions): Promise<UploadResult>;
   listStatements(): Promise<{ items: StatementSummary[] }>;
   getStatement(id: string): Promise<Statement>;
   deleteStatement(id: string): Promise<void>;
+  createTemplateDraft(statementId: string): Promise<TemplateDraft>;
+  getPdfPasswords(): Promise<PdfPasswords>;
+  putPdfPassword(bank: string, password: string): Promise<void>;
+  deletePdfPassword(bank: string): Promise<void>;
+
+  // categories and diagnosis
+  getCategoryRules(): Promise<CategoryRules>;
+  createCategoryRule(body: NewCategoryRule): Promise<CategoryRuleCreated>;
+  deleteCategoryRule(id: string): Promise<void>;
+  diagnose(file: File, options?: DiagnoseOptions): Promise<Diagnosis>;
+
+  // imports
+  importFile(file: File, options?: ImportOptions): Promise<ImportResult>;
+  listImports(): Promise<{ items: ImportSummary[] }>;
+  deleteImport(id: string): Promise<void>;
+
+  // manual entry
   createTransaction(body: NewTransaction): Promise<Transaction>;
+  listTransactions(filter?: TransactionFilter): Promise<{ items: Transaction[] }>;
   deleteTransaction(id: string): Promise<void>;
+
+  // fixed costs
+  createFixedCost(body: NewFixedCost): Promise<FixedCost>;
+  listFixedCosts(): Promise<{ items: FixedCost[] }>;
+  deleteFixedCost(id: string): Promise<void>;
+
+  // calculations
   getSchedule(months: number): Promise<Schedule>;
   getMonthlySummary(month: IsoMonth): Promise<MonthlySummary>;
   getSubscriptions(): Promise<{ items: Subscription[] }>;
+  simulateInstallment(body: SimulationRequest): Promise<Simulation>;
+  getAlerts(): Promise<{ items: Alert[] }>;
+
+  // model analysis
   analyzeStatement(id: string): Promise<{ job_id: string; status: 'pending' }>;
   getJob(jobId: string): Promise<Job>;
   getAnalysis(id: string): Promise<Analysis>;
+
+  // insights
+  getInsightRules(): Promise<InsightRules>;
+  putInsightRules(overrides: Partial<RuleOverrides>): Promise<InsightRules>;
+  getMinimumPayment(query?: MinimumPaymentQuery): Promise<MinimumPaymentPlan>;
+  listCardFees(): Promise<{ items: CardFee[] }>;
+  getCardFeePrompt(transactionId: string): Promise<CardFeePrompt>;
+  draftCardFeeLetter(transactionId: string): Promise<CardFeeDraft>;
+  getWhichCard(date?: IsoDate): Promise<WhichCard>;
+  getShareCard(query?: ShareCardQuery): Promise<ShareCard>;
+  getShareCardSvg(query?: ShareCardQuery): Promise<string>;
+  getForecast(includeFixed?: boolean): Promise<Forecast>;
+  getForecastBacktest(query?: BacktestQuery): Promise<Backtest>;
+  getEarlyPayoffOverview(): Promise<EarlyPayoffOverview>;
+  getEarlyPayoff(planId: string, month?: IsoMonth): Promise<Payoff>;
+  listCancelledSubscriptions(): Promise<{ items: CancelledSubscription[] }>;
+  addCancelledSubscription(body: CancelledSubscription): Promise<{ items: CancelledSubscription[] }>;
+  deleteCancelledSubscription(merchant: string): Promise<void>;
+  getFixedCostMatches(): Promise<FixedCostMatches>;
+  exportData(query: ExportQuery): Promise<ExportFile>;
 }
