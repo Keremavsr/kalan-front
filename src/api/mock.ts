@@ -898,7 +898,7 @@ export function createMockApi(options: MockOptions = {}): KalanApi {
     getProviders: () => wait(providersResponse()),
     selectProvider: (id) => {
       const provider = fixtureProviders.find((p) => p.id === id);
-      if (!provider) return fail(404, 'not_found', 'Unknown provider.');
+      if (!provider) return fail(422, 'unknown_provider', `There is no provider called ${id}.`, { known: fixtureProviders.map((p) => p.id) });
       if (!provider.available) return fail(409, 'provider_unavailable', `${provider.name} is not available on this computer.`, { id });
       state.selected = id;
       return wait(providersResponse());
@@ -925,9 +925,10 @@ export function createMockApi(options: MockOptions = {}): KalanApi {
       }),
     getStatement: (id) => {
       const st = findStatement(id);
-      return st ? wait(st) : fail(404, 'not_found', 'Statement not found.');
+      return st ? wait(st) : fail(404, 'statement_not_found', 'No statement with this id.', { id });
     },
     deleteStatement: (id) => {
+      if (!findStatement(id)) return fail(404, 'statement_not_found', 'No statement with this id.', { id });
       state.statements = state.statements.filter((s) => s.id !== id);
       state.analyses.delete(id);
       return wait(undefined);
@@ -935,7 +936,7 @@ export function createMockApi(options: MockOptions = {}): KalanApi {
     createTemplateDraft: (id) =>
       later(() => {
         const st = findStatement(id);
-        if (!st) throw new ApiError(404, 'not_found', 'Statement not found.');
+        if (!st) throw new ApiError(404, 'statement_not_found', 'No statement with this id.', { id });
         if (st.parser_id !== AI_FALLBACK_PARSER) {
           throw new ApiError(409, 'no_statement_text', 'Only statements read by the AI fallback keep their text.');
         }
@@ -1013,7 +1014,7 @@ export function createMockApi(options: MockOptions = {}): KalanApi {
     importFile: (file, opts) => importFile(file, opts),
     listImports: () => wait({ items: state.imports.map((b) => b.summary) }),
     deleteImport: (id) => {
-      if (!state.imports.some((b) => b.summary.id === id)) return fail(404, 'not_found', 'No such import.');
+      if (!state.imports.some((b) => b.summary.id === id)) return fail(404, 'import_not_found', 'No import with this id.', { id });
       state.imports = state.imports.filter((b) => b.summary.id !== id);
       return wait(undefined);
     },
@@ -1075,7 +1076,11 @@ export function createMockApi(options: MockOptions = {}): KalanApi {
       }),
     deleteTransaction: (id) => {
       const tx = state.manualTransactions.find((t) => t.id === id);
-      if (!tx) return fail(404, 'not_found', 'Only manual transactions can be deleted.');
+      if (!tx) {
+        return allRows().some((t) => t.id === id)
+          ? fail(409, 'not_manual', 'Only manual transactions can be deleted.')
+          : fail(404, 'transaction_not_found', 'No transaction with this id.', { id });
+      }
       state.manualTransactions = state.manualTransactions.filter((t) => t.id !== id);
       if (tx.installment) state.manualPlans = state.manualPlans.filter((p) => p.plan_id !== tx.installment!.plan_id);
       return wait(undefined);
@@ -1119,7 +1124,7 @@ export function createMockApi(options: MockOptions = {}): KalanApi {
 
     analyzeStatement: (id) => {
       const st = findStatement(id);
-      if (!st) return fail(404, 'not_found', 'Statement not found.');
+      if (!st) return fail(404, 'statement_not_found', 'No statement with this id.', { id });
       if (!state.selected) return fail(409, 'no_provider', 'Choose an AI provider first.');
       const jobId = `job_${state.nextId++}`;
       const provider = state.selected;
@@ -1138,11 +1143,12 @@ export function createMockApi(options: MockOptions = {}): KalanApi {
     },
     getJob: (jobId) => {
       const job = state.jobs.get(jobId);
-      return job ? wait(job) : fail(404, 'not_found', 'Job not found.');
+      return job ? wait(job) : fail(404, 'job_not_found', 'No job with this id.', { id: jobId });
     },
     getAnalysis: (id) => {
+      if (!findStatement(id)) return fail(404, 'statement_not_found', 'No statement with this id.', { id });
       const analysis = state.analyses.get(id);
-      return analysis ? wait(analysis) : fail(404, 'not_found', 'No analysis for this statement yet.');
+      return analysis ? wait(analysis) : fail(404, 'analysis_not_found', 'This statement has not been analysed yet.');
     },
 
     getInsightRules: () => wait({ rules: insightRulesFixture.rules, overrides: state.overrides }),

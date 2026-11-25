@@ -434,6 +434,8 @@ export interface SchedulePlan {
   total_remaining: Minor;
   breakdown?: InstallmentBreakdown | null;
   source?: TransactionSource;
+  /** Back end extra, not in the contract text. */
+  last_statement_id?: string | null;
 }
 
 export interface FixedScheduleItem {
@@ -865,11 +867,15 @@ export interface ErrorDetailsByCode {
   unknown_format: { ai_fallback: AiFallbackReason };
   ai_fallback_failed: { provider: ProviderId };
   provider_failed: { provider: ProviderId };
-  provider_unavailable: { id?: ProviderId };
+  provider_unavailable: { id?: ProviderId; detail?: string };
+  unknown_provider: { known: string[] };
   file_too_large: { max_bytes?: number };
   duplicate_rule: { rule_id: string };
   unknown_bank: { known: string[] };
   statement_not_found: { id: string };
+  transaction_not_found: { id: string };
+  import_not_found: { id: string };
+  job_not_found: { id: string };
   card_fee_not_found: { id: string };
   plan_not_found: { id: string };
   month_outside_schedule: { start_month: IsoMonth; months: number };
@@ -879,6 +885,9 @@ export interface ErrorDetailsByCode {
 /** Codes without `details`. */
 export type PlainErrorCode =
   | 'not_found'
+  | 'analysis_not_found'
+  | 'not_manual'
+  | 'invalid_installment'
   | 'not_pdf'
   | 'invalid_pdf'
   | 'parse_error'
