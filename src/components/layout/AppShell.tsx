@@ -8,6 +8,7 @@ import { Scribble } from '../pencil';
 import { Button, buttonClass } from '../ui';
 import { ManualEntryModal } from '../../features/manual/ManualEntryModal';
 import { cx } from '../../lib/cx';
+import { useTour } from '../../features/tour/Tour';
 
 /** Main menu, in reading order. Settings sits apart as an icon. */
 const NAV = [
@@ -39,6 +40,7 @@ export function AppShell({ children }: { children: ReactNode }) {
   const isMock = import.meta.env.VITE_KALAN_MOCK === '1';
   const scrolled = useScrolled();
   const [manualOpen, setManualOpen] = useState(false);
+  const tour = useTour();
 
   return (
     <div className="flex min-h-dvh flex-col">
@@ -99,6 +101,13 @@ export function AppShell({ children }: { children: ReactNode }) {
           <span>{selected ? t('nav.providerSelected', { name: selected.name }) : t('nav.providerNone')}</span>
           {latest ? <span>{t('common.card', { last4: latest.card_last4 })}</span> : null}
           {isMock ? <span>{t('common.demoData')}</span> : null}
+          <button
+            type="button"
+            onClick={tour.open}
+            className="ml-auto rounded-sm text-ink underline decoration-1 underline-offset-4 transition-[text-decoration-color] duration-(--duration-1) hover:decoration-transparent"
+          >
+            {t('tour.link')}
+          </button>
         </p>
       </footer>
 

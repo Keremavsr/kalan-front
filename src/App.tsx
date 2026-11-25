@@ -14,6 +14,7 @@ import { RightsPage } from './features/rights/RightsPage';
 import { SettingsPage } from './features/settings/SettingsPage';
 import { SpendingPage } from './features/spending/SpendingPage';
 import { StatementsPage } from './features/statements/StatementsPage';
+import { TourProvider } from './features/tour/Tour';
 
 export function createQueryClient() {
   return new QueryClient({
@@ -49,26 +50,28 @@ function MovedMonth() {
 
 export function AppRoutes() {
   return (
-    <AppShell>
-      <Routes>
-        <Route path="/" element={<OverviewPage />} />
-        <Route path="/installments" element={<InstallmentsPage />} />
-        <Route path="/spending" element={<SpendingPage />} />
-        <Route path="/spending/:month" element={<SpendingPage />} />
-        <Route path="/recurring" element={<RecurringPage />} />
-        <Route path="/rights" element={<RightsPage />} />
-        <Route path="/statements" element={<StatementsPage />} />
-        <Route path="/settings" element={<SettingsPage />} />
-        <Route path="/month" element={<Moved to="/spending" />} />
-        <Route path="/month/:month" element={<MovedMonth />} />
-        <Route path="/subscriptions" element={<Moved to="/recurring" />} />
-        <Route path="/watch" element={<Moved to="/" />} />
-        <Route path="/upload" element={<Moved to="/statements" />} />
-        <Route path="/setup" element={<Moved to="/settings" />} />
-        <Route path="/calendar" element={<Moved to="/installments" />} />
-        <Route path="*" element={<Navigate to="/" replace />} />
-      </Routes>
-    </AppShell>
+    <TourProvider>
+      <AppShell>
+        <Routes>
+          <Route path="/" element={<OverviewPage />} />
+          <Route path="/installments" element={<InstallmentsPage />} />
+          <Route path="/spending" element={<SpendingPage />} />
+          <Route path="/spending/:month" element={<SpendingPage />} />
+          <Route path="/recurring" element={<RecurringPage />} />
+          <Route path="/rights" element={<RightsPage />} />
+          <Route path="/statements" element={<StatementsPage />} />
+          <Route path="/settings" element={<SettingsPage />} />
+          <Route path="/month" element={<Moved to="/spending" />} />
+          <Route path="/month/:month" element={<MovedMonth />} />
+          <Route path="/subscriptions" element={<Moved to="/recurring" />} />
+          <Route path="/watch" element={<Moved to="/" />} />
+          <Route path="/upload" element={<Moved to="/statements" />} />
+          <Route path="/setup" element={<Moved to="/settings" />} />
+          <Route path="/calendar" element={<Moved to="/installments" />} />
+          <Route path="*" element={<Navigate to="/" replace />} />
+        </Routes>
+      </AppShell>
+    </TourProvider>
   );
 }
 
@@ -92,11 +95,7 @@ export function App({ api, queryClient, initialPath }: AppProps) {
     <ApiProvider api={api}>
       <QueryClientProvider client={client}>
         <ToastProvider>
-          {initialPath ? (
-            <MemoryRouter initialEntries={[initialPath]}>{content}</MemoryRouter>
-          ) : (
-            <BrowserRouter>{content}</BrowserRouter>
-          )}
+          {initialPath ? <MemoryRouter initialEntries={[initialPath]}>{content}</MemoryRouter> : <BrowserRouter>{content}</BrowserRouter>}
         </ToastProvider>
       </QueryClientProvider>
     </ApiProvider>

@@ -1,0 +1,23 @@
+{
+  "label": "Como o kalan funciona",
+  "link": "Como funciona",
+  "progress": "Passo {{n}} de {{total}}",
+  "step": "{{n}} / {{total}}",
+  "drop": {
+    "title": "Solte sua fatura",
+    "body": "Solte aqui a fatura em PDF do seu banco. Eu leio os valores, as parcelas e a data de vencimento."
+  },
+  "see": {
+    "title": "Veja o que você vai pagar",
+    "body": "Em uma só tela você vê quanto paga em cada cartão este mês e em que mês suas parcelas terminam."
+  },
+  "ai": {
+    "title": "Se quiser, conecte uma ferramenta de IA",
+    "body": "Se você conectar a ferramenta de IA do seu computador, ela separa seus gastos por categoria e mostra onde você pode economizar.",
+    "sent": "A ferramenta recebe a data, a descrição, o valor, a moeda e o tipo de cada lançamento das suas faturas, e os totais dos seus gastos."
+  },
+  "skip": "Pular",
+  "back": "Voltar",
+  "next": "Avançar",
+  "finish": "Enviar uma fatura"
+}

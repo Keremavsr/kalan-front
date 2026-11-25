@@ -1,0 +1,23 @@
+{
+  "label": "How kalan works",
+  "link": "How it works",
+  "progress": "Step {{n}} of {{total}}",
+  "step": "{{n}} / {{total}}",
+  "drop": {
+    "title": "Drop your statement",
+    "body": "Drop your bank's PDF statement here. I read the amounts, the installments and the due date."
+  },
+  "see": {
+    "title": "See what you will pay",
+    "body": "On one screen you see how much you pay on each card this month and in which month your installments end."
+  },
+  "ai": {
+    "title": "Connect an AI tool if you like",
+    "body": "If you connect the AI tool on your computer, it sorts your spending into categories and tells you where you can save.",
+    "sent": "The tool receives the date, description, amount, currency and type of each transaction in your statements, and your spending totals."
+  },
+  "skip": "Skip",
+  "back": "Back",
+  "next": "Next",
+  "finish": "Upload a statement"
+}

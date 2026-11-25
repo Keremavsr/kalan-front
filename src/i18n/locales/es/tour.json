@@ -1,0 +1,23 @@
+{
+  "label": "Cómo funciona kalan",
+  "link": "Cómo funciona",
+  "progress": "Paso {{n}} de {{total}}",
+  "step": "{{n}} / {{total}}",
+  "drop": {
+    "title": "Suelta tu estado de cuenta",
+    "body": "Suelta aquí el estado de cuenta en PDF de tu banco. Yo leo los montos, las cuotas y la fecha límite de pago."
+  },
+  "see": {
+    "title": "Mira lo que vas a pagar",
+    "body": "En una sola pantalla ves cuánto pagas este mes en cada tarjeta y en qué mes terminan tus cuotas."
+  },
+  "ai": {
+    "title": "Si quieres, conecta una herramienta de IA",
+    "body": "Si conectas la herramienta de IA de tu computadora, clasifica tus gastos por categoría y te dice dónde puedes ahorrar.",
+    "sent": "La herramienta recibe la fecha, la descripción, el monto, la moneda y el tipo de cada movimiento de tus estados de cuenta, y los totales de tus gastos."
+  },
+  "skip": "Omitir",
+  "back": "Atrás",
+  "next": "Siguiente",
+  "finish": "Subir un estado de cuenta"
+}

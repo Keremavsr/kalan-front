@@ -1,0 +1,23 @@
+{
+  "label": "kalan nasıl çalışır?",
+  "link": "Nasıl çalışır?",
+  "progress": "{{total}} adımdan {{n}}. adım",
+  "step": "{{n}} / {{total}}",
+  "drop": {
+    "title": "Ekstreni bırak",
+    "body": "Bankanın PDF ekstresini buraya bırak. Tutarları, taksitleri ve son ödeme tarihini ben okurum."
+  },
+  "see": {
+    "title": "Ne ödeyeceğini gör",
+    "body": "Bu ay hangi kartına ne kadar ödeyeceğini ve kalan taksitlerinin hangi ay biteceğini tek ekranda görürsün."
+  },
+  "ai": {
+    "title": "İstersen bir yapay zekâ aracı bağla",
+    "body": "Bilgisayarındaki yapay zekâ aracını bağlarsan harcamalarını kategorilere ayırır, nerede tasarruf edebileceğini söyler.",
+    "sent": "Araca ekstrelerindeki işlemlerin tarihi, açıklaması, tutarı, para birimi ve türü ile harcama toplamların gider."
+  },
+  "skip": "Atla",
+  "back": "Geri",
+  "next": "Devam",
+  "finish": "Ekstre yükle"
+}

@@ -1,5 +1,5 @@
 import '@testing-library/jest-dom/vitest';
-import { afterEach } from 'vitest';
+import { afterEach, beforeEach } from 'vitest';
 import { cleanup } from '@testing-library/react';
 import i18n from '../i18n';
 
@@ -15,6 +15,12 @@ if (typeof HTMLDialogElement !== 'undefined' && !HTMLDialogElement.prototype.sho
 if (!('scrollIntoView' in Element.prototype)) {
   Object.defineProperty(Element.prototype, 'scrollIntoView', { value: () => undefined });
 }
+
+// The first-run tour opens by itself on a fresh profile; screen tests start as a returning user.
+// Tour tests remove the flag first.
+beforeEach(() => {
+  localStorage.setItem('kalan.tourSeen', '1');
+});
 
 afterEach(async () => {
   cleanup();

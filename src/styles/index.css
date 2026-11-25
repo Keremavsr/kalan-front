@@ -157,6 +157,26 @@
     }
   }
 
+  /* Bars drawn in SVG grow from their own box, not from the drawing's origin. */
+  svg .bar-x,
+  svg .bar-y,
+  svg .tour-drop {
+    transform-box: fill-box;
+  }
+
+  /* Tour, first step: the statement settles once into place from a little higher. */
+  .tour-drop {
+    translate: 0 0;
+    opacity: 1;
+    transition:
+      translate var(--duration-3) var(--ease-out),
+      opacity var(--duration-2) var(--ease-out);
+    @starting-style {
+      translate: 0 calc(var(--enter-offset) * -3);
+      opacity: 0;
+    }
+  }
+
   /* Indeterminate progress: constant motion, so linear */
   .indeterminate {
     animation: slide 1.4s linear infinite;
