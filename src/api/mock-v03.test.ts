@@ -110,7 +110,10 @@ describe('mock: categories, imports, manual rows, fixed costs', () => {
   it('lists transactions by month and source', async () => {
     const api = fast();
     const sep = await api.listTransactions({ month: '2026-09' });
-    expect(sep.items.every((t) => t.date.startsWith('2026-09'))).toBe(true);
+    // Statement month (contract): st_09 ends 25 Sep, so its rows dated 26-31 Aug are in 2026-09.
+    const st09 = await api.getStatement('st_09');
+    expect(sep.items.map((t) => t.id).sort()).toEqual(st09.transactions.map((t) => t.id).sort());
+    expect(sep.items.some((t) => t.date.startsWith('2026-08'))).toBe(true);
     expect(sep.items.map((t) => t.date)).toEqual([...sep.items.map((t) => t.date)].sort());
     expect((await api.listTransactions({ source: 'manual' })).items).toHaveLength(0);
   });

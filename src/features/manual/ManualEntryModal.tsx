@@ -3,6 +3,7 @@ import { useTranslation } from 'react-i18next';
 import { useCreateTransaction, useSettings } from '../../api/queries';
 import { ApiError } from '../../api/types';
 import { Button, Modal, Notice, SelectField, TextField, useMoneyFormatter, useToast } from '../../components/ui';
+import { DateField } from '../../components/ui/DateField';
 import { parseAmountToMinor } from '../../lib/format';
 import { useIntlLocale } from '../../lib/useLocale';
 
@@ -105,12 +106,16 @@ export function ManualEntryModal({ open, onClose }: { open: boolean; onClose: ()
           fieldClassName="col-span-2"
           autoComplete="off"
         />
-        <TextField
+        {/* Day, month name and year in the app language; the native date input would follow the OS locale. */}
+        <DateField
           label={t('manual.date')}
-          type="date"
+          locale={locale}
           value={date}
-          onChange={(e) => setDate(e.target.value)}
+          onChange={setDate}
+          years={[new Date().getFullYear() - 2, new Date().getFullYear() + 1]}
+          parts={{ day: t('manual.day'), month: t('manual.month'), year: t('manual.year') }}
           error={errors.date}
+          className="col-span-2"
         />
         <TextField
           label={t('manual.amount')}

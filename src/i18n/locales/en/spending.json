@@ -32,5 +32,53 @@
   "noStatementsTitle": "No statements yet",
   "noStatements": "Upload your first statement and your spending appears here, split into categories.",
   "goUpload": "Upload a statement",
-  "highlighted": "Cited in the commentary"
+  "highlighted": "Cited in the commentary",
+  "categoryHint": "Click a category to change it for that merchant.",
+  "transactionsFailed": "I could not load this month’s transactions.",
+  "filterSource": "Source",
+  "source": {
+    "statement": "Statement",
+    "manual": "Added by hand",
+    "import": "Imported",
+    "importedRow": "Imported"
+  },
+  "changeCategoryFor": "Change category: {{merchant}}, now {{category}}",
+  "categoryNames": {
+    "clothing": "Clothing",
+    "entertainment": "Entertainment",
+    "taxes": "Taxes",
+    "cash": "Cash",
+    "transfers": "Payments and transfers"
+  },
+  "rule": {
+    "title": "Change category",
+    "merchant": "Merchant",
+    "current": "Current category",
+    "newCategory": "New category",
+    "explain": "I keep this as a rule: every transaction named {{merchant}}, in stored statements and imports too, moves to this category. Statements you upload later get the same category. Purchases you added by hand do not change.",
+    "apply": "Apply to all of this merchant",
+    "saved_one": "{{merchant}} is now {{category}}. {{count}} transaction changed.",
+    "saved_other": "{{merchant}} is now {{category}}. {{count}} transactions changed.",
+    "savedNone": "Rule saved: {{merchant}} is now {{category}}. No stored transaction changed.",
+    "failed": "I could not save the rule. Try again in a moment.",
+    "invalidPattern": "This merchant name has no letters or digits, so I cannot make a rule for it.",
+    "invalidCategory": "This category is not on the allowed list. Pick another one.",
+    "listFailed": "I could not load the category list.",
+    "duplicateTitle": "This merchant already has a rule",
+    "duplicate": "The old rule puts {{pattern}} in {{category}}. I can replace it with the new one.",
+    "duplicateUnknown": "A rule with the same name exists. I can replace it with the new one.",
+    "replace": "Replace the old rule"
+  },
+  "rules": {
+    "title": "Category rules",
+    "intro": "The rules I made when you changed a transaction’s category. New statements follow them too.",
+    "failed": "I could not load the category rules.",
+    "empty": "No rules yet. Click a category in the transactions table and the first rule shows up here.",
+    "sets": "Category: {{category}}",
+    "delete": "Delete",
+    "deleteFor": "Delete rule: {{pattern}}",
+    "deleted": "I deleted the {{pattern}} rule. The categories it set stay as they are.",
+    "gone": "This rule was already deleted.",
+    "deleteFailed": "I could not delete the rule. Try again in a moment."
+  }
 }

@@ -15,5 +15,8 @@
   "amountInvalid": "Tutarı rakamla yaz, örnek 1.234,56.",
   "submit": "Ekle",
   "added": "Harcama eklendi.",
-  "addedPlan": "{{count}} taksitli harcama eklendi ve taksitlere işlendi."
+  "addedPlan": "{{count}} taksitli harcama eklendi ve taksitlere işlendi.",
+  "day": "Gün",
+  "month": "Ay",
+  "year": "Yıl"
 }

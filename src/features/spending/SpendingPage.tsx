@@ -1,11 +1,11 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
-import { ChevronLeft, ChevronRight } from 'lucide-react';
+import { ChevronLeft, ChevronRight, PencilLine } from 'lucide-react';
 import { useQueries } from '@tanstack/react-query';
 import { Link, Navigate, useNavigate, useParams, useSearchParams } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { useApi } from '../../api/context';
-import { keys, useMonthlySummary, useStatements } from '../../api/queries';
-import { TRANSACTION_KINDS, type MonthlySummary, type Statement, type Transaction } from '../../api/types';
+import { keys, useMonthlySummary, useStatements, useTransactions } from '../../api/queries';
+import { TRANSACTION_KINDS, type MonthlySummary, type Statement, type Transaction, type TransactionSource } from '../../api/types';
 import {
   Button,
   Card,
@@ -35,6 +35,12 @@ import { useIntlLocale } from '../../lib/useLocale';
 import { cx } from '../../lib/cx';
 import { seriesAt, type Series } from '../../lib/series';
 import { Scribble } from '../../components/pencil';
+import { SectionState } from '../../components/ui/SectionState';
+import { CategoryRuleModal } from './CategoryRuleModal';
+import { CategoryRules } from './CategoryRules';
+import { useCategoryName } from './categoryName';
+
+const SOURCES: TransactionSource[] = ['statement', 'manual', 'import'];
 
 export function SpendingPage() {
   const { t } = useTranslation();
@@ -122,12 +128,12 @@ function MonthView({ month, months }: { month: string; months: string[] }) {
           </div>
         }
       >
-        {summary.data && summary.data.statement_ids.length ? <MonthLead summary={summary.data} /> : null}
+        {summary.data && hasData(summary.data) ? <MonthLead summary={summary.data} /> : null}
       </PageHeader>
 
       <QueryState query={summary}>
         {() =>
-          summary.data && summary.data.statement_ids.length ? (
+          summary.data && hasData(summary.data) ? (
             <MonthBody summary={summary.data} />
           ) : (
             <EmptyState mark="empty" title={t('spending.emptyTitle')}>
@@ -138,6 +144,11 @@ function MonthView({ month, months }: { month: string; months: string[] }) {
       </QueryState>
     </>
   );
+}
+
+/** A month counts when a statement ends in it or manual and imported rows fall in it. */
+function hasData(summary: MonthlySummary) {
+  return summary.statement_ids.length > 0 || summary.by_category.length > 0 || summary.total_credit > 0;
 }
 
 function MonthLead({ summary }: { summary: MonthlySummary }) {
@@ -169,18 +180,23 @@ function MonthLead({ summary }: { summary: MonthlySummary }) {
 }
 
 function MonthBody({ summary }: { summary: MonthlySummary }) {
+  const { t } = useTranslation();
   const api = useApi();
   const statementQueries = useQueries({
     queries: summary.statement_ids.map((id) => ({ queryKey: keys.statement(id), queryFn: () => api.getStatement(id) })),
   });
   const loaded = statementQueries.map((q) => q.data).filter((s): s is Statement => Boolean(s));
+  // Every row of the statement month, whatever its source: statement rows by their statement's period end,
+  // manual and imported rows by their own date (GET /transactions?month=).
+  const transactions = useTransactions({ month: summary.month });
 
   return (
     <div className="grid grid-cols-1 gap-8">
       <CategoryCard summary={summary} statements={loaded} />
-      {statementQueries.some((q) => q.isPending) ? null : (
-        <TransactionsTable transactions={loaded.flatMap((s) => s.transactions)} />
-      )}
+      <SectionState query={transactions} failed={t('spending.transactionsFailed')}>
+        {() => <TransactionsTable transactions={transactions.data?.items ?? []} />}
+      </SectionState>
+      <CategoryRules />
     </div>
   );
 }
@@ -195,7 +211,7 @@ function CategoryCard({ summary, statements }: { summary: MonthlySummary; statem
   const c = summary.currency;
   const sorted = [...summary.by_category].sort((a, b) => b.amount - a.amount);
   const seriesOf = new Map<string, Series>(sorted.map((cat, i) => [cat.category, i < TOP ? seriesAt(i) : 'gri']));
-  const name = (category: string) => t(`category.${category}`, { defaultValue: category });
+  const name = useCategoryName();
   const rest = sorted.slice(TOP);
   const parts: BarPart[] = sorted.slice(0, TOP).map((cat) => ({
     key: cat.category,
@@ -256,7 +272,17 @@ function CategoryCard({ summary, statements }: { summary: MonthlySummary; statem
             <KeyValue
               key={st.id}
               items={[
-                { k: 'D', label: t('spending.period'), value: `${formatDate(st.period_start, locale)} – ${formatDate(st.period_end, locale)}` },
+                {
+                  k: 'D',
+                  label: t('spending.period'),
+                  // Each date stays on one line; a narrow column breaks only after the dash.
+                  value: (
+                    <>
+                      <span className="whitespace-nowrap">{formatDate(st.period_start, locale)} –</span>{' '}
+                      <span className="whitespace-nowrap">{formatDate(st.period_end, locale)}</span>
+                    </>
+                  ),
+                },
                 { k: 'S', label: t('spending.due'), value: formatDate(st.due_date, locale) },
                 { k: 'K', label: t('statements.card'), value: `•••• ${st.card_last4}` },
               ]}
@@ -271,11 +297,14 @@ function CategoryCard({ summary, statements }: { summary: MonthlySummary; statem
 function TransactionsTable({ transactions }: { transactions: Transaction[] }) {
   const { t } = useTranslation();
   const locale = useIntlLocale();
+  const name = useCategoryName();
   const [params, setParams] = useSearchParams();
   const highlight = params.get('tx');
   const [query, setQuery] = useState('');
   const [category, setCategory] = useState('');
   const [kind, setKind] = useState('');
+  const [source, setSource] = useState('');
+  const [editing, setEditing] = useState<Transaction | null>(null);
   const highlightRef = useRef<HTMLTableRowElement>(null);
 
   useEffect(() => {
@@ -284,6 +313,7 @@ function TransactionsTable({ transactions }: { transactions: Transaction[] }) {
 
   const categories = [...new Set(transactions.map((tx) => tx.category).filter((c): c is string => Boolean(c)))].sort();
   const kinds = TRANSACTION_KINDS.filter((k) => transactions.some((tx) => tx.kind === k));
+  const sources = SOURCES.filter((k) => transactions.some((tx) => tx.source === k));
 
   const needle = foldForSearch(query.trim(), locale);
   const shown = transactions.filter(
@@ -292,19 +322,21 @@ function TransactionsTable({ transactions }: { transactions: Transaction[] }) {
         foldForSearch(tx.description, locale).includes(needle) ||
         foldForSearch(tx.merchant ?? '', locale).includes(needle)) &&
       (!category || tx.category === category) &&
-      (!kind || tx.kind === kind),
+      (!kind || tx.kind === kind) &&
+      (!source || tx.source === source),
   );
-  const filtered = Boolean(needle || category || kind);
+  const filtered = Boolean(needle || category || kind || source);
 
   function clear() {
     setQuery('');
     setCategory('');
     setKind('');
+    setSource('');
     if (highlight) setParams({}, { replace: true });
   }
 
   return (
-    <Card title={t('spending.transactions')} flush>
+    <Card title={t('spending.transactions')} description={t('spending.categoryHint')} flush>
       <div className="flex flex-wrap items-end gap-3 px-6 pt-5 pb-4">
         <TextField
           label={t('spending.search')}
@@ -312,24 +344,31 @@ function TransactionsTable({ transactions }: { transactions: Transaction[] }) {
           placeholder={t('spending.searchPlaceholder')}
           value={query}
           onChange={(e) => setQuery(e.target.value)}
-          fieldClassName="w-64"
+          fieldClassName="w-60"
         />
         <SelectField
           label={t('spending.filterCategory')}
           value={category}
           onChange={(e) => setCategory(e.target.value)}
-          fieldClassName="w-48"
-          options={[
-            { value: '', label: t('spending.all') },
-            ...categories.map((c) => ({ value: c, label: t(`category.${c}`, { defaultValue: c }) })),
-          ]}
+          fieldClassName="w-44"
+          options={[{ value: '', label: t('spending.all') }, ...categories.map((c) => ({ value: c, label: name(c) }))]}
         />
         <SelectField
           label={t('spending.filterKind')}
           value={kind}
           onChange={(e) => setKind(e.target.value)}
-          fieldClassName="w-44"
+          fieldClassName="w-40"
           options={[{ value: '', label: t('spending.all') }, ...kinds.map((k) => ({ value: k, label: t(`kind.${k}`) }))]}
+        />
+        <SelectField
+          label={t('spending.filterSource')}
+          value={source}
+          onChange={(e) => setSource(e.target.value)}
+          fieldClassName="w-40"
+          options={[
+            { value: '', label: t('spending.all') },
+            ...sources.map((k) => ({ value: k, label: t(`spending.source.${k}`) })),
+          ]}
         />
         <p className="ml-auto pb-3 text-meta text-ink" aria-live="polite">
           {t('spending.showing', { shown: shown.length, total: transactions.length })}
@@ -354,12 +393,18 @@ function TransactionsTable({ transactions }: { transactions: Transaction[] }) {
           <TBody>
             {shown.map((tx) => {
               const isHighlighted = tx.id === highlight;
+              const notes = [
+                tx.installment ? t('common.left', { count: tx.installment.remaining_count }) : null,
+                tx.source === 'manual' ? t('common.manual') : null,
+                tx.source === 'import' ? t('spending.source.importedRow') : null,
+                isHighlighted ? t('spending.highlighted') : null,
+              ].filter(Boolean);
               return (
                 <Tr
                   key={tx.id}
                   ref={isHighlighted ? highlightRef : undefined}
                   className={cx(
-                    'transition-colors duration-(--duration-fast)',
+                    'group transition-colors duration-(--duration-fast)',
                     isHighlighted ? 'bg-ground-alt' : 'hover:bg-ground',
                   )}
                   aria-current={isHighlighted ? 'true' : undefined}
@@ -376,27 +421,31 @@ function TransactionsTable({ transactions }: { transactions: Transaction[] }) {
                     ) : (
                       <span className="block font-semibold">{tx.description}</span>
                     )}
-                    {tx.installment || tx.source === 'manual' || isHighlighted ? (
-                      <span className="block text-meta text-muted">
-                        {[
-                          tx.installment ? t('common.left', { count: tx.installment.remaining_count }) : null,
-                          tx.source === 'manual' ? t('common.manual') : null,
-                          isHighlighted ? t('spending.highlighted') : null,
-                        ]
-                          .filter(Boolean)
-                          .join(' · ')}
-                      </span>
-                    ) : null}
+                    {notes.length ? <span className="block text-meta text-muted">{notes.join(' · ')}</span> : null}
                   </Td>
                   <Td className="text-muted">{t(`kind.${tx.kind}`)}</Td>
                   <Td className="text-muted">
-                    {tx.category ? t(`category.${tx.category}`, { defaultValue: tx.category }) : t('category.none')}
+                    {/* Rules match merchant names on statement and imported rows; a manual row, or a row with no
+                        merchant (carried balance, payment, fee lines), has nothing a rule could follow. */}
+                    {tx.source === 'manual' || !tx.merchant ? (
+                      name(tx.category)
+                    ) : (
+                      <button
+                        type="button"
+                        className={cx(
+                          'inline-flex items-center gap-1.5 text-left underline decoration-line decoration-1 underline-offset-4',
+                          'transition-colors duration-(--duration-1) ease-(--ease-out) hover:text-ink hover:decoration-ink focus-visible:text-ink',
+                        )}
+                        onClick={() => setEditing(tx)}
+                        aria-label={t('spending.changeCategoryFor', { category: name(tx.category), merchant: tx.merchant ?? tx.description })}
+                      >
+                        <span>{name(tx.category)}</span>
+                        <PencilLine aria-hidden className="size-3.5 shrink-0 opacity-0 transition-opacity duration-(--duration-1) ease-(--ease-out) group-focus-within:opacity-100 group-hover:opacity-100" />
+                      </button>
+                    )}
                   </Td>
                   <Td numeric>
-                    <Money
-                      minor={tx.direction === 'credit' ? -tx.amount : tx.amount}
-                      currency={tx.currency}
-                    />
+                    <Money minor={tx.direction === 'credit' ? -tx.amount : tx.amount} currency={tx.currency} />
                   </Td>
                 </Tr>
               );
@@ -406,6 +455,7 @@ function TransactionsTable({ transactions }: { transactions: Transaction[] }) {
       ) : (
         <p className="px-6 pt-2 pb-6 text-body text-ink">{t('spending.noResults')}</p>
       )}
+      <CategoryRuleModal tx={editing} onClose={() => setEditing(null)} />
     </Card>
   );
 }

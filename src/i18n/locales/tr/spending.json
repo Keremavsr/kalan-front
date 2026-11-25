@@ -32,5 +32,53 @@
   "noStatementsTitle": "Henüz ekstre yok",
   "noStatements": "İlk ekstreni yüklediğinde harcamaların kategorilere ayrılmış olarak burada görünür.",
   "goUpload": "Ekstre yükle",
-  "highlighted": "Yorumda anılan işlem"
+  "highlighted": "Yorumda anılan işlem",
+  "categoryHint": "Bir kategorinin üstüne tıklayınca o işyerinin kategorisini değiştirebilirsin.",
+  "transactionsFailed": "Bu ayın işlemlerini getiremedim.",
+  "filterSource": "Kaynak",
+  "source": {
+    "statement": "Ekstre",
+    "manual": "Elle girilen",
+    "import": "İçe aktarılan",
+    "importedRow": "İçe aktarıldı"
+  },
+  "changeCategoryFor": "Kategoriyi değiştir: {{merchant}}, şimdi {{category}}",
+  "categoryNames": {
+    "clothing": "Giyim",
+    "entertainment": "Eğlence",
+    "taxes": "Vergi",
+    "cash": "Nakit",
+    "transfers": "Ödeme ve transfer"
+  },
+  "rule": {
+    "title": "Kategoriyi değiştir",
+    "merchant": "İşyeri",
+    "current": "Şimdiki kategori",
+    "newCategory": "Yeni kategori",
+    "explain": "Bunu bir kural olarak saklıyorum: adı {{merchant}} olan bütün işlemler, kayıtlı ekstrelerde ve içe aktarmalarda da, bu kategoriye geçer. Sonra yükleyeceğin ekstrelerde de aynı kategoriyi alır. Elle girdiğin harcamalar değişmez.",
+    "apply": "Bu işyerinin hepsine uygula",
+    "saved_one": "{{merchant}} artık {{category}}. {{count}} işlem değişti.",
+    "saved_other": "{{merchant}} artık {{category}}. {{count}} işlem değişti.",
+    "savedNone": "Kural kaydedildi: {{merchant}} artık {{category}}. Kayıtlı işlemlerden değişen olmadı.",
+    "failed": "Kuralı kaydedemedim. Birazdan yeniden dene.",
+    "invalidPattern": "Bu işyeri adında harf ya da rakam yok, ona kural kuramıyorum.",
+    "invalidCategory": "Bu kategori izin verilen listede yok. Listeden başka birini seç.",
+    "listFailed": "Kategori listesini getiremedim.",
+    "duplicateTitle": "Bu işyeri için zaten bir kural var",
+    "duplicate": "Eski kural {{pattern}} işyerini {{category}} yapıyor. Yenisiyle değiştirebilirim.",
+    "duplicateUnknown": "Aynı adla kayıtlı bir kural var. Yenisiyle değiştirebilirim.",
+    "replace": "Eski kuralı değiştir"
+  },
+  "rules": {
+    "title": "Kategori kuralları",
+    "intro": "Bir işlemin kategorisini değiştirdiğinde kurduğum kurallar. Yeni ekstrelere de uygulanır.",
+    "failed": "Kategori kurallarını getiremedim.",
+    "empty": "Henüz kural yok. İşlemler tablosunda bir kategorinin üstüne tıkladığında ilk kural burada görünür.",
+    "sets": "Kategori: {{category}}",
+    "delete": "Sil",
+    "deleteFor": "Kuralı sil: {{pattern}}",
+    "deleted": "{{pattern}} kuralını sildim. Koyduğu kategoriler yerinde kaldı.",
+    "gone": "Bu kural zaten silinmiş.",
+    "deleteFailed": "Kuralı silemedim. Birazdan yeniden dene."
+  }
 }
