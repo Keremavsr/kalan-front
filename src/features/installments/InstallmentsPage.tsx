@@ -1,16 +1,17 @@
-import { useState } from 'react';
+import { useState, type ReactNode } from 'react';
 import { Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
-import { useSchedule, useSettings } from '../../api/queries';
-import type { Schedule, SchedulePlan } from '../../api/types';
+import { useEarlyPayoffOverview, useSchedule, useSettings, useSimulateInstallment } from '../../api/queries';
+import type { ClosedEarly, Schedule, SchedulePlan, Simulation, SimulationRequest } from '../../api/types';
+import { PencilLink } from '../../components/pencil';
 import {
   Card,
   EmptyState,
-  KeyValue,
   Money,
   PageHeader,
   QueryState,
   Rich,
+  Section,
   Segmented,
   StackedBar,
   Swatch,
@@ -28,9 +29,17 @@ import { formatMonth, formatMonthName } from '../../lib/format';
 import { SERIES_CLASS } from '../../lib/series';
 import { useIntlLocale } from '../../lib/useLocale';
 import { cx } from '../../lib/cx';
+import { TextButton } from '../../components/ui/TextButton';
+import { EarlyPayoffDialog } from './EarlyPayoff';
 import { EXTRA_SERIES, extraOf, readSchedule, seriesFor } from './schedule';
+import { ShareCardBody } from './ShareCard';
+import { SimulateForm } from './Simulate';
+import { WhichCardBody } from './WhichCard';
 
 type Range = '6' | '12';
+
+/** The hatched, framed slice of a what-if purchase. The pattern is drawn in ink from the token. */
+const SIM_HATCH = { backgroundImage: 'repeating-linear-gradient(135deg, var(--color-ink) 0 1px, transparent 1px 6px)' };
 
 export function InstallmentsPage() {
   const { t } = useTranslation();
@@ -39,6 +48,9 @@ export function InstallmentsPage() {
   const effective: Range = range ?? (settings.data?.months_ahead === 6 ? '6' : '12');
   const schedule = useSchedule(Number(effective));
   const hasPlans = Boolean(schedule.data?.plans.length);
+  const [simBody, setSimBody] = useState<SimulationRequest | undefined>(undefined);
+  const simRequest = simBody ? { ...simBody, months: Number(effective) } : undefined;
+  const sim = useSimulateInstallment(simRequest);
 
   return (
     <>
@@ -63,13 +75,31 @@ export function InstallmentsPage() {
         {() =>
           schedule.data && hasPlans ? (
             <div className="grid grid-cols-1 gap-8">
-              <CommitmentChart schedule={schedule.data} />
+              <CommitmentChart schedule={schedule.data} sim={simBody ? sim.data : undefined}>
+                <div className="mt-8 border-t border-ink pt-6">
+                  <h3 className="mb-2 text-title font-bold text-ink">{t('installments.sim.title')}</h3>
+                  <SimulateForm
+                    schedule={schedule.data}
+                    months={Number(effective)}
+                    body={simBody}
+                    query={sim}
+                    onSubmit={setSimBody}
+                    onClear={() => setSimBody(undefined)}
+                  />
+                </div>
+              </CommitmentChart>
               <PlanTable schedule={schedule.data} />
               {schedule.data.plans
                 .filter((p) => p.kind === 'cash_advance' && p.breakdown)
                 .map((p) => (
-                  <CashAdvanceParts key={p.plan_id} plan={p} currency={schedule.data.currency} />
+                  <CashAdvanceParts key={p.plan_id} plan={p} schedule={schedule.data} />
                 ))}
+              <Section id="which" title={t('installments.which.title')} description={t('installments.which.description')}>
+                <WhichCardBody />
+              </Section>
+              <Section id="share" title={t('installments.share.title')} description={t('installments.share.description')}>
+                <ShareCardBody />
+              </Section>
             </div>
           ) : (
             <EmptyState
@@ -127,30 +157,45 @@ function MonthLabel({ month, showYear }: { month: string; showYear: boolean }) {
   );
 }
 
-/** Monthly columns in the plan pigments; the amount sits on top of each column like the bar labels of the site. */
-function CommitmentChart({ schedule }: { schedule: Schedule }) {
+/**
+ * Monthly columns in the plan pigments; the amount sits on top of each column like the bar labels of the site.
+ * A what-if purchase is drawn on top of each month as a framed, hatched slice, and the label shows the new total
+ * the back end returned (`with`).
+ */
+function CommitmentChart({ schedule, sim, children }: { schedule: Schedule; sim: Simulation | undefined; children?: ReactNode }) {
   const { t } = useTranslation();
-  const max = Math.max(1, ...schedule.months.map((m) => m.total));
+  const fmt = useMoneyFormatter();
+  const simByMonth = new Map((sim?.months ?? []).map((m) => [m.month, m]));
+  const columns = schedule.months.map((m) => {
+    const s = simByMonth.get(m.month);
+    return { ...m, purchase: s?.purchase ?? 0, shown: s ? s.with : m.total };
+  });
+  const max = Math.max(1, ...columns.map((m) => m.shown));
   const planIndex = new Map(schedule.plans.map((p, i) => [p.plan_id, i]));
   const planById = new Map(schedule.plans.map((p) => [p.plan_id, p]));
   const hasTax = schedule.plans.some((p) => p.breakdown);
+  const hasSim = columns.some((m) => m.purchase > 0);
 
   return (
     <Card title={t('installments.chartTitle')}>
       <figure>
-        <div role="img" aria-label={t('installments.chartLabel')} className="flex h-64 items-end gap-2 border-b border-ink">
-          {schedule.months.map((m) => (
+        <div
+          role="img"
+          aria-label={hasSim ? t('installments.sim.chartLabel') : t('installments.chartLabel')}
+          className="flex h-64 items-end gap-2 border-b border-ink"
+        >
+          {columns.map((m) => (
             <div key={m.month} className="flex h-full min-w-0 flex-1 flex-col items-center justify-end">
               <span className="mb-1.5 text-meta font-semibold whitespace-nowrap text-ink">
-                {m.total ? <Money minor={m.total} currency={schedule.currency} bare /> : '–'}
+                {m.shown ? <Money minor={m.shown} currency={schedule.currency} bare /> : '–'}
               </span>
               <div
-                className="bar-y flex w-full max-w-14 flex-col-reverse overflow-hidden rounded-t-bar"
-                style={{ height: `${(m.total / max) * 80}%` }}
+                className="bar-y flex w-full max-w-14 flex-col-reverse overflow-hidden rounded-t-bar transition-[height] duration-(--duration-2) ease-(--ease-out)"
+                style={{ height: `${(m.shown / max) * 80}%` }}
               >
                 {m.items.map((item, i) => {
                   const plan = planById.get(item.plan_id);
-                  const series = plan ? seriesFor(plan, planIndex.get(item.plan_id) ?? 0) : 'prusya';
+                  const series = plan ? seriesFor(plan, planIndex.get(item.plan_id) ?? 0, schedule.plans) : 'prusya';
                   const extra = item.breakdown ? extraOf(item.breakdown) : 0;
                   return (
                     <div
@@ -163,6 +208,14 @@ function CommitmentChart({ schedule }: { schedule: Schedule }) {
                     </div>
                   );
                 })}
+                {m.purchase ? (
+                  <div
+                    data-sim-slice
+                    title={fmt(m.purchase, schedule.currency)}
+                    className={cx('enter border-[1.5px] border-ink bg-paper', m.items.length > 0 && 'border-b-paper')}
+                    style={{ ...SIM_HATCH, flexGrow: m.purchase, flexBasis: 0 }}
+                  />
+                ) : null}
               </div>
             </div>
           ))}
@@ -178,7 +231,7 @@ function CommitmentChart({ schedule }: { schedule: Schedule }) {
           <span className="sr-only">{t('installments.legend')}</span>
           {schedule.plans.map((p, i) => (
             <span key={p.plan_id} className="inline-flex items-center gap-2">
-              <Swatch series={seriesFor(p, i)} />
+              <Swatch series={seriesFor(p, i, schedule.plans)} />
               {p.description}
             </span>
           ))}
@@ -188,8 +241,15 @@ function CommitmentChart({ schedule }: { schedule: Schedule }) {
               {t('installments.legendTax')}
             </span>
           ) : null}
+          {hasSim ? (
+            <span className="inline-flex items-center gap-2 font-semibold">
+              <span aria-hidden className="inline-block size-3 shrink-0 rounded-swatch border border-ink bg-paper" style={SIM_HATCH} />
+              {t('installments.sim.legend')}
+            </span>
+          ) : null}
         </figcaption>
       </figure>
+      {children}
     </Card>
   );
 }
@@ -199,9 +259,15 @@ function PlanTable({ schedule }: { schedule: Schedule }) {
   const { t } = useTranslation();
   const locale = useIntlLocale();
   const fmt = useMoneyFormatter();
+  const overview = useEarlyPayoffOverview();
+  const [payoffPlan, setPayoffPlan] = useState<SchedulePlan | null>(null);
   const c = schedule.currency;
   const cells = new Map<string, { amount: number; index: number; count: number }>();
   for (const m of schedule.months) for (const it of m.items) cells.set(`${it.plan_id}|${m.month}`, it);
+  const closed = overview.data?.closed_early ?? [];
+  const closedIds = new Set(closed.map((x) => x.plan_id));
+  const planIds = new Set(schedule.plans.map((p) => p.plan_id));
+  const closedElsewhere = closed.filter((x) => !planIds.has(x.plan_id));
 
   return (
     <Card title={t('installments.planTitle')} description={t('installments.planCaption')} flush>
@@ -223,7 +289,7 @@ function PlanTable({ schedule }: { schedule: Schedule }) {
         </THead>
         <TBody>
           {schedule.plans.map((plan, pi) => {
-            const series = seriesFor(plan, pi);
+            const series = seriesFor(plan, pi, schedule.plans);
             return (
               <Tr key={plan.plan_id}>
                 <Th scope="row" sticky className="w-64 min-w-64 font-normal">
@@ -237,6 +303,17 @@ function PlanTable({ schedule }: { schedule: Schedule }) {
                       <span className="block text-meta text-muted">
                         <Rich i18nKey="installments.remainingTotal" values={{ amount: fmt(plan.total_remaining, c) }} />
                       </span>
+                      {closedIds.has(plan.plan_id) ? (
+                        <span className="block text-meta font-semibold text-ink">{t('installments.payoff.closed')}</span>
+                      ) : null}
+                      <TextButton
+                        className="mt-2 text-meta"
+                        seed={plan.plan_id}
+                        aria-label={t('installments.payoff.openLabel', { plan: plan.description })}
+                        onClick={() => setPayoffPlan(plan)}
+                      >
+                        {t('installments.payoff.open')}
+                      </TextButton>
                     </span>
                   </span>
                 </Th>
@@ -277,56 +354,126 @@ function PlanTable({ schedule }: { schedule: Schedule }) {
           </Tr>
         </TFoot>
       </Table>
+      {closedElsewhere.length ? <ClosedEarlyList items={closedElsewhere} /> : null}
+      <EarlyPayoffDialog plan={payoffPlan} months={schedule.months.map((m) => m.month)} onClose={() => setPayoffPlan(null)} />
     </Card>
   );
 }
 
-function CashAdvanceParts({ plan, currency }: { plan: SchedulePlan; currency: string }) {
+/** Plans a statement already shows as closed before their last installment. */
+function ClosedEarlyList({ items }: { items: ClosedEarly[] }) {
+  const { t } = useTranslation();
+  const locale = useIntlLocale();
+  return (
+    <div className="mx-6 mt-2 mb-6 border-t border-ink pt-4">
+      <h3 className="text-meta font-semibold text-ink">{t('installments.payoff.closedTitle')}</h3>
+      <ul className="mt-2">
+        {items.map((x) => (
+          <li key={`${x.plan_id}-${x.transaction_id}`} className="flex flex-wrap items-baseline gap-x-4 border-b border-line py-2 text-table text-ink">
+            <span>
+              {x.index && x.total_count
+                ? t('installments.payoff.closedRow', { month: formatMonth(x.month, locale), index: x.index, count: x.total_count })
+                : t('installments.payoff.closedRowNoIndex', { month: formatMonth(x.month, locale) })}
+            </span>
+            <PencilLink to={`/spending/${x.month}?tx=${encodeURIComponent(x.transaction_id)}`} className="text-meta font-semibold">
+              {t('installments.payoff.closedLink')}
+            </PencilLink>
+          </li>
+        ))}
+      </ul>
+    </div>
+  );
+}
+
+/**
+ * What a cash advance still costs. The plan's `breakdown` splits the remaining total (not one month);
+ * each schedule item carries its own month's split. Both come from the back end as they are.
+ */
+function CashAdvanceParts({ plan, schedule }: { plan: SchedulePlan; schedule: Schedule }) {
   const { t } = useTranslation();
   const fmt = useMoneyFormatter();
   const locale = useIntlLocale();
+  const c = schedule.currency;
   const b = plan.breakdown!;
-  const extra = extraOf(b);
+  const next = schedule.months
+    .map((m) => ({ month: m.month, item: m.items.find((it) => it.plan_id === plan.plan_id) }))
+    .find((x) => x.item?.breakdown);
+  const nb = next?.item?.breakdown ?? null;
   const pct = (part: number) =>
-    new Intl.NumberFormat(locale, { style: 'percent', maximumFractionDigits: 1 }).format(part / plan.amount_each);
+    new Intl.NumberFormat(locale, { style: 'percent', maximumFractionDigits: 1 }).format(plan.total_remaining ? part / plan.total_remaining : 0);
   const parts = [
-    { key: 'principal', k: 'A', label: t('installments.partPrincipal'), long: null, amount: b.principal, series: seriesFor(plan, 0) },
-    { key: 'interest', k: 'F', label: t('installments.partInterest'), long: null, amount: b.interest, series: EXTRA_SERIES },
-    { key: 'bsmv', k: 'B', label: t('installments.partBsmv'), long: t('installments.partBsmvLong'), amount: b.bsmv, series: EXTRA_SERIES },
-    { key: 'kkdf', k: 'K', label: t('installments.partKkdf'), long: t('installments.partKkdfLong'), amount: b.kkdf, series: EXTRA_SERIES },
+    { key: 'principal', label: t('installments.partPrincipal'), long: null, amount: b.principal, month: nb?.principal, series: seriesFor(plan, 0) },
+    { key: 'interest', label: t('installments.partInterest'), long: null, amount: b.interest, month: nb?.interest, series: EXTRA_SERIES },
+    { key: 'bsmv', label: t('installments.partBsmv'), long: t('installments.partBsmvLong'), amount: b.bsmv, month: nb?.bsmv, series: EXTRA_SERIES },
+    { key: 'kkdf', label: t('installments.partKkdf'), long: t('installments.partKkdfLong'), amount: b.kkdf, month: nb?.kkdf, series: EXTRA_SERIES },
   ];
 
   return (
-    <Card title={t('installments.cashTitle')} description={t('installments.cashCaption', { plan: plan.description })}>
+    <Card
+      title={t('installments.cashTitle')}
+      description={t('installments.cashCaption', { plan: plan.description, count: plan.remaining_count })}
+    >
       <p className="max-w-measure text-body text-ink">
         <Rich
           i18nKey="installments.cashLead"
-          values={{ extra: fmt(extra, currency), totalExtra: fmt(extra * plan.remaining_count, currency), count: plan.remaining_count }}
+          values={{ count: plan.remaining_count, total: fmt(plan.total_remaining, c), principal: fmt(b.principal, c) }}
         />
       </p>
-      <div className="mt-6 grid gap-8 lg:grid-cols-[minmax(0,3fr)_minmax(0,2fr)] lg:items-start">
+      <div className="mt-6 grid gap-8 lg:grid-cols-[minmax(0,1fr)_minmax(0,1fr)] lg:items-start">
         <StackedBar
-          label={parts.map((p) => `${p.label} ${fmt(p.amount, currency)}`).join(', ')}
+          label={parts.map((p) => `${p.label} ${fmt(p.amount, c)}`).join(', ')}
           parts={parts.map((p) => ({ key: p.key, value: p.amount, series: p.series, label: pct(p.amount) }))}
           aside={
             <>
-              {t('installments.partTotal')}: <Money minor={plan.amount_each} currency={currency} className="font-bold" />
+              {t('installments.colRemaining')}: <Money minor={plan.total_remaining} currency={c} className="font-bold" />
             </>
           }
           caption={parts.map((p) => `${p.label} ${pct(p.amount)}`).join(', ')}
         />
-        <KeyValue
-          items={parts.map((p) => ({
-            k: p.k,
-            label: (
-              <>
-                <span className="block">{p.label}</span>
-                {p.long ?<span className="block text-muted">{p.long}</span> : null}
-              </>
-            ),
-            value: <Money minor={p.amount} currency={currency} />,
-          }))}
-        />
+        <Table caption={t('installments.cashTitle')} captionHidden className="-mx-6" scroll={false}>
+          <THead>
+            <Tr>
+              <Th>{t('installments.colPart')}</Th>
+              {next && nb ? <Th numeric>{t('installments.colMonthPart', { month: formatMonth(next.month, locale) })}</Th> : null}
+              <Th numeric className="lg:pr-0">
+                {t('installments.colRemaining')}
+              </Th>
+            </Tr>
+          </THead>
+          <TBody>
+            {parts.map((p) => (
+              <Tr key={p.key}>
+                <Th scope="row" className="font-normal">
+                  <span className="block font-semibold">{p.label}</span>
+                  {p.long ? <span className="block text-meta text-muted">{p.long}</span> : null}
+                </Th>
+                {next && nb ? (
+                  <Td numeric>
+                    <Money minor={p.month ?? 0} currency={c} />
+                  </Td>
+                ) : null}
+                <Td numeric className="font-semibold">
+                  <Money minor={p.amount} currency={c} />
+                </Td>
+              </Tr>
+            ))}
+          </TBody>
+          <TFoot>
+            <Tr>
+              <Th scope="row" className="font-bold">
+                {t('installments.partTotal')}
+              </Th>
+              {next?.item && nb ? (
+                <Td numeric className="font-bold">
+                  <Money minor={next.item.amount} currency={c} />
+                </Td>
+              ) : null}
+              <Td numeric className="font-bold">
+                <Money minor={plan.total_remaining} currency={c} />
+              </Td>
+            </Tr>
+          </TFoot>
+        </Table>
       </div>
     </Card>
   );

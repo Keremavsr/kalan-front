@@ -1,6 +1,7 @@
 {
   "title": "Overview",
   "lead": "What you should not miss in your latest statement, in one place.",
+  "leadForecast": "My forecast for your {{month}} statement is <c>{{amount}}</c>. Of that, <m>{{installments}}</m> is already fixed by installments.",
   "noStatementsTitle": "No statements yet",
   "noStatements": "Upload your first statement and follow your installments, spending and the things to watch from here.",
   "goUpload": "Upload a statement",
@@ -22,5 +23,127 @@
   "noCites": "This point is not tied to one transaction.",
   "meta": "Written with {{provider}}, {{date}}.",
   "disclaimer": "Code computes the totals and installments; the model only adds categories and commentary.",
-  "done": "Commentary ready."
+  "done": "Commentary ready.",
+  "first": {
+    "lead": "Once you upload a card statement, I show the forecast for the next one, the alerts and your installment load here.",
+    "title": "Start in two steps",
+    "label": "Getting started",
+    "uploadTitle": "Upload your statement",
+    "uploadBody": "Pick the bank’s PDF statement. The file stays on this computer; code reads the amounts and installments.",
+    "uploadAction": "Upload a statement",
+    "aiTitle": "If you like, pick a tool for commentary",
+    "aiBody": "For categories and commentary I use an AI tool on your computer. Installments and the forecast work without one.",
+    "aiAction": "Pick a tool",
+    "aiChosen": "Selected tool: {{name}}.",
+    "aiChange": "Change",
+    "step": "Step {{n}}"
+  },
+  "forecast": {
+    "title": "Next statement",
+    "description": "Forecast for the {{month}} statement. Installments are certain; I count subscriptions at their last amount and variable spend at the median of earlier months.",
+    "barLabel": "Parts of the forecast",
+    "total": "Forecast",
+    "installments": "Installments",
+    "installmentsNote": "Installments that fall in this month",
+    "subscriptions": "Subscriptions",
+    "subscriptionsNote": "At their last amount: {{names}}",
+    "subscriptionsNone": "No subscriptions in the last month",
+    "variable": "Variable spend",
+    "variableNote": "Median of {{from}} – {{to}}",
+    "variableNoteOne": "Spend of {{month}}",
+    "variableNoteNone": "No earlier month",
+    "variableKnown": "{{amount}} already entered this month",
+    "fixed": "Fixed costs",
+    "fixedNote": "Fixed costs due this month",
+    "fixedExcluded": "Not in the total",
+    "includeFixed": "Fixed costs",
+    "includeFixedYes": "Included",
+    "includeFixedNo": "Left out",
+    "openPeriod": "Spend you added by hand or by import since the {{from}} cut-off: <m>{{amount}}</m>.",
+    "openPeriodNone": "You haven’t added any spend since the {{from}} cut-off.",
+    "backtest": "I tested this method on {{count}} past months: the forecast was off by <m>{{mae}}</m> on average ({{mape}} percent), mostly too {{direction}}.",
+    "backtestNoPct": "I tested this method on {{count}} past months: the forecast was off by <m>{{mae}}</m> on average, mostly too {{direction}}.",
+    "backtestLow": "low",
+    "backtestHigh": "high",
+    "backtestEven": "I tested this method on {{count}} past months: the forecast was off by <m>{{mae}}</m> on average.",
+    "backtestNone": "I can’t test the forecast yet. That needs at least {{need}} months of statements.",
+    "backtestOpen": "Month by month",
+    "backtestCaption": "Each month was forecast from earlier data only.",
+    "colMonth": "Month",
+    "colForecast": "Forecast",
+    "colActual": "Actual",
+    "colError": "Error",
+    "loadError": "I couldn’t get the forecast. The back end may be off."
+  },
+  "alerts": {
+    "title": "Alerts",
+    "none": "No alerts right now.",
+    "label": "Alerts",
+    "moreInfo": "Also show {{count}} notes",
+    "lessInfo": "Hide the notes",
+    "loadError": "I couldn’t get the alerts.",
+    "unknown": "There is an alert this version does not know.",
+    "go": {
+      "statements": "Statements",
+      "spending": "Spending",
+      "recurring": "Recurring",
+      "installments": "Installments",
+      "rights": "My rights"
+    },
+    "kind": {
+      "installment_ending": {
+        "title": "Last installment of {{description}}",
+        "detail": "The {{month}} statement has the last installment: <m>{{amount}}</m>. From the month after, you no longer pay it."
+      },
+      "limit_high": {
+        "title": "Your limit is nearly used up",
+        "titleFull": "Your limit is used up",
+        "detail": "The statement total is <m>{{total}}</m> and the card limit <m>{{limit}}</m>. You have used {{share}} percent of it."
+      },
+      "interest_charged": {
+        "title": "Interest was charged",
+        "detail": "The {{month}} statement has <m>{{total}}</m> of interest."
+      },
+      "fee_charged": {
+        "title": "A fee was charged",
+        "detail": "The {{month}} statement has <m>{{total}}</m> of fees. If it is the annual card fee, you can ask for it back."
+      },
+      "tax_charged": {
+        "title": "Taxes were charged",
+        "detail": "The {{month}} statement has <m>{{total}}</m> of BSMV and KKDF."
+      },
+      "foreign_currency": {
+        "title": "Spend in a foreign currency",
+        "detail": "On the {{month}} statement, spend in {{currencies}} came to <m>{{total}}</m>."
+      },
+      "missing_statement": {
+        "title": "A statement is missing",
+        "detail": "The {{month}} statement of {{card}} is missing. Installment and spend totals for that month are incomplete."
+      },
+      "subscription_price_rise": {
+        "title": "{{merchant}} went up",
+        "detail": "The charge went from <m>{{previous}}</m> to <m>{{last}}</m>, up {{change}} percent."
+      },
+      "due_soon": {
+        "title": "Payment due {{date}}",
+        "detail": "The statement balance is <m>{{total}}</m>; the minimum payment is <m>{{minimum}}</m>.",
+        "today": "Payment due today."
+      },
+      "statement_overdue": {
+        "title": "The {{card}} statement is late",
+        "detail": "The cut-off should have been {{date}}. Upload the statement and the forecast and alerts update."
+      },
+      "charged_after_cancel": {
+        "title": "{{merchant}} charged after you cancelled",
+        "detail": "You marked it cancelled on {{date}}; <m>{{total}}</m> was charged after that. You can dispute it with your bank."
+      }
+    }
+  },
+  "load": {
+    "title": "Installments over 12 months",
+    "sentence": "Installments fall in {{busy}} of the next 12 months. The heaviest month is {{month}}, at <m>{{amount}}</m>.",
+    "sentenceNone": "No installments in the next 12 months.",
+    "go": "Go to installments",
+    "loadError": "I couldn’t get the installment plan."
+  }
 }

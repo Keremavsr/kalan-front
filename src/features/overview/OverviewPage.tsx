@@ -1,7 +1,8 @@
 import { useEffect, useState } from 'react';
 import { ArrowRight } from 'lucide-react';
 import { Link } from 'react-router-dom';
-import { useQueryClient } from '@tanstack/react-query';
+import { keepPreviousData, useQuery, useQueryClient } from '@tanstack/react-query';
+import { useApi } from '../../api/context';
 import { useTranslation } from 'react-i18next';
 import {
   keys,
@@ -16,65 +17,128 @@ import { Scribble } from '../../components/pencil';
 import {
   Button,
   Card,
-  Dot,
-  EmptyState,
   List,
   ListRow,
   Money,
   Notice,
   PageHeader,
   QueryState,
-  RollLabel,
+  Rich,
   Section,
   SelectField,
   buttonClass,
+  useMoneyFormatter,
   useToast,
 } from '../../components/ui';
-import { formatDate, formatDateTime, formatDayMonth } from '../../lib/format';
+import { formatDate, formatDateTime, formatDayMonth, formatMonth } from '../../lib/format';
 import { monthOf } from '../../lib/month';
 import { useIntlLocale } from '../../lib/useLocale';
+import { AlertsBody } from './Alerts';
+import { FirstRun } from './FirstRun';
+import { ForecastBody, type FixedChoice } from './Forecast';
+import { LoadStrip } from './LoadStrip';
 
 /**
- * Özet. Today it holds the things to watch in a statement. The next step adds, above them,
- * the forecast for the coming months and the alerts, each as its own <Section>, in this order:
- *   1. forecast (next months, from the schedule)   2. alerts   3. things to watch (below)
+ * Özet, top to bottom: 1. the next statement forecast, 2. alerts, 3. the 12-month installment strip,
+ * 4. the model's commentary and the things to watch. Before the first statement it is one flow
+ * that leads to Ekstreler and the AI tool choice.
  */
 export function OverviewPage() {
   const { t } = useTranslation();
   const statements = useStatements();
   const [chosen, setChosen] = useState<string | null>(null);
+  const [includeFixed, setIncludeFixed] = useState<FixedChoice>('yes');
   const items = statements.data?.items ?? [];
   const selected = items.find((s) => s.id === chosen) ?? items[0];
+  const forecast = useForecastKept(includeFixed === 'yes');
+  const f = forecast.data?.forecast;
+  const fmt = useMoneyFormatter();
+  const locale = useIntlLocale();
+
+  if (statements.isSuccess && !selected) {
+    return (
+      <>
+        <PageHeader title={t('overview.title')}>
+          <p>{t('overview.first.lead')}</p>
+        </PageHeader>
+        <FirstRun />
+      </>
+    );
+  }
 
   return (
     <>
-      <PageHeader title={t('overview.title')}>{selected ? <p>{t('overview.lead')}</p> : null}</PageHeader>
+      <PageHeader title={t('overview.title')}>
+        {selected ? (
+          <p>
+            {f ? (
+              <Rich
+                i18nKey="overview.leadForecast"
+                values={{ month: formatMonth(f.month, locale), amount: fmt(f.total, f.currency), installments: fmt(f.parts.installments, f.currency) }}
+              />
+            ) : forecast.isPending ? null : (
+              t('overview.lead')
+            )}
+          </p>
+        ) : null}
+      </PageHeader>
       <QueryState query={statements}>
         {() =>
           selected ? (
-            <Section id="watch" title={t('overview.watchTitle')}>
-              <WatchBody key={selected.id} statements={items} selected={selected} onSelect={setChosen} />
-            </Section>
-          ) : (
-            <EmptyState
-              mark="empty"
-              title={t('overview.noStatementsTitle')}
-              action={
-                <Link to="/statements" className={buttonClass('go', 'md', undefined, true)}>
-                  <RollLabel>{t('overview.goUpload')}</RollLabel>
-                  <Dot>
-                    <ArrowRight className="size-4" />
-                  </Dot>
-                </Link>
-              }
-            >
-              {t('overview.noStatements')}
-            </EmptyState>
-          )
+            <div className="grid gap-12">
+              <Section
+                id="forecast"
+                title={t('overview.forecast.title')}
+                description={f ? t('overview.forecast.description', { month: formatMonth(f.month, locale) }) : undefined}
+              >
+                {forecast.isPending ? (
+                  <p className="text-body text-muted" role="status">
+                    {t('common.loading')}
+                  </p>
+                ) : forecast.isError ? (
+                  <Notice
+                    tone="warning"
+                    title={t('overview.forecast.loadError')}
+                    actions={
+                      <Button variant="secondary" size="sm" onClick={() => void forecast.refetch()}>
+                        {t('common.retry')}
+                      </Button>
+                    }
+                  />
+                ) : forecast.data.forecast ? (
+                  <ForecastBody data={forecast.data} includeFixed={includeFixed} onIncludeFixed={setIncludeFixed} />
+                ) : (
+                  <p className="text-body text-ink">{t('overview.forecast.backtestNone', { need: forecast.data.backtest.min_history + 1 })}</p>
+                )}
+              </Section>
+              <Section id="alerts" title={t('overview.alerts.title')}>
+                <AlertsBody />
+              </Section>
+              <Section id="load" title={t('overview.load.title')}>
+                <LoadStrip />
+              </Section>
+              <Section id="watch" title={t('overview.watchTitle')}>
+                <WatchBody key={selected.id} statements={items} selected={selected} onSelect={setChosen} />
+              </Section>
+            </div>
+          ) : null
         }
       </QueryState>
     </>
   );
+}
+
+/**
+ * The forecast query of `useForecast`, but switching fixed costs in or out keeps the last answer on screen
+ * until the new one arrives, so the section does not collapse into a loading line and back.
+ */
+function useForecastKept(includeFixed: boolean) {
+  const api = useApi();
+  return useQuery({
+    queryKey: keys.insights.forecast(includeFixed),
+    queryFn: () => api.getForecast(includeFixed),
+    placeholderData: keepPreviousData,
+  });
 }
 
 interface BodyProps {

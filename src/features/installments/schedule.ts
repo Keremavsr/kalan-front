@@ -6,9 +6,14 @@ const PLAN_SERIES: Series[] = ['prusya', 'asi', 'toprak', 'ink'];
 export const CASH_SERIES: Series = 'kraplak';
 export const EXTRA_SERIES: Series = 'gri';
 
-export function seriesFor(plan: SchedulePlan, index: number): Series {
+/**
+ * Pigment of a plan. `index` is the plan's place in `plans`; when `plans` is given, only purchase plans
+ * before it count, so four purchases and a cash advance get five different colours.
+ */
+export function seriesFor(plan: SchedulePlan, index: number, plans?: SchedulePlan[]): Series {
   if (plan.kind === 'cash_advance') return CASH_SERIES;
-  return PLAN_SERIES[index % PLAN_SERIES.length]!;
+  const n = plans ? plans.slice(0, index).filter((p) => p.kind !== 'cash_advance').length : index;
+  return PLAN_SERIES[n % PLAN_SERIES.length]!;
 }
 
 export function extraOf(b: InstallmentBreakdown): number {
