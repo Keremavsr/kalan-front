@@ -1,10 +1,12 @@
 import { useTranslation } from 'react-i18next';
-import { EmptyState, PageHeader } from '../../components/ui';
+import { PageHeader } from '../../components/ui';
+import { CardFeesSection } from './CardFeesSection';
+import { MinimumPaymentSection } from './MinimumPaymentSection';
 
 /**
- * Haklarım: fee lines a cardholder can dispute (annual card fee, late interest, charges added
- * without asking). The back end does not report them yet; the screen holds its place in the menu
- * and says plainly what will appear here.
+ * Haklarım: the place that tells you what you did not know. An annual card fee you can ask back,
+ * with where to apply and on what basis; and what paying only the minimum really costs. Every legal
+ * value carries its source; the figures come from the back end.
  */
 export function RightsPage() {
   const { t } = useTranslation();
@@ -13,9 +15,10 @@ export function RightsPage() {
       <PageHeader title={t('rights.title')}>
         <p>{t('rights.lead')}</p>
       </PageHeader>
-      <EmptyState mark="empty" title={t('rights.emptyTitle')}>
-        {t('rights.empty')}
-      </EmptyState>
+      <div className="grid grid-cols-1 gap-12">
+        <CardFeesSection />
+        <MinimumPaymentSection />
+      </div>
     </>
   );
 }

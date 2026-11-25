@@ -116,14 +116,6 @@ describe('recurring', () => {
   });
 });
 
-describe('rights', () => {
-  it('holds its place with an empty state', async () => {
-    await renderApp('/rights');
-    expect(await screen.findByRole('heading', { level: 1, name: 'Haklarım' })).toBeInTheDocument();
-    expect(screen.getByRole('heading', { name: 'Şimdilik itiraz edilecek bir şey yok' })).toBeInTheDocument();
-  });
-});
-
 describe('settings and overview', () => {
   it('shows which providers exist, then analyses a statement with a pending state', async () => {
     const user = userEvent.setup();
