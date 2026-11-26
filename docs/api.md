@@ -77,7 +77,7 @@ form a subscription, bill or frequent place.
 - `subscription`: exactly one charge a month in at least 2 consecutive months. A known subscription service
   (category `subscriptions` or `insurance`) may change its price by any amount. Any other allowed category must stay
   within 5 % of the month before, apart from one price change of at most 50 % next to a steady month
-  (`99,99 / 99,99 / 119,99` is a subscription with a price rise; `450 / 610` is not). The latest such run of months
+  (`99,99 / 99,99 / 123,45` is a subscription with a price rise; `450 / 610` is not). The latest such run of months
   is reported (`months_seen`).
 - Never regular (they go to frequent places): groceries, dining (restaurants, food delivery, cafés, bakeries), fuel,
   transport, shopping, clothing, electronics, home, travel, cash, fees, taxes, transfers, and any place whose amount
