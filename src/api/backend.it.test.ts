@@ -363,7 +363,18 @@ describe.skipIf(!ENABLED)('kalan-back integration', () => {
     );
     expectShape(
       await api.getSubscriptions(),
-      obj({ items: arr(obj({ merchant: S, amount_last: N, amount_previous: N, currency: S, months_seen: arr(S), price_change: nul(S) })) }),
+      obj(
+        {
+          items: arr(
+            obj({
+              id: S, kind: S, merchant: S, category: nul(S), amount_last: N, amount_previous: nul(N), currency: S, months_seen: arr(S),
+              price_change: nul(S), expected_amount: nul(N), expected_since: nul(S), monthly_amount: N, last_date: S,
+              card_id: nul(S), card_label: nul(S),
+            }),
+          ),
+        },
+        { totals: arr(obj({ currency: S, subscription: N, bill: N })) },
+      ),
       'subscriptions',
     );
     expectShape(
@@ -528,5 +539,62 @@ describe.skipIf(!ENABLED)('kalan-back integration', () => {
     await expectError(api.deleteImport(imported.id), 'import_not_found', 404);
     await api.deleteStatement(opened.statement.id);
     expect((await api.listStatements()).items).toHaveLength(3);
+
+    // v0.4.0: cards, plans, regular payments, per-card forecast, suggestions, the AI batch
+    const cards = await api.listCards();
+    const Card = obj({
+      id: S, bank: S, bank_name: S, product: nul(S), card_last4: S, name: nul(S), label: S,
+      statement_count: N, first_month: S, last_month: S, latest_statement_id: S,
+    });
+    expectShape(cards, obj({ items: arr(Card) }), 'cards');
+    const card = cards.items[0]!;
+    const named = await api.renameCard(card.id, 'Market kartım');
+    expect(named.label).toBe(`Market kartım ··${card.card_last4}`);
+    expect((await api.listStatements()).items.find((x) => x.card_id === card.id)?.card_label).toBe(named.label);
+    await api.renameCard(card.id, null);
+    await expectError(api.renameCard('cd_0000000000', 'x'), 'card_not_found', 404);
+
+    const plans = await api.getSchedule(12);
+    expectShape(plans.summary, obj({ total_remaining: N, plan_count: N, last_month: nul(S) }), 'schedule.summary');
+    const open = plans.plans.find((p) => !p.closed);
+    if (open) {
+      const closed = await api.closePlan(open.plan_id);
+      expect(closed.closed).toBe('user');
+      expect((await api.getSchedule(12)).summary!.plan_count).toBe(plans.summary!.plan_count - 1);
+      await api.reopenPlan(open.plan_id);
+      await expectError(api.reopenPlan(open.plan_id), 'plan_not_closed', 404);
+    }
+
+    const forecast = await api.getForecast(true);
+    expectShape(
+      { currency: forecast.currency, total: forecast.total, fixed: forecast.fixed, cards: forecast.cards },
+      obj({
+        currency: S, total: N, fixed: N,
+        cards: arr(
+          obj({
+            card_id: S, card_label: S, bank: S, card_last4: S, due_date: S, amount: N, estimated: B, statement_id: nul(S),
+            minimum_payment: nul(N), days_left: N, parts: nul(obj({ installments: N, subscriptions: N, other: N })), next_statement: 'any',
+          }),
+        ),
+      }),
+      'forecast.cards',
+    );
+    const suggestions = await api.getSuggestions('tr');
+    expectShape(
+      suggestions,
+      obj({
+        items: arr(
+          obj({
+            id: S, kind: S, title: S, body: S, monthly_saving: nul(N), yearly_saving: nul(N), currency: S, card_id: nul(S),
+            card_label: nul(S), source: S, link: nul(S), message_key: nul(S), params: 'any',
+          }),
+        ),
+        ai: obj({ status: S, provider: nul(S), created_at: nul(S), job_id: nul(S) }),
+      }),
+      'suggestions',
+    );
+    expectShape(await api.getFrequentPlaces(6), obj({ currency: S, window: obj({ months: arr(S), count: N }), items: arr('any') }), 'frequentPlaces');
+    await expectError(api.startAnalysisAll(), 'no_provider', 409);
+    expect(await api.getAnalysisAll()).toBeNull();
   }, 180_000);
 });

@@ -570,7 +570,7 @@ export function extendMock(base: V03Api, hooks: MockHooks): KalanApi {
           card_id: null,
           source: 'rules',
           link: '/installments',
-          params: { month: months[drop]!.month, amount: months[drop]!.total, previous: months[drop - 1]!.total, plans: ending },
+          params: { month: months[drop]!.month, amount: months[drop - 1]!.total - months[drop]!.total, plans: ending.length },
         }),
       );
     }

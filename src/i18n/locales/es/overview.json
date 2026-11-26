@@ -73,7 +73,7 @@
       },
       "installment_relief": {
         "title": "Tus cuotas bajan en {{month}}",
-        "body": "Ese mes tus cuotas suman <m>{{amount}}</m>. Puedes apartar lo que se libera."
+        "body": "Ese mes tus cuotas bajan <m>{{amount}}</m>. Puedes apartar lo que se libera."
       }
     }
   },

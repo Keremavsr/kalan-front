@@ -73,7 +73,7 @@
       },
       "installment_relief": {
         "title": "{{month}} ayında taksitlerin azalıyor",
-        "body": "O ay taksit toplamın <m>{{amount}}</m> oluyor. Boşalan tutarı birikime ayırabilirsin."
+        "body": "O ay taksitlerin <m>{{amount}}</m> azalıyor. Boşalan tutarı birikime ayırabilirsin."
       }
     }
   },

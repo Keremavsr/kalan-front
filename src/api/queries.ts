@@ -86,6 +86,8 @@ export const invalidation = {
     keys.cards,
     keys.suggestions,
     keys.frequentPlaces,
+    // A new statement joins the AI batch when a tool is chosen; the strip finds it.
+    keys.analysisRun,
   ],
   /** What the run over every statement changes: categories, commentary, suggestions. */
   analysisRun: [

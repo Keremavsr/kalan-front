@@ -83,7 +83,7 @@ export function AppShell({ children }: { children: ReactNode }) {
               to="/settings"
               aria-label={t('nav.settings')}
               title={t('nav.settings')}
-              className={({ isActive }) => cx(buttonClass('icon', 'sm'), isActive && 'bg-ink text-paper')}
+              className={({ isActive }) => cx(buttonClass('icon', 'sm'), isActive && 'bg-ink! text-paper!')}
             >
               <Settings aria-hidden className="size-4" />
             </NavLink>

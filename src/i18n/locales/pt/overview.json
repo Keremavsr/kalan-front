@@ -73,7 +73,7 @@
       },
       "installment_relief": {
         "title": "Suas parcelas diminuem em {{month}}",
-        "body": "Nesse mês suas parcelas somam <m>{{amount}}</m>. Você pode guardar o que sobrar."
+        "body": "Nesse mês suas parcelas caem <m>{{amount}}</m>. Você pode guardar o que sobrar."
       }
     }
   },

@@ -73,7 +73,7 @@
       },
       "installment_relief": {
         "title": "Your installments go down in {{month}}",
-        "body": "That month your installments come to <m>{{amount}}</m>. You could set the freed amount aside."
+        "body": "That month your installments drop by <m>{{amount}}</m>. You could set the freed amount aside."
       }
     }
   },
