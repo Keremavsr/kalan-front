@@ -1,0 +1,11 @@
+{
+  "title": "I couldn't show this screen",
+  "body": "Something went wrong on this screen. The menu still takes you to the others. Try again; if it stays broken, copy the error details and add them when you report it. The details hold only the error's name, its message and the component it came from.",
+  "appTitle": "I couldn't show kalan",
+  "appBody": "Something went wrong in the app. Try again; if it stays broken, close kalan and open it again. The error details hold only the error's name, its message and the component it came from.",
+  "retry": "Try again",
+  "copy": "Copy error details",
+  "copied": "Copied",
+  "copyFailed": "Couldn't copy; select the details below and copy them yourself.",
+  "detail": "Error details"
+}

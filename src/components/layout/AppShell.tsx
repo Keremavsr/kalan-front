@@ -1,15 +1,16 @@
 import { useEffect, useState, type ReactNode } from 'react';
 import { Plus, Settings } from 'lucide-react';
-import { Link, NavLink } from 'react-router-dom';
+import { Link, NavLink, useLocation } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { useProviders } from '../../api/queries';
 import { Logo } from '../brand/Logo';
 import { Scribble } from '../pencil';
-import { Button, buttonClass } from '../ui';
+import { Button, buttonClass, ErrorBoundary, silentFallback } from '../ui';
 import { ManualEntryModal } from '../../features/manual/ManualEntryModal';
 import { cx } from '../../lib/cx';
 import { useTour } from '../../features/tour/Tour';
 import { AnalysisStrip } from '../../features/ai/AnalysisStrip';
+import { useAutoAnalysis } from '../../features/ai/autoStart';
 
 /** Main menu, in reading order. Settings sits apart as an icon. */
 const NAV = [
@@ -20,6 +21,12 @@ const NAV = [
   { to: '/rights', key: 'nav.rights', end: false },
   { to: '/statements', key: 'nav.statements', end: false },
 ] as const;
+
+/** A sheet that failed to render closes, so the next "Ekle" opens a fresh one. */
+function CloseOnError({ onClose }: { onClose: () => void }) {
+  useEffect(() => onClose(), [onClose]);
+  return null;
+}
 
 function useScrolled() {
   const [scrolled, setScrolled] = useState(false);
@@ -40,6 +47,8 @@ export function AppShell({ children }: { children: ReactNode }) {
   const scrolled = useScrolled();
   const [manualOpen, setManualOpen] = useState(false);
   const tour = useTour();
+  const { pathname } = useLocation();
+  useAutoAnalysis();
 
   return (
     <div className="flex min-h-dvh flex-col">
@@ -89,11 +98,16 @@ export function AppShell({ children }: { children: ReactNode }) {
             </NavLink>
           </div>
         </div>
-        <AnalysisStrip />
+        <ErrorBoundary fallback={silentFallback}>
+          <AnalysisStrip />
+        </ErrorBoundary>
       </header>
 
       <main id="main" tabIndex={-1} className="w-full flex-1 focus:outline-none">
-        <div className="mx-auto max-w-content px-(--space-gutter) pt-10 pb-16">{children}</div>
+        <div className="mx-auto max-w-content px-(--space-gutter) pt-10 pb-16">
+          {/* One screen failing leaves the menu working; moving to another screen clears it. */}
+          <ErrorBoundary resetKey={pathname}>{children}</ErrorBoundary>
+        </div>
       </main>
 
       <footer className="mx-auto w-full max-w-content px-(--space-gutter) pb-6">
@@ -110,7 +124,9 @@ export function AppShell({ children }: { children: ReactNode }) {
         </p>
       </footer>
 
-      <ManualEntryModal open={manualOpen} onClose={() => setManualOpen(false)} />
+      <ErrorBoundary fallback={() => <CloseOnError onClose={() => setManualOpen(false)} />} resetKey={manualOpen}>
+        <ManualEntryModal open={manualOpen} onClose={() => setManualOpen(false)} />
+      </ErrorBoundary>
     </div>
   );
 }

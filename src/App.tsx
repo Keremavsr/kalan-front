@@ -6,7 +6,7 @@ import { ApiProvider } from './api/context';
 import { useSettings } from './api/queries';
 import type { KalanApi } from './api/types';
 import { AppShell } from './components/layout/AppShell';
-import { ToastProvider } from './components/ui';
+import { ErrorBoundary, ScreenError, ToastProvider, type ErrorFallbackProps } from './components/ui';
 import { InstallmentsPage } from './features/installments/InstallmentsPage';
 import { OverviewPage } from './features/overview/OverviewPage';
 import { RecurringPage } from './features/recurring/RecurringPage';
@@ -75,6 +75,15 @@ export function AppRoutes() {
   );
 }
 
+/** Last line of defence: if even the shell fails to render, the page still says so instead of going blank. */
+function RootError(props: ErrorFallbackProps) {
+  return (
+    <main className="mx-auto max-w-content px-(--space-gutter) pt-16 pb-16">
+      <ScreenError {...props} scope="app" />
+    </main>
+  );
+}
+
 interface AppProps {
   api: KalanApi;
   queryClient?: QueryClient;
@@ -92,12 +101,14 @@ export function App({ api, queryClient, initialPath }: AppProps) {
     </>
   );
   return (
-    <ApiProvider api={api}>
-      <QueryClientProvider client={client}>
-        <ToastProvider>
-          {initialPath ? <MemoryRouter initialEntries={[initialPath]}>{content}</MemoryRouter> : <BrowserRouter>{content}</BrowserRouter>}
-        </ToastProvider>
-      </QueryClientProvider>
-    </ApiProvider>
+    <ErrorBoundary fallback={RootError}>
+      <ApiProvider api={api}>
+        <QueryClientProvider client={client}>
+          <ToastProvider>
+            {initialPath ? <MemoryRouter initialEntries={[initialPath]}>{content}</MemoryRouter> : <BrowserRouter>{content}</BrowserRouter>}
+          </ToastProvider>
+        </QueryClientProvider>
+      </ApiProvider>
+    </ErrorBoundary>
   );
 }

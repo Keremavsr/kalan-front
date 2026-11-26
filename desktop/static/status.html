@@ -20,6 +20,25 @@
         <div class="track" aria-hidden="true"><div class="run"></div></div>
       </section>
 
+      <section id="recovering" hidden aria-live="polite">
+        <h1 data-text="recoveringTitle">The screen closed unexpectedly</h1>
+        <p class="lead" data-text="recoveringExplain">Opening it again. If it happens once more, kalan will ask you to restart it.</p>
+        <div class="track" aria-hidden="true"><div class="run"></div></div>
+      </section>
+
+      <section id="crashed" hidden>
+        <h1 data-text="crashedTitle">The screen closed again</h1>
+        <p class="lead" data-text="crashedExplain">Your statements are safe on this computer. Restart kalan; the error log in Settings says what happened.</p>
+        <p>
+          <button id="relaunch" type="button" class="pill">
+            <span data-text="relaunch">Restart kalan</span>
+            <span class="dot" aria-hidden="true">
+              <svg viewBox="0 0 24 24"><path d="M3 12a9 9 0 1 0 3-6.7M3 4v5h5" /></svg>
+            </span>
+          </button>
+        </p>
+      </section>
+
       <section id="error" hidden>
         <h1 data-text="stopped">kalan stopped working</h1>
         <p class="lead" data-text="explain">Your statements are safe on this computer. Restart it; if it stops again, the lines below say why.</p>

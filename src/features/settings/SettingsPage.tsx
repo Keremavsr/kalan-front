@@ -46,6 +46,7 @@ export function SettingsPage() {
         <div className="grid grid-cols-1 gap-8">
           <PasswordsSection />
           <PrivacySection />
+          <ErrorLogSection />
         </div>
       </div>
     </>
@@ -433,6 +434,27 @@ function PasswordsSection() {
 }
 
 /** Numbered like the issue list of the site: a bold number, then the sentence. */
+/** Desktop only: the renderer's errors go to a small file; this opens its folder. */
+function ErrorLogSection() {
+  const { t } = useTranslation();
+  const toast = useToast();
+  const openLogs = typeof window !== 'undefined' ? window.kalan?.openLogs : undefined;
+  if (!openLogs) return null;
+  return (
+    <Card title={t('settings.logTitle')}>
+      <p className="max-w-measure text-body text-ink">{t('settings.logBody')}</p>
+      <Button
+        variant="ghost"
+        size="sm"
+        className="mt-3"
+        onClick={() => void openLogs().catch(() => toast.show(t('settings.logFailed'), 'neutral'))}
+      >
+        {t('settings.logOpen')}
+      </Button>
+    </Card>
+  );
+}
+
 function PrivacySection() {
   const { t } = useTranslation();
   const points = ['privacy1', 'privacy2', 'privacy3', 'privacy4', 'privacy5'] as const;

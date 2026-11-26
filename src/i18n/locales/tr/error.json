@@ -1,0 +1,11 @@
+{
+  "title": "Bu ekranı gösteremedim",
+  "body": "Bu ekranda bir hata oldu. Menüden diğer ekranlara geçebilirsin. Yeniden dene; düzelmezse hata ayrıntısını kopyalayıp sorunu bildirirken ekle. Ayrıntıda yalnız hatanın adı, iletisi ve hangi bileşende olduğu yazar.",
+  "appTitle": "kalan'ı gösteremedim",
+  "appBody": "Uygulamada bir hata oldu. Yeniden dene; düzelmezse uygulamayı kapatıp aç. Hata ayrıntısında yalnız hatanın adı, iletisi ve hangi bileşende olduğu yazar.",
+  "retry": "Yeniden dene",
+  "copy": "Hata ayrıntısını kopyala",
+  "copied": "Kopyalandı",
+  "copyFailed": "Kopyalayamadım; ayrıntıyı aşağıdan seçip kopyalayabilirsin.",
+  "detail": "Hata ayrıntısı"
+}

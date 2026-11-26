@@ -302,9 +302,9 @@ export function useDeleteImport() {
 
 // -- manual entry ---------------------------------------------------------------------------------
 
-export function useTransactions(filter: TransactionFilter = {}) {
+export function useTransactions(filter: TransactionFilter = {}, { enabled = true }: { enabled?: boolean } = {}) {
   const api = useApi();
-  return useQuery({ queryKey: keys.transactions(filter), queryFn: () => api.listTransactions(filter) });
+  return useQuery({ queryKey: keys.transactions(filter), queryFn: () => api.listTransactions(filter), enabled });
 }
 
 export function useCreateTransaction() {
@@ -589,13 +589,19 @@ export function useFrequentPlaces() {
   return useQuery({ queryKey: keys.frequentPlaces, queryFn: () => api.getFrequentPlaces() });
 }
 
-/** The latest run over every statement. Polls once a second while it runs. */
-export function useAnalysisRun(pollMs = JOB_POLL_MS) {
+/** How often the strip looks for a batch started while the app is open (an upload, another window). */
+export const ANALYSIS_IDLE_POLL_MS = 15_000;
+
+/**
+ * The latest run over every statement. Polls every 1.5 s while it runs, and slowly while none runs, so a batch
+ * that starts after the first look (an upload joining it, the automatic start) still shows its progress.
+ */
+export function useAnalysisRun(pollMs = JOB_POLL_MS, idleMs = ANALYSIS_IDLE_POLL_MS) {
   const api = useApi();
   return useQuery({
     queryKey: keys.analysisRun,
     queryFn: () => api.getAnalysisAll(),
-    refetchInterval: (query) => (query.state.data?.status === 'pending' ? pollMs : false),
+    refetchInterval: (query) => (query.state.data?.status === 'pending' ? pollMs : idleMs),
   });
 }
 

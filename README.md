@@ -82,6 +82,12 @@ npm run desktop:build      # Windows NSIS installer (unsigned) in release/
 - Packaged builds run `resources/kalan-back/kalan(.exe)`, a PyInstaller binary from the back repo. Copy it into
   `desktop/resources/kalan-back/` with `npm run desktop:fetch-back -- <path>` before `desktop:build`.
 - If the back end stops, the window shows its exit and the last 20 stderr lines with a Restart button.
+- If the page's renderer process dies, the status page says so and the page loads again; a second crash in the
+  same session stops on the status page with a button that restarts the app. `unresponsive` is logged.
+- The page's uncaught errors and `console.error` lines go to `renderer.log` under `app.getPath('logs')`
+  (each line cut at 500 characters; at 256 KB it moves to `renderer.1.log`). Settings has "Open the error log".
+- In the page, the root and every screen sit in an error boundary: a screen that fails to render shows
+  "I couldn't show this screen" with Try again and Copy error details, and the menu keeps working.
 - `KALAN_DESKTOP_SMOKE=1` runs the app hidden, prints one `KALAN_SMOKE {...}` line once the page has rendered
   and quits (exit code 0 on success). `KALAN_DESKTOP_SMOKE_SHOT=<file.png>` also saves a screenshot.
 - Security: context isolation, sandbox, no Node in the page, strict CSP, pages served from `app://kalan/`,

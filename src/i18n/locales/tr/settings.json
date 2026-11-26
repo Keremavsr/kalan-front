@@ -66,5 +66,9 @@
   "cardCleared": "Adı kaldırdım: {{label}}.",
   "cardFailed": "Adı kaydedemedim. Birazdan yeniden dene.",
   "cardCount_one": "{{count}} ekstre, {{span}}",
-  "cardCount_other": "{{count}} ekstre, {{span}}"
+  "cardCount_other": "{{count}} ekstre, {{span}}",
+  "logTitle": "Hata kaydı",
+  "logBody": "Uygulamada bir hata olursa hatanın adını ve iletisini bu bilgisayarda küçük bir dosyaya yazıyorum. Sorun bildirirken bu dosyayı ekleyebilirsin.",
+  "logOpen": "Hata kaydını aç",
+  "logFailed": "Hata kaydının klasörünü açamadım."
 }

@@ -66,5 +66,9 @@
   "cardCleared": "Name removed: {{label}}.",
   "cardFailed": "I could not save the name. Try again in a moment.",
   "cardCount_one": "{{count}} statement, {{span}}",
-  "cardCount_other": "{{count}} statements, {{span}}"
+  "cardCount_other": "{{count}} statements, {{span}}",
+  "logTitle": "Error log",
+  "logBody": "When something goes wrong in the app, I write the error's name and message to a small file on this computer. You can attach it when you report a problem.",
+  "logOpen": "Open the error log",
+  "logFailed": "Couldn't open the error log folder."
 }

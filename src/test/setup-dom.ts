@@ -1,4 +1,5 @@
 import '@testing-library/jest-dom/vitest';
+import { AUTO_RUN_KEY, localDay } from '../features/ai/autoStart';
 import { afterEach, beforeEach } from 'vitest';
 import { cleanup } from '@testing-library/react';
 import i18n from '../i18n';
@@ -18,8 +19,11 @@ if (!('scrollIntoView' in Element.prototype)) {
 
 // The first-run tour opens by itself on a fresh profile; screen tests start as a returning user.
 // Tour tests remove the flag first.
+// Likewise the automatic AI run counts as done for today, so a chosen tool does not start a batch by itself;
+// the auto-start tests remove the flag.
 beforeEach(() => {
   localStorage.setItem('kalan.tourSeen', '1');
+  localStorage.setItem(AUTO_RUN_KEY, localDay(new Date()));
 });
 
 afterEach(async () => {

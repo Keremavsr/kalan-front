@@ -66,5 +66,9 @@
   "cardCleared": "Nome removido: {{label}}.",
   "cardFailed": "Não consegui salvar o nome. Tente de novo em instantes.",
   "cardCount_one": "{{count}} fatura, {{span}}",
-  "cardCount_other": "{{count}} faturas, {{span}}"
+  "cardCount_other": "{{count}} faturas, {{span}}",
+  "logTitle": "Registro de erros",
+  "logBody": "Quando algo dá errado no aplicativo, escrevo o nome e a mensagem do erro em um arquivo pequeno neste computador. Você pode anexá-lo ao relatar um problema.",
+  "logOpen": "Abrir o registro de erros",
+  "logFailed": "Não consegui abrir a pasta do registro de erros."
 }

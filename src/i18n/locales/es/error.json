@@ -1,0 +1,11 @@
+{
+  "title": "No pude mostrar esta pantalla",
+  "body": "Algo falló en esta pantalla. El menú te sigue llevando a las demás. Inténtalo de nuevo; si sigue fallando, copia los detalles del error y añádelos al reportarlo. Los detalles solo contienen el nombre del error, su mensaje y el componente donde ocurrió.",
+  "appTitle": "No pude mostrar kalan",
+  "appBody": "Algo falló en la aplicación. Inténtalo de nuevo; si sigue fallando, cierra kalan y vuelve a abrirlo. Los detalles del error solo contienen su nombre, su mensaje y el componente donde ocurrió.",
+  "retry": "Reintentar",
+  "copy": "Copiar detalles del error",
+  "copied": "Copiado",
+  "copyFailed": "No pude copiar; selecciona los detalles de abajo y cópialos tú.",
+  "detail": "Detalles del error"
+}

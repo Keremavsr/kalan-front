@@ -13,3 +13,5 @@ export { Segmented } from './Segmented';
 export { StackedBar, Swatch, type BarPart } from './StackedBar';
 export { Table, TBody, TFoot, THead, Td, Th, Tr } from './Table';
 export { ToastProvider, useToast } from './Toast';
+export { ErrorBoundary, ScreenError, type ErrorFallbackProps } from './ErrorBoundary';
+export { errorDetail, silentFallback } from './errorDetail';

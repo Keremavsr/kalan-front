@@ -12,11 +12,14 @@ import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath, pathToFileURL } from 'node:url';
 import { APP_HOST, APP_ORIGIN, APP_SCHEME, buildCsp, isAppUrl, isExternalUrl } from './security.js';
+import { RECOVER_NOTICE_MS, RendererCrashes } from './crash.js';
+import { ErrorLog } from './error-log.js';
 import { resolveBackCommand, Sidecar } from './sidecar.js';
 import { fitToDisplays, MIN_SIZE, WindowStateStore } from './window-state.js';
 
 interface DesktopStatus {
-  state: 'starting' | 'ready' | 'error';
+  /** `recovering`: the screen crashed once and is coming back; `crashed`: it crashed again, Restart relaunches. */
+  state: 'starting' | 'ready' | 'error' | 'recovering' | 'crashed';
   message: string | null;
   stderr: string[];
 }
@@ -39,6 +42,8 @@ let apiPort: number | null = null;
 let status: DesktopStatus = { state: 'starting', message: null, stderr: [] };
 let quitting = false;
 let readyToQuit = false;
+let errorLog: ErrorLog | null = null;
+const crashes = new RendererCrashes();
 
 protocol.registerSchemesAsPrivileged([
   { scheme: APP_SCHEME, privileges: { standard: true, secure: true, supportFetchAPI: true } },
@@ -84,6 +89,7 @@ if (!app.requestSingleInstanceLock()) {
 }
 
 function onReady(): void {
+  errorLog = new ErrorLog({ dir: app.getPath('logs') });
   registerAppProtocol();
   hardenSession();
   ipcMain.on('kalan:api-base', (event: IpcMainEvent) => {
@@ -92,6 +98,16 @@ function onReady(): void {
   ipcMain.handle('kalan:status', (event: IpcMainInvokeEvent) => (trusted(event) ? status : null));
   ipcMain.handle('kalan:restart', async (event: IpcMainInvokeEvent) => {
     if (trusted(event) && status.state === 'error') await bootBackend();
+  });
+  ipcMain.handle('kalan:relaunch', (event: IpcMainInvokeEvent) => {
+    if (!trusted(event) || status.state !== 'crashed') return;
+    app.relaunch();
+    app.quit();
+  });
+  ipcMain.handle('kalan:open-logs', async (event: IpcMainInvokeEvent) => {
+    if (!trusted(event) || !errorLog) return;
+    fs.mkdirSync(errorLog.dir, { recursive: true });
+    await shell.openPath(errorLog.dir);
   });
   Menu.setApplicationMenu(buildMenu());
   createWindow();
@@ -193,16 +209,55 @@ function createWindow(): void {
   window.on('closed', () => {
     win = null;
   });
+  window.on('unresponsive', () => errorLog?.write('unresponsive', `window stopped responding at ${window.webContents.getURL()}`));
+  window.on('responsive', () => errorLog?.write('responsive', 'window responds again'));
+  window.webContents.on('console-message', (details) => {
+    if (details.level !== 'error') return;
+    const where = details.sourceId ? ` (${details.sourceId}:${details.lineNumber})` : '';
+    errorLog?.write('error', `${details.message}${where}`);
+  });
+  window.webContents.on('render-process-gone', (_event, details) => void onRendererGone(details));
   win = window;
+}
+
+/** First crash: say so on the status page, then load the screen again. Second: stop there with Restart. */
+async function onRendererGone(details: Electron.RenderProcessGoneDetails): Promise<void> {
+  errorLog?.write('gone', `renderer process gone: ${details.reason} (exit ${details.exitCode})`);
+  if (quitting || !win) return;
+  const action = crashes.onGone(details.reason);
+  if (action === 'ignore') return;
+  if (smoke) {
+    finishSmoke(1, { error: `renderer process gone: ${details.reason}` });
+    return;
+  }
+  const before = status;
+  if (action === 'give-up') {
+    setStatus({ state: 'crashed', message: details.reason, stderr: [] });
+    await showStatusPage(true);
+    return;
+  }
+  setStatus({ state: 'recovering', message: details.reason, stderr: [] });
+  await showStatusPage(true);
+  await new Promise((resolve) => setTimeout(resolve, RECOVER_NOTICE_MS));
+  if (status.state !== 'recovering') return;
+  if (mock || apiPort !== null) {
+    setStatus({ state: 'ready', message: null, stderr: [] });
+    await showRenderer().catch(() => undefined);
+  } else {
+    // The back end was still starting or had stopped: the status page goes on telling that.
+    setStatus(before);
+  }
 }
 
 function setStatus(next: DesktopStatus): void {
   status = next;
-  win?.webContents.send('kalan:status', status);
+  // A crashed renderer has no frame to send to; the status page asks for the status itself once it loads.
+  if (win && !win.webContents.isCrashed()) win.webContents.send('kalan:status', status);
 }
 
-async function showStatusPage(): Promise<void> {
-  if (!win || win.webContents.getURL() === STATUS_URL) return;
+/** `force` loads it again even when it is already the page (its renderer may be gone). */
+async function showStatusPage(force = false): Promise<void> {
+  if (!win || (!force && win.webContents.getURL() === STATUS_URL)) return;
   await win.loadURL(STATUS_URL).catch(() => undefined);
 }
 

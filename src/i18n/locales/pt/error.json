@@ -1,0 +1,11 @@
+{
+  "title": "Não consegui mostrar esta tela",
+  "body": "Algo deu errado nesta tela. O menu continua levando às outras. Tente de novo; se continuar com erro, copie os detalhes e inclua-os ao relatar o problema. Os detalhes trazem só o nome do erro, a mensagem e o componente onde aconteceu.",
+  "appTitle": "Não consegui mostrar o kalan",
+  "appBody": "Algo deu errado no aplicativo. Tente de novo; se continuar com erro, feche o kalan e abra de novo. Os detalhes do erro trazem só o nome, a mensagem e o componente onde aconteceu.",
+  "retry": "Tentar de novo",
+  "copy": "Copiar detalhes do erro",
+  "copied": "Copiado",
+  "copyFailed": "Não consegui copiar; selecione os detalhes abaixo e copie você mesmo.",
+  "detail": "Detalhes do erro"
+}

@@ -66,5 +66,9 @@
   "cardCleared": "Quité el nombre: {{label}}.",
   "cardFailed": "No pude guardar el nombre. Inténtalo de nuevo en un momento.",
   "cardCount_one": "{{count}} estado de cuenta, {{span}}",
-  "cardCount_other": "{{count}} estados de cuenta, {{span}}"
+  "cardCount_other": "{{count}} estados de cuenta, {{span}}",
+  "logTitle": "Registro de errores",
+  "logBody": "Cuando algo falla en la aplicación, escribo el nombre y el mensaje del error en un archivo pequeño en este ordenador. Puedes adjuntarlo al reportar un problema.",
+  "logOpen": "Abrir el registro de errores",
+  "logFailed": "No pude abrir la carpeta del registro de errores."
 }
