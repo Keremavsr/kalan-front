@@ -713,6 +713,8 @@ export interface ForecastCard {
   card_label: string;
   bank: string;
   card_last4: string;
+  /** The card's currency (v0.4.0). */
+  currency?: string;
   due_date: IsoDate;
   amount: Minor;
   /** true: the forecast of the next statement. false: the stored statement's printed total. */

@@ -74,9 +74,11 @@ form a subscription, bill or frequent place.
 - `bill`: category `utilities` or `telecom` (electricity, water, natural gas, internet, phone/GSM) or a bill word
   in the name, charged in at least 2 consecutive months; the amount may change freely; up to 2 charges in a month
   are added up. `price_change` is always `null` for a bill.
-- `subscription`: exactly one charge a month in at least 2 consecutive months, and either a known subscription
-  service (category `subscriptions` or `insurance`) with each amount within 25 % of the month before, or any other
-  allowed category with each amount within 5 %.
+- `subscription`: exactly one charge a month in at least 2 consecutive months. A known subscription service
+  (category `subscriptions` or `insurance`) may change its price by any amount. Any other allowed category must stay
+  within 5 % of the month before, apart from one price change of at most 50 % next to a steady month
+  (`99,99 / 99,99 / 119,99` is a subscription with a price rise; `450 / 610` is not). The latest such run of months
+  is reported (`months_seen`).
 - Never regular (they go to frequent places): groceries, dining (restaurants, food delivery, cafés, bakeries), fuel,
   transport, shopping, clothing, electronics, home, travel, cash, fees, taxes, transfers, and any place whose amount
   moves more than the limits above. A model "recurring" flag is ignored for these categories.
@@ -121,7 +123,7 @@ billed month, and is never in `months[]`, `summary` or any total.
 The old `open_period`, `forecast` and `backtest` stay. Added, one row per card:
 ```json
 "currency":"TRY","total":234567,"fixed":100000,
-"cards":[{"card_id","card_label","bank","card_last4",
+"cards":[{"card_id","card_label","bank","card_last4","currency",
   "due_date":"2099-06-05","amount":123456,"estimated":false,"statement_id":"st_.."|null,
   "minimum_payment":24691|null,"days_left":9,"parts":{"installments":10000,"subscriptions":4999,"other":130000}|null,
   "next_statement":{"month":"2099-06","cut_off":"2099-06-25","due_date":"2099-07-05","dates":"printed|estimated",
@@ -160,26 +162,30 @@ The old `open_period`, `forecast` and `backtest` stay. Added, one row per card:
    "message_key":"suggestion.<kind>"|null,"params":{}}],
  "ai":{"status":"none|pending|done|failed","provider":"claude-cli"|null,"created_at":"..."|null,"job_id":"job_.."|null}}
 ```
-`link` is an in-app path: `/recurring?id=<sb_..>`, `/installments?id=<pl_..>`, `/rights?id=<tx_..>`,
-`/statements?id=<st_..>`, `/spending?merchant=<name>`, `/settings`.
-Rule suggestions (code only, no AI needed), most saving first, then the rest:
-| kind | when | saving |
-| --- | --- | --- |
-| `duplicate_service` | two or more subscriptions doing the same job (cloud storage, music, video, AI assistant) | the cheapest one's `monthly_amount` |
-| `price_rise` | a subscription's last charge is higher than the one before | null (`params.amount_previous`, `amount_last`) |
-| `card_fee` | an annual card fee row not refunded; link `/rights?id=<fee row id>` | yearly = the fee, monthly = fee / 12 |
-| `interest` | interest or late-payment rows (+ their taxes) on a card's latest statement | monthly = that total |
-| `foreign_currency` | foreign-currency rows in the latest 3 months | null (`params.monthly_average`) |
-| `frequent_place` | a dining / entertainment / shopping frequent place whose `monthly_average` is at least 5 % of the average monthly spend (top 3) | monthly = half of it, yearly = 12 x that |
-| `installment_relief` | the first schedule month whose installment total drops by 10 % or more because plans end | null (`params.month`, `amount`, `plans`) |
+`link` is an in-app path: `/recurring?id=<sb_..>`, `/installments`, `/rights?id=<tx_..>`,
+`/statements?id=<st_..>`, `/spending?merchant=<name>` (URL-encoded), `/spending`; AI items may also point at
+`/settings` or `/`.
+Rule suggestions (code only, no AI needed), biggest `monthly_saving` first, then the ones without a saving. Amounts
+in `params` are minor units; `title` / `body` show them formatted (`1.234,56 TL`):
+| kind | when | saving | `params` |
+| --- | --- | --- | --- |
+| `duplicate_service` | two or more subscriptions doing the same job (cloud storage, music, video, AI assistant) | monthly = the cheapest one's `monthly_amount` | `merchants` (cheapest first), `monthly_amount`, `group` (`cloud_storage|music|video|ai_assistant`), `subscription_ids` |
+| `price_rise` | a subscription's last charge is higher than the one before (none while an expected amount is set) | null | `merchant`, `amount_previous`, `amount_last`, `subscription_id` |
+| `card_fee` | an annual card fee row that was not refunded | yearly = the fee, monthly = fee / 12 | `amount`, `card` (label), `transaction_id` |
+| `interest` | interest or late-payment rows (+ the taxes on that statement) on a card's latest statement | monthly = that total | `amount`, `month`, `card` (label), `statement_id` |
+| `foreign_currency` | rows with a foreign original amount in the latest 3 months with data | null | `monthly_average`, `currencies`, `months` |
+| `frequent_place` | a dining / entertainment / shopping frequent place whose `monthly_average` is at least 5 % of the average monthly spend (top 3) | monthly = half of it, yearly = 12 x that | `merchant`, `monthly_average`, `category`, `yearly` |
+| `installment_relief` | the first schedule month whose installment total drops by 10 % or more because plans end | null | `month` (the lighter month), `amount` (the drop), `plans` (plans ending the month before) |
 `source:"ai"` items come from the last `POST /analysis/all` (`kind:"ai"`, `monthly_saving` and `yearly_saving`
 always null: kalan never shows a model's numbers as savings).
 
 ### AI batch (`POST /analysis/all`, `GET /jobs/{id}` changed)
 - `POST /analysis/all` -> 202 `{"job_id","kind":"analysis_all","status":"pending","total":12}`. Analyses, one after
-  the other, every statement whose `analysis_status` is not `done` (categories for uncategorised rows + watch
-  items, as `POST /statements/{id}/analyze`), then writes AI suggestions. A pending batch is returned instead of a
-  second one and also picks up statements stored while it runs. 409 `no_provider` / `provider_unavailable`.
+  the other, every statement whose `analysis_status` is `none` or `failed`, and every `done` statement that still
+  has rows without a category (categories for uncategorised rows + watch items, as
+  `POST /statements/{id}/analyze`), then writes AI suggestions. So "let the AI sort them" in the spending screen can
+  call it too. A pending batch is returned instead of a second one and also picks up statements stored while it
+  runs. 409 `no_provider` / `provider_unavailable`.
 - The model gets only aggregates for suggestions: category totals per month, regular payments (merchant, kind,
   monthly amount), frequent places (merchant, category, monthly average) and the 12-month installment load; never
   single transaction rows.
@@ -191,8 +197,10 @@ always null: kalan never shows a model's numbers as savings).
   "status":"pending|done|failed","phase":"statements|suggestions|done","done":3,"total":12,"failed":0,"error":null}`.
   A single-statement job has `total:1`.
 - `POST /statements`: when a provider is selected and available, the stored statement joins the batch (a pending
-  one, else a new one); the 201 body then has `"analysis_job_id":"job_.."` (else `null`) and
-  `analysis_status:"pending"`.
+  one, else a new one that takes only statements never analysed or failed, not the `done` ones); the 201 body then
+  has `"analysis_job_id":"job_.."` (else `null`) and `analysis_status:"pending"`.
+- `GET /suggestions` `ai.status` is `failed` when the last batch finished without writing suggestions; `error`
+  of that job says why.
 - Rules first: the model only fills rows no rule and no user categorised (`category_source:"model"`).
 - On start the service also re-applies the built-in rules to stored rows that still have no category.
 
