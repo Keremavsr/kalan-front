@@ -1,0 +1,8 @@
+blank_issues_enabled: false
+contact_links:
+  - name: My bank is not supported
+    url: https://github.com/Keremavsr/kalan-back/issues/new?template=bank-not-supported.yml
+    about: Bank requests go to the engine's repository, with the anonymous layout report.
+  - name: Security problem
+    url: https://github.com/Keremavsr/kalan-front/security/advisories/new
+    about: Report it privately, not as a public issue.

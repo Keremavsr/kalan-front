@@ -1,0 +1,16 @@
+name: Idea
+description: Something kalan should do.
+labels: ["idea"]
+body:
+  - type: textarea
+    id: want
+    attributes:
+      label: What you want to do
+    validations:
+      required: true
+  - type: textarea
+    id: why
+    attributes:
+      label: Why the current version does not cover it
+    validations:
+      required: true

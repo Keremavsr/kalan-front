@@ -1,0 +1,37 @@
+name: Something broke
+description: The app did not do what the README says.
+labels: ["bug"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Please do **not** attach a statement, a screenshot of one, or text copied from it: it holds your name,
+        card number and spending. Screenshots of kalan itself are fine once the amounts and names are covered.
+  - type: textarea
+    id: what
+    attributes:
+      label: What you did
+      description: The screen and the steps, for example "Statements, dropped a PDF, then opened Installments".
+    validations:
+      required: true
+  - type: textarea
+    id: expected
+    attributes:
+      label: What you expected
+    validations:
+      required: true
+  - type: textarea
+    id: happened
+    attributes:
+      label: What happened instead
+      description: The message on screen. If the app has an error log (Settings, "Open the error log"), paste the last lines; read them first and remove anything personal.
+    validations:
+      required: true
+  - type: input
+    id: setup
+    attributes:
+      label: Your setup
+      description: The installer you used (its file name has the version) and your Windows version.
+      placeholder: kalan-setup-0.1.0.exe, Windows 11
+    validations:
+      required: true
