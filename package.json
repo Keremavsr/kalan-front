@@ -25,6 +25,11 @@
     "desktop:fetch-back": "node scripts/fetch-back.mjs"
   },
   "license": "MIT",
+  "homepage": "https://github.com/Keremavsr/kalan-front",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/Keremavsr/kalan-front.git"
+  },
   "type": "module",
   "dependencies": {
     "@tanstack/react-query": "^5.108.4",

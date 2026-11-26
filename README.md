@@ -1,13 +1,58 @@
-# kalan-front
+# kalan
 
-Web front end for **kalan**, a free, open source credit card tracker built around installments
-(taksit, parcelado, meses sin intereses, cuotas). It answers one question well: how much of the
-next 6 to 12 months is already committed, and what should you watch.
+**Know what your credit cards will take from you, month by month.**
 
-The front end talks to [kalan-back](../back) over HTTP only (`docs/api.md`). All amounts are
-computed by the back end; the UI formats and presents them.
+kalan is a free, open source desktop app that reads your credit card statement PDFs and shows, in plain words:
 
-## Run
+1. how much you pay on each card this month, and by when,
+2. how much installment (taksit) debt is left and when it ends,
+3. where your money goes, and where you can save.
+
+It runs on your own computer. There is no account, no server and no subscription. If you already use an AI tool such as
+Claude Code, Codex, Gemini CLI or Antigravity, kalan can use it to sort your spending into categories and suggest savings.
+It works without one too.
+
+![Overview: what each card takes this month, installments left, things to do, savings ideas](docs/screenshots/overview.png)
+
+## Download
+
+Get the Windows installer from the [latest release](https://github.com/Keremavsr/kalan-front/releases/latest).
+The app is not code-signed yet, so Windows SmartScreen asks once before it starts (More info, then Run anyway).
+macOS and Linux builds are configured but not published yet.
+
+## What it does
+
+- **Reads statements by itself.** Drop a PDF; kalan reads every row and checks its sum against the totals printed on the
+  statement. Garanti BBVA Bonus, Yapı Kredi World and VakıfBank Worldcard are supported today; other banks can be added
+  with a short template file, no code ([how](https://github.com/Keremavsr/kalan-back/blob/main/docs/adding-a-bank.md)).
+- **Installments first.** Every plan, what is paid, what is left, the month each one ends. "What if I buy this in
+  6 installments?" shows the new load on top of the current one before you buy.
+- **Subscriptions and bills apart.** Fixed-price subscriptions, bills that change every month, and places you simply
+  visit often are listed separately; price rises and charges after you cancelled are flagged.
+- **Your rights.** Turkish card rules are built in: a letter to ask for the annual card fee back, and the minimum
+  payment and interest at the legal rates.
+- **Four languages:** Turkish, English, Spanish, Portuguese.
+
+| | |
+| --- | --- |
+| ![Installments by month and by plan](docs/screenshots/installments.png) | ![Subscriptions and bills](docs/screenshots/regular-payments.png) |
+
+## Privacy
+
+Statements are read on your computer. kalan removes your card number, name, address and similar details before anything
+is stored, and keeps the data in one file in your user folder. If you connect an AI tool, the transactions it sorts
+(date, description, amount) are sent to that tool, and kalan tells you so in the app. The full rules are in the
+[back end README](https://github.com/Keremavsr/kalan-back#privacy).
+
+## How it is built
+
+This repository is the app: the interface (Vite, React, TypeScript) and the desktop shell (Electron). The engine that
+reads statements and does every calculation is [kalan-back](https://github.com/Keremavsr/kalan-back) (Python); the
+two talk over HTTP on `127.0.0.1` only. The installer bundles both.
+
+## Development
+
+### Run
 
 ```sh
 npm ci
@@ -19,7 +64,7 @@ Demo data is invented (card 0000, merchants such as MIGROS-ORNEK and STREAMFLIX)
 uploading any PDF "reads" the October statement, which has a deliberate reconciliation mismatch;
 a second upload returns `409 duplicate`, a file named `bilinmeyen.pdf` returns `422 unknown_format`.
 
-## Desktop app (Electron)
+### Desktop app (Electron)
 
 The desktop app is the same front end in an Electron window. On start it launches the back end as a
 child process on 127.0.0.1 and passes its URL to the page as `window.kalan.apiBase`. No cloud server.
@@ -43,7 +88,7 @@ npm run desktop:build      # Windows NSIS installer (unsigned) in release/
   web links open in the system browser. mac (dmg) and Linux (AppImage, deb) targets are configured in
   `desktop/electron-builder.yml` but not built yet.
 
-## Check
+### Check
 
 ```sh
 npm run lint && npm run typecheck && npm test && npm run build
@@ -51,7 +96,7 @@ npm run test:e2e   # Playwright smoke test on the mock build
 npm run build:mock && npm run shots -- <dir>   # review screenshots at 1440x900 and 1024x768, empty and error states
 ```
 
-## Structure
+### Structure
 
 - `src/styles/tokens.css`: every colour, font, size, radius, shadow and motion value. Change the look here only.
   Tailwind's default palette, fonts and radii are switched off; `tokens.test.ts` fails if a raw colour, a font name,
@@ -69,8 +114,8 @@ npm run build:mock && npm run shots -- <dir>   # review screenshots at 1440x900 
   settings, and the manual entry modal. Old v0.1 paths (`/month`, `/subscriptions`, `/watch`, `/upload`, `/setup`)
   redirect to the new ones.
 - `desktop/src`: Electron main process, sidecar, preload; `desktop/static`: start and error page.
-- `src/i18n/locales/<lang>/<area>.json`: one file per screen area, so screens can be translated in parallel. `tr` and
-  `en` are complete; `pt` and `es` have every key, waiting for text.
+- `src/i18n/locales/<lang>/<area>.json`: one file per screen area, so screens can be translated in parallel. All four languages
+  (`tr`, `en`, `es`, `pt`) are complete.
 
 ## Licence
 
