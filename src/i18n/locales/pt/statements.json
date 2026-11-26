@@ -192,25 +192,25 @@
   "diagnoseTextHint": "Leia uma vez antes de enviar. Se alguma linha ainda parecer pessoal, exclua.",
   "diagnoseCopy": "Copiar o relatório",
   "commentary": {
-    "title": "Commentary",
-    "analyze": "Comment",
-    "again": "Comment again",
-    "pending": "Writing the commentary. This can take 10 to 60 seconds.",
+    "title": "Comentário",
+    "analyze": "Comentar",
+    "again": "Comentar de novo",
+    "pending": "Estou escrevendo o comentário. Pode levar de 10 a 60 segundos.",
     "elapsed": "{{seconds}} s",
-    "failed": "I could not get the commentary: {{error}}",
-    "none": "I have not commented on this statement yet.",
-    "noProvider": "Choose an AI tool in Settings first.",
-    "goSetup": "Go to settings",
-    "items": "Points to watch",
-    "meta": "Written with {{provider}}, {{date}}.",
-    "done": "The commentary is ready.",
-    "sent": "The tool receives only the date, description, amount, currency and type of each transaction in this statement."
+    "failed": "Não consegui obter o comentário: {{error}}",
+    "none": "Ainda não comentei esta fatura.",
+    "noProvider": "Primeiro escolha uma ferramenta de IA em Configurações.",
+    "goSetup": "Ir para Configurações",
+    "items": "Pontos de atenção",
+    "meta": "Escrito com {{provider}}, {{date}}.",
+    "done": "O comentário está pronto.",
+    "sent": "A ferramenta recebe só a data, a descrição, o valor, a moeda e o tipo de cada lançamento desta fatura."
   },
   "missing": {
-    "title_one": "A statement is missing",
-    "title_other": "Missing statements",
-    "row_one": "{{card}}: the {{range}} statement is missing.",
-    "row_other": "{{card}}: the {{range}} statements are missing.",
-    "how": "Download the PDF statements for those months from your bank’s app or website and drop them below. Without them, installment and spending totals for those months are incomplete."
+    "title_one": "Falta uma fatura",
+    "title_other": "Faltam faturas",
+    "row_one": "{{card}}: falta a fatura de {{range}}.",
+    "row_other": "{{card}}: faltam as faturas de {{range}}.",
+    "how": "Baixe as faturas em PDF desses meses no app ou no site do seu banco e solte abaixo. Sem elas, os totais de parcelas e gastos desses meses ficam incompletos."
   }
 }

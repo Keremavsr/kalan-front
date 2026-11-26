@@ -74,25 +74,25 @@
     "gone": "Esta regla ya estaba eliminada.",
     "deleteFailed": "No pude eliminar la regla. Inténtalo de nuevo en un momento."
   },
-  "unreadable": "Unreadable merchant",
+  "unreadable": "Comercio sin nombre legible",
   "uncategorized": {
-    "count_one": "{{count}} transaction has no category.",
-    "count_other": "{{count}} transactions have no category.",
-    "hint": "Show them, then pick a category on each row; later spending at the same place goes there too.",
-    "hintAi": "I can have the AI tool sort them all; the categories you picked always come first.",
-    "show": "Show",
-    "showAll": "Show all",
-    "ai": "Sort with AI",
-    "running": "Sorting",
-    "started": "I sent the uncategorised transactions to the tool. I will refresh the list when it is done.",
-    "failed": "I could not start the tool.",
-    "connect": "Connect an AI tool"
+    "count_one": "{{count}} movimiento no tiene categoría.",
+    "count_other": "{{count}} movimientos no tienen categoría.",
+    "hint": "Muéstralos y elige una categoría en cada fila; los gastos siguientes en el mismo lugar también irán ahí.",
+    "hintAi": "Puedo pedirle a la herramienta de IA que los clasifique todos; las categorías que elegiste siempre van primero.",
+    "show": "Mostrar",
+    "showAll": "Mostrar todos",
+    "ai": "Clasificar con IA",
+    "running": "Clasificando",
+    "started": "Envié los movimientos sin categoría a la herramienta. Cuando termine, actualizo la lista.",
+    "failed": "No pude iniciar la herramienta.",
+    "connect": "Conectar una herramienta de IA"
   },
   "places": {
-    "title": "Places you spend at often",
-    "intro": "Places you went to regularly over the last {{count}} months. They are not subscriptions; how much you spend is up to you.",
-    "visits_one": "{{count}} time in {{months}} months",
-    "visits_other": "{{count}} times in {{months}} months",
-    "average": "<m>{{amount}}</m> a month on average"
+    "title": "Lugares donde gastas seguido",
+    "intro": "Lugares a los que fuiste con frecuencia en los últimos {{count}} meses. No son suscripciones; cuánto gastas depende de ti.",
+    "visits_one": "{{count}} vez en {{months}} meses",
+    "visits_other": "{{count}} veces en {{months}} meses",
+    "average": "<m>{{amount}}</m> al mes en promedio"
   }
 }

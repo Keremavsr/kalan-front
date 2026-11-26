@@ -122,28 +122,28 @@
     "loadError": "No pude preparar la tarjeta."
   },
   "plan": {
-    "paid_one": "{{paid}} of {{total}} installments paid, {{count}} left.",
-    "paid_other": "{{paid}} of {{total}} installments paid, {{count}} left.",
-    "left_one": "{{count}} installment left.",
-    "left_other": "{{count}} installments left.",
-    "next": "Next: {{month}}, {{amount}}."
+    "paid_one": "{{paid}} de {{total}} cuotas pagadas, queda {{count}}.",
+    "paid_other": "{{paid}} de {{total}} cuotas pagadas, quedan {{count}}.",
+    "left_one": "Queda {{count}} cuota.",
+    "left_other": "Quedan {{count}} cuotas.",
+    "next": "Siguiente: {{month}}, {{amount}}."
   },
   "close": {
-    "open": "I paid this off",
-    "openLabel": "I paid off {{plan}}",
-    "title": "Did you pay this off?",
-    "intro": "{{plan}}: {{amount}} left.",
-    "body": "I take a closed plan out of the calendar, the forecast and every total. If you marked it by mistake, undo it in the list below.",
-    "confirm": "Paid off",
-    "done": "{{plan}} is closed; it is out of the totals.",
-    "failed": "I could not close the plan. Try again in a moment.",
-    "byStatement": "A statement already shows this plan closed.",
-    "listTitle": "Closed installments",
-    "byYou": "you closed it on {{date}}",
-    "byStatementNote": "closed on a statement",
-    "wouldHave": "the {{amount}} left is not in the totals",
-    "undo": "Undo",
-    "undoLabel": "Open {{plan}} again",
-    "undone": "{{plan}} is open again."
+    "open": "Ya lo liquidé",
+    "openLabel": "Ya liquidé {{plan}}",
+    "title": "¿Liquidaste esta compra a cuotas?",
+    "intro": "{{plan}}: quedan {{amount}}.",
+    "body": "Saco el plan liquidado del calendario, del pronóstico y de todos los totales. Si lo marcaste por error, lo deshaces en la lista de abajo.",
+    "confirm": "Lo liquidé",
+    "done": "{{plan}} quedó cerrado; ya no está en los totales.",
+    "failed": "No pude cerrar el plan. Inténtalo de nuevo en un momento.",
+    "byStatement": "Un estado de cuenta ya muestra este plan cerrado.",
+    "listTitle": "Cuotas cerradas",
+    "byYou": "lo cerraste el {{date}}",
+    "byStatementNote": "cerrado en un estado de cuenta",
+    "wouldHave": "los {{amount}} restantes no están en los totales",
+    "undo": "Deshacer",
+    "undoLabel": "Abrir de nuevo {{plan}}",
+    "undone": "{{plan}} está abierto de nuevo."
   }
 }

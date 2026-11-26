@@ -69,6 +69,17 @@ const ENDPOINTS: Record<string, { method: keyof KalanApi; call: Call }> = {
   'DELETE /insights/cancelled-subscriptions': { method: 'deleteCancelledSubscription', call: (a) => a.deleteCancelledSubscription('ORNEK') },
   'GET /insights/fixed-costs/matches': { method: 'getFixedCostMatches', call: (a) => a.getFixedCostMatches() },
   'GET /insights/export': { method: 'exportData', call: (a) => a.exportData({ format: 'csv' }) },
+  // v0.4.0
+  'GET /cards': { method: 'listCards', call: (a) => a.listCards() },
+  'PUT /cards/{}': { method: 'renameCard', call: (a) => a.renameCard('X', 'Market kartım') },
+  'POST /plans/{}/close': { method: 'closePlan', call: (a) => a.closePlan('X') },
+  'DELETE /plans/{}/close': { method: 'reopenPlan', call: (a) => a.reopenPlan('X') },
+  'PUT /subscriptions/{}/expected': { method: 'setSubscriptionExpected', call: (a) => a.setSubscriptionExpected('X', 2999) },
+  'DELETE /subscriptions/{}/expected': { method: 'clearSubscriptionExpected', call: (a) => a.clearSubscriptionExpected('X') },
+  'GET /insights/frequent-places': { method: 'getFrequentPlaces', call: (a) => a.getFrequentPlaces(6) },
+  'GET /suggestions': { method: 'getSuggestions', call: (a) => a.getSuggestions('tr') },
+  'POST /analysis/all': { method: 'startAnalysisAll', call: (a) => a.startAnalysisAll() },
+  'GET /analysis/all': { method: 'getAnalysisAll', call: (a) => a.getAnalysisAll() },
 };
 
 /** `METHOD /path` for every route in the contract text, path parameters as `{}`. */
@@ -105,8 +116,8 @@ function recordingFetch(answer: (req: Recorded) => Response = () => new Response
 describe('contract coverage', () => {
   const routes = contractRoutes(contract);
 
-  it('reads the v0.3.0 contract', () => {
-    expect(contract).toMatch(/^# kalan API contract v0\.3\.0/);
+  it('reads the v0.4.0 contract', () => {
+    expect(contract).toMatch(/^# kalan API contract v0\.4\.0/);
     expect(routes.length).toBeGreaterThanOrEqual(50);
   });
 

@@ -192,25 +192,25 @@
   "diagnoseTextHint": "Léelo una vez antes de enviarlo. Si alguna línea todavía parece personal, bórrala.",
   "diagnoseCopy": "Copiar el reporte",
   "commentary": {
-    "title": "Commentary",
-    "analyze": "Comment",
-    "again": "Comment again",
-    "pending": "Writing the commentary. This can take 10 to 60 seconds.",
+    "title": "Comentario",
+    "analyze": "Comentar",
+    "again": "Comentar de nuevo",
+    "pending": "Estoy escribiendo el comentario. Puede tardar de 10 a 60 segundos.",
     "elapsed": "{{seconds}} s",
-    "failed": "I could not get the commentary: {{error}}",
-    "none": "I have not commented on this statement yet.",
-    "noProvider": "Choose an AI tool in Settings first.",
-    "goSetup": "Go to settings",
-    "items": "Points to watch",
-    "meta": "Written with {{provider}}, {{date}}.",
-    "done": "The commentary is ready.",
-    "sent": "The tool receives only the date, description, amount, currency and type of each transaction in this statement."
+    "failed": "No pude obtener el comentario: {{error}}",
+    "none": "Todavía no comento este estado de cuenta.",
+    "noProvider": "Primero elige una herramienta de IA en Ajustes.",
+    "goSetup": "Ir a Ajustes",
+    "items": "Puntos a vigilar",
+    "meta": "Escrito con {{provider}}, {{date}}.",
+    "done": "El comentario está listo.",
+    "sent": "La herramienta recibe solo la fecha, la descripción, el monto, la moneda y el tipo de cada movimiento de este estado de cuenta."
   },
   "missing": {
-    "title_one": "A statement is missing",
-    "title_other": "Missing statements",
-    "row_one": "{{card}}: the {{range}} statement is missing.",
-    "row_other": "{{card}}: the {{range}} statements are missing.",
-    "how": "Download the PDF statements for those months from your bank’s app or website and drop them below. Without them, installment and spending totals for those months are incomplete."
+    "title_one": "Falta un estado de cuenta",
+    "title_other": "Faltan estados de cuenta",
+    "row_one": "{{card}}: falta el estado de cuenta de {{range}}.",
+    "row_other": "{{card}}: faltan los estados de cuenta de {{range}}.",
+    "how": "Descarga los estados de cuenta en PDF de esos meses desde la app o el sitio de tu banco y suéltalos abajo. Sin ellos, los totales de cuotas y gastos de esos meses quedan incompletos."
   }
 }

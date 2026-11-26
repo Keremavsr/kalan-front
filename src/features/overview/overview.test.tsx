@@ -19,76 +19,71 @@ function renderWith(path: string, options: MockOptions = {}, patch: Partial<Kala
 
 const down = () => Promise.reject(new ApiError(503, 'unavailable', 'back end is off'));
 
-describe('overview: next statement forecast', () => {
-  it('rings the forecast in the lead and lists the parts the back end returned', async () => {
+describe('overview: what you pay, card by card', () => {
+  it('rings the total in the lead and names the nearest card and due date', async () => {
     renderWith('/', { preset: 'full' });
-    const lead = await screen.findByText(/ekstren için tahminim/);
-    await waitFor(() => expect(text(lead.textContent)).toContain('48.522,87 TL'));
-    expect(text(lead.textContent)).toBe('Kasım 2026 ekstren için tahminim 48.522,87 TL. Bunun 10.497,26 TL kadarı şimdiden taksit olarak belli.');
-    expect(lead.querySelectorAll('[data-pencil="circle"]')).toHaveLength(1);
-
-    const section = screen.getByRole('region', { name: 'Gelecek ekstre' });
-    for (const label of ['Taksitler', 'Abonelikler', 'Değişken harcama', 'Sabit giderler']) {
-      expect(within(section).getAllByText(label).length).toBeGreaterThan(0);
-    }
-    expect(within(section).getByText(/STREAMFLIX, MUZIKBOX, BULUTDEPO/)).toBeInTheDocument();
-    // Honest backtest line: how far off it was and in which direction.
-    expect(text(within(section).getByText(/sınadım/).textContent)).toBe(
-      'Bu yöntemi geçmişteki 1 ayda sınadım: tahmin ortalama 5.940,80 TL saptı (yüzde 33), çoğunlukla düşük kaldı. Ay ay sınama',
+    const lead = await screen.findByText(/sıradaki ödemelerin toplam/);
+    expect(text(lead.textContent)).toBe(
+      '2 kartına sıradaki ödemelerin toplam 18.502,04 TL. İlki Denemebank Deneme Kart ··1111: 10 Kasım 2026 tarihine kadar 4.019,16 TL.',
     );
+    expect(lead.querySelectorAll('[data-pencil="circle"]')).toHaveLength(1);
   });
 
-  it('asks the back end again when fixed costs are left out', async () => {
-    const user = userEvent.setup();
-    const calls: boolean[] = [];
-    const base = createMockApi({ latency: 0, preset: 'full' });
-    renderWith('/', { preset: 'full' }, {
-      getForecast: (includeFixed?: boolean) => {
-        calls.push(includeFixed ?? true);
-        return base.getForecast(includeFixed);
-      },
-    });
-    const lead = await screen.findByText(/ekstren için tahminim/);
-    await user.click(screen.getByLabelText('Hariç'));
-    await waitFor(() => expect(text(lead.textContent)).toContain('17.982,88 TL'));
-    expect(calls).toContain(false);
-    expect(screen.getByText('Toplama katmadım')).toBeInTheDocument();
-  });
-
-  it('shows the months behind the backtest on request', async () => {
-    const user = userEvent.setup();
+  it('lists one row per card, marks a forecast with the word "tahmin" and shows the total', async () => {
     renderWith('/', { preset: 'full' });
-    await user.click(await screen.findByRole('button', { name: 'Ay ay sınama' }));
-    const table = await screen.findByRole('table', { name: /kendinden önceki verilerle/ });
-    expect(text(within(table).getByText('Ekim 2026').closest('tr')?.textContent)).toContain('-5.940,80');
+    const table = await screen.findByRole('table', { name: 'Ödeyeceklerin' });
+    // the header row is for screen readers; then two cards and the total
+    const rows = within(table).getAllByRole('row').slice(1);
+    expect(rows).toHaveLength(3);
+    expect(text(rows[0]!.textContent)).toContain('Denemebank Deneme Kart ··1111');
+    expect(text(rows[0]!.textContent)).toContain('Ekstren geldi. Asgari ödeme 804,00 TL.');
+    expect(text(rows[0]!.textContent)).not.toContain('tahmin');
+    expect(text(rows[1]!.textContent)).toContain('Örnekbank Örnek Kart ··0000');
+    expect(text(rows[1]!.textContent)).toContain('tahmin');
+    expect(text(rows[1]!.textContent)).toContain('Son ödeme 4 Aralık 2026');
+    expect(text(rows[2]!.textContent)).toBe('Toplam18.502,04 TL');
+    expect(screen.getByText(/karttan çıkmadığı için toplama katmadım/)).toBeInTheDocument();
   });
 
-  it('says so when the forecast cannot be read, and the rest of the page still works', async () => {
+  it('keeps no jargon from the old forecast on the page', async () => {
+    renderWith('/', { preset: 'full' });
+    await screen.findByRole('table', { name: 'Ödeyeceklerin' });
+    for (const word of [/ortanca/i, /sınama/i, /Dahil/, /Hariç/, /uncategorized/]) expect(screen.queryByText(word)).not.toBeInTheDocument();
+  });
+
+  it('says so when the payments cannot be read, and the rest of the page still works', async () => {
     renderWith('/', { preset: 'full' }, { getForecast: down });
-    expect(await screen.findByText('Tahmini alamadım. Arka uç kapalı olabilir.')).toBeInTheDocument();
+    expect(await screen.findByText('Ödemelerini alamadım. Arka uç kapalı olabilir.')).toBeInTheDocument();
     expect(await screen.findByRole('list', { name: 'Uyarılar' })).toBeInTheDocument();
   });
 });
 
-describe('overview: alerts', () => {
-  it('marks critical rows with the word and keeps notes folded', async () => {
+describe('overview: installments left', () => {
+  it('says how much is left in how many plans and when the last one ends, from the back end summary', async () => {
+    renderWith('/', { preset: 'full' });
+    const sentence = await screen.findByText(/borcun kaldı/);
+    expect(text(sentence.textContent)).toBe('Süren 4 taksitli harcamandan toplam 30.994,52 TL borcun kaldı. Son taksit Haziran 2027 ayında.');
+    expect(screen.getByRole('link', { name: 'Taksitlere git' })).toHaveAttribute('href', '/installments');
+    expect(screen.getByText(/Kasım 2026: 7.997,26/)).toBeInTheDocument();
+  });
+});
+
+describe('overview: to do', () => {
+  it('shows at most three things to do, critical first, and opens the rest', async () => {
     const user = userEvent.setup();
     renderWith('/', { preset: 'full' });
     const list = await screen.findByRole('list', { name: 'Uyarılar' });
     const rows = within(list).getAllByRole('listitem');
-    expect(rows).toHaveLength(4);
+    expect(rows).toHaveLength(3);
     expect(text(rows[0]!.textContent)).toContain('Kritik');
-    expect(text(rows[0]!.textContent)).toContain('Ekstre borcu 2.484,56 TL, asgari ödeme 497,00 TL.');
+    expect(text(rows[0]!.textContent)).toContain('Denemebank Deneme Kart ··1111');
     expect(text(rows[1]!.textContent)).toContain('MUZIKBOX iptalden sonra çekim yaptı');
-    expect(text(rows[2]!.textContent)).toContain('Limitin dolmak üzere');
-    expect(text(rows[2]!.textContent)).not.toContain('Kritik');
-    expect(within(list).getAllByText('Kritik')).toHaveLength(2);
-    expect(within(rows[1]!).getByRole('link', { name: 'Düzenli ödemeler' })).toHaveAttribute('href', '/recurring');
+    expect(text(rows[2]!.textContent)).toContain('Denemebank Deneme Kart ··1111: eksik ekstre');
+    expect(text(rows[2]!.textContent)).toContain('Ağustos 2026 ekstresi yok.');
 
-    await user.click(screen.getByRole('button', { name: '6 bilgi notunu da göster' }));
-    expect(within(list).getAllByRole('listitem')).toHaveLength(10);
+    await user.click(screen.getByRole('button', { name: /tane daha göster/ }));
+    expect(within(list).getAllByRole('listitem').length).toBeGreaterThan(3);
     expect(within(list).getByText('STREAMFLIX ücreti arttı')).toBeInTheDocument();
-    expect(within(list).getAllByRole('link', { name: 'Haklarım' })[0]).toHaveAttribute('href', '/rights');
   });
 
   it('handles an alert list that will not load', async () => {
@@ -97,20 +92,48 @@ describe('overview: alerts', () => {
   });
 });
 
-describe('overview: installment strip and first run', () => {
-  it('sums up the next 12 months in one sentence and links to installments', async () => {
+describe('overview: savings and where the money goes', () => {
+  it('lists the rule suggestions with what to do and the monthly saving the back end computed', async () => {
     renderWith('/', { preset: 'full' });
-    const sentence = await screen.findByText(/Önümüzdeki 12 ayın/);
-    expect(text(sentence.textContent)).toBe('Önümüzdeki 12 ayın 8 ayında taksit var. En yüksek ay Kasım 2026, 10.497,26 TL.');
-    expect(screen.getByRole('link', { name: 'Taksitlere git' })).toHaveAttribute('href', '/installments');
+    const list = await screen.findByRole('list', { name: 'Tasarruf önerileri' });
+    const first = within(list).getAllByRole('listitem')[0]!;
+    expect(text(first.textContent)).toContain('MIGROS-ORNEK için ayda ortalama 1.940,33 TL harcıyorsun');
+    expect(text(first.textContent)).toContain('Ayda 970,17 TL kalır');
+    expect(within(first).getByRole('link', { name: 'Harcamalar' })).toHaveAttribute('href', '/spending?merchant=MIGROS-ORNEK');
+    expect(within(list).getByText(/kartında faiz ödüyorsun/)).toBeInTheDocument();
   });
 
+  it('writes Spanish suggestions on this side from kind and params', async () => {
+    const base = createMockApi({ latency: 0, preset: 'full' });
+    renderWith('/', { preset: 'full' }, { getSettings: async () => ({ ...(await base.getSettings()), locale: 'es' }) });
+    const list = await screen.findByRole('list', { name: 'Formas de ahorrar' });
+    expect(within(list).getByText(/Gastas .* al mes en MIGROS-ORNEK/)).toBeInTheDocument();
+  });
+
+  it('shows the five biggest categories of the latest month as bars with amounts', async () => {
+    renderWith('/', { preset: 'full' });
+    const list = await screen.findByRole('list', { name: 'Paran nereye gidiyor' });
+    const rows = within(list).getAllByRole('listitem');
+    expect(rows).toHaveLength(5);
+    expect(text(rows[0]!.textContent)).toBe('Market4.584,51 TL');
+    const region = screen.getByRole('region', { name: 'Paran nereye gidiyor' });
+    expect(text(region.textContent)).toContain('Ekim 2026 ayında 19.669,80 TL harcadın. En çok Market: 4.584,51 TL.');
+  });
+
+  it('invites to connect an AI tool in one line when none is chosen', async () => {
+    renderWith('/', { preset: 'basic' });
+    expect(await screen.findByText(/Bilgisayarındaki yapay zekâ aracını bağlarsan/)).toBeInTheDocument();
+    expect(screen.getByRole('link', { name: 'Aracı bağla' })).toHaveAttribute('href', '/settings');
+  });
+});
+
+describe('overview: first run', () => {
   it('leads a first run to the statements and the AI tool choice', async () => {
     renderWith('/', { preset: 'empty' });
     const steps = await screen.findByRole('list', { name: 'Başlangıç adımları' });
     expect(within(steps).getAllByRole('listitem')).toHaveLength(2);
     expect(within(steps).getByRole('link', { name: 'Ekstre yükle' })).toHaveAttribute('href', '/statements');
     expect(within(steps).getByRole('link', { name: 'Araç seç' })).toHaveAttribute('href', '/settings');
-    expect(screen.queryByRole('region', { name: 'Gelecek ekstre' })).not.toBeInTheDocument();
+    await waitFor(() => expect(screen.queryByRole('table', { name: 'Ödeyeceklerin' })).not.toBeInTheDocument());
   });
 });

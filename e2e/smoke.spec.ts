@@ -3,6 +3,24 @@ import { fileURLToPath } from 'node:url';
 
 // The mock keeps its state in memory, so the whole journey uses in-app links, not page.goto.
 const pdf = fileURLToPath(new URL('./fixtures/ornek-ekstre.pdf', import.meta.url));
+/** A returning user: the first-run tour has been seen. The tour has its own test below. */
+const SEEN = "localStorage.setItem('kalan.tourSeen', '1')";
+
+test('the first-run tour walks three steps and leads to the upload screen; "Nasıl çalışır?" opens it again', async ({ page }) => {
+  await page.goto('/');
+  const dialog = page.getByRole('dialog', { name: 'Ekstreni bırak' });
+  await expect(dialog).toBeVisible();
+  await page.getByRole('button', { name: 'Devam' }).click();
+  await expect(page.getByRole('dialog', { name: 'Ne ödeyeceğini gör' })).toBeVisible();
+  await page.getByRole('button', { name: 'Devam' }).click();
+  await page.getByRole('button', { name: 'Ekstre yükle' }).click();
+  await expect(page.getByRole('heading', { level: 1, name: 'Ekstreler' })).toBeVisible();
+  await expect(page.getByRole('dialog')).toHaveCount(0);
+  await page.getByRole('button', { name: 'Nasıl çalışır?' }).click();
+  await expect(page.getByRole('dialog', { name: 'Ekstreni bırak' })).toBeVisible();
+  await page.keyboard.press('Escape');
+  await expect(page.getByRole('dialog')).toHaveCount(0);
+});
 
 test('a first session on demo data', async ({ page }) => {
   const errors: string[] = [];
@@ -12,6 +30,7 @@ test('a first session on demo data', async ({ page }) => {
   });
   const nav = (name: string) => page.getByRole('navigation', { name: 'Ana menü' }).getByRole('link', { name, exact: true });
 
+  await page.addInitScript(SEEN);
   await page.goto('/');
   await expect(page.getByRole('heading', { level: 1, name: 'Özet' })).toBeVisible();
 
@@ -50,9 +69,13 @@ test('a first session on demo data', async ({ page }) => {
   await expect(page.getByRole('heading', { name: 'Yalnız asgariyi ödersem' })).toBeVisible();
 
   await nav('Özet').click();
-  await page.getByRole('button', { name: 'Yorumla' }).click();
-  await expect(page.getByText(/Yorum hazırlanıyor/)).toBeVisible();
-  await expect(page.getByText('Nakit avansın iki taksiti kaldı')).toBeVisible({ timeout: 15_000 });
+  await expect(page.getByRole('table', { name: 'Ödeyeceklerin' })).toBeVisible();
+  await expect(page.getByRole('heading', { name: 'Kalan taksitlerin' })).toBeVisible();
+
+  // Choosing the tool started the batch; the upload joined it. The commentary sits in the statement detail.
+  await nav('Ekstreler').click();
+  await page.getByRole('list', { name: 'Yüklenen ekstreler' }).getByRole('link').first().click();
+  await expect(page.getByText('Nakit avansın iki taksiti kaldı')).toBeVisible({ timeout: 20_000 });
   await page.getByRole('link', { name: /STREAMFLIX/ }).first().click();
   await expect(page.getByText('Yorumda anılan işlem')).toBeVisible();
 
@@ -61,6 +84,7 @@ test('a first session on demo data', async ({ page }) => {
 
 test('the page never scrolls sideways at the 960 px window minimum', async ({ page }) => {
   await page.setViewportSize({ width: 960, height: 720 });
+  await page.addInitScript(SEEN);
   await page.goto('/');
   await page.getByRole('link', { name: 'Ayarlar', exact: true }).waitFor();
   const nav = page.getByRole('navigation', { name: 'Ana menü' });

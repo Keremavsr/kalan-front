@@ -141,18 +141,19 @@ function CostRow({ cost, report, matchesPending }: { cost: FixedCost; report: Re
     ? t('recurring.fixed.between', { start: formatMonth(cost.start, locale), end: formatMonth(cost.end, locale) })
     : t('recurring.fixed.since', { start: formatMonth(cost.start, locale) });
 
+  /** The row leaves the list as soon as the list refreshes, so the toast does not wait for this row to stay mounted. */
   function drop() {
     setFailed(null);
-    remove.mutate(cost.id, {
-      onSuccess: () => toast.show(t('recurring.fixed.deleted', { name: cost.name }), 'positive'),
-      onError: (error) => {
+    remove.mutateAsync(cost.id).then(
+      () => toast.show(t('recurring.fixed.deleted', { name: cost.name }), 'positive'),
+      (error: unknown) => {
         if (isApiError(error, 'fixed_cost_not_found')) {
           toast.show(t('recurring.fixed.gone'), 'neutral');
           return;
         }
         setFailed(errorText(error, t('recurring.fixed.deleteFailed')));
       },
-    });
+    );
   }
 
   return (

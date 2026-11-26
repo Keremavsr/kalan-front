@@ -155,9 +155,11 @@ describe('mock: calculations and alerts', () => {
     const severities = items.map((a) => a.severity);
     expect(severities).toEqual([...severities].sort((a, b) => ['critical', 'warning', 'info'].indexOf(a) - ['critical', 'warning', 'info'].indexOf(b)));
     const kinds = new Set(items.map((a) => a.kind));
-    for (const kind of ['due_soon', 'charged_after_cancel', 'limit_high', 'interest_charged', 'fee_charged', 'foreign_currency', 'subscription_price_rise', 'installment_ending']) {
+    for (const kind of ['due_soon', 'charged_after_cancel', 'limit_high', 'interest_charged', 'fee_charged', 'foreign_currency', 'subscription_price_rise', 'missing_statement']) {
       expect(kinds.has(kind as never), kind).toBe(true);
     }
+    // ORNEK TEKNOLOJI would end next month, but the card's newer statement shows it closed (v0.4.0), so no alert.
+    expect(kinds.has('installment_ending')).toBe(false);
     expect(items.find((a) => a.kind === 'due_soon')).toMatchObject({ severity: 'critical', params: { days_left: 1 } });
     expect(items.find((a) => a.kind === 'limit_high')).toMatchObject({ severity: 'warning', params: { used_share: '0.86' } });
     expect(items.find((a) => a.kind === 'charged_after_cancel')).toMatchObject({ params: { merchant: 'MUZIKBOX', count: 1 } });

@@ -1,92 +1,92 @@
 {
   "title": "Visão geral",
-  "leadDue": "Your next payments on {{count}} cards come to <c>{{total}}</c>. First up, {{card}}: <m>{{amount}}</m> by {{date}}.",
-  "leadDueOne": "Your next payment is <c>{{total}}</c>: {{card}}, due {{date}}.",
+  "leadDue": "Seus próximos pagamentos em {{count}} cartões somam <c>{{total}}</c>. O primeiro, {{card}}: <m>{{amount}}</m> até {{date}}.",
+  "leadDueOne": "Seu próximo pagamento é de <c>{{total}}</c>: {{card}}, vencimento {{date}}.",
   "invite": {
-    "text": "Connect the AI tool on your computer and I will sort your spending into categories and tell you where you can save.",
-    "action": "Connect a tool"
+    "text": "Se você conectar a ferramenta de IA do seu computador, eu separo seus gastos por categoria e mostro onde dá para economizar.",
+    "action": "Conectar uma ferramenta"
   },
   "due": {
-    "title": "What you pay",
-    "colCard": "Card",
-    "colDue": "Due date",
-    "colAmount": "Amount",
+    "title": "O que você paga",
+    "colCard": "Cartão",
+    "colDue": "Vencimento",
+    "colAmount": "Valor",
     "total": "Total",
-    "estimated": "estimate",
-    "dueOn": "Due {{date}}",
-    "days_one": "{{count}} day left",
-    "days_other": "{{count}} days left",
-    "today": "Due today",
-    "past": "The due date has passed",
-    "statementNote": "Your statement is in. Minimum payment {{minimum}}.",
-    "statementShort": "Your statement is in.",
-    "estimatedNote": "Your statement closes on {{date}}; the amount is my estimate.",
-    "estimatedShort": "Your statement is not in yet; the amount is my estimate.",
-    "parts": "Installments {{installments}}, subscriptions {{subscriptions}}, other spending {{other}}.",
-    "fixed": "Fixed costs such as rent come to <m>{{amount}}</m> this month; they are not paid by card, so they are not in the total.",
-    "none": "There is no statement to pay right now.",
-    "loadError": "I could not get your payments. The back end may be down."
+    "estimated": "estimativa",
+    "dueOn": "Vence em {{date}}",
+    "days_one": "Falta {{count}} dia",
+    "days_other": "Faltam {{count}} dias",
+    "today": "Vence hoje",
+    "past": "O vencimento já passou",
+    "statementNote": "Sua fatura chegou. Pagamento mínimo {{minimum}}.",
+    "statementShort": "Sua fatura chegou.",
+    "estimatedNote": "Sua fatura fecha em {{date}}; o valor é minha estimativa.",
+    "estimatedShort": "Sua fatura ainda não chegou; o valor é minha estimativa.",
+    "parts": "Parcelas {{installments}}, assinaturas {{subscriptions}}, outros gastos {{other}}.",
+    "fixed": "Seus gastos fixos, como o aluguel, somam <m>{{amount}}</m> este mês; não são pagos no cartão, então não entram no total.",
+    "none": "Agora você não tem nenhuma fatura para pagar.",
+    "loadError": "Não consegui obter seus pagamentos. O servidor local pode estar desligado."
   },
   "left": {
-    "title": "Installments left",
-    "sentence_one": "You still owe <m>{{amount}}</m> on {{count}} installment purchase. The last installment is in {{month}}.",
-    "sentence_other": "You still owe <m>{{amount}}</m> in total on {{count}} installment purchases. The last installment is in {{month}}.",
-    "none": "You have no installments left.",
-    "chart": "Installment totals for the next 12 months"
+    "title": "Parcelas restantes",
+    "sentence_one": "Você ainda deve <m>{{amount}}</m> de {{count}} compra parcelada. A última parcela é em {{month}}.",
+    "sentence_other": "Você ainda deve <m>{{amount}}</m> no total de {{count}} compras parceladas. A última parcela é em {{month}}.",
+    "none": "Você não tem parcelas restantes.",
+    "chart": "Totais de parcelas dos próximos 12 meses"
   },
   "todo": {
-    "title": "To do"
+    "title": "O que fazer"
   },
   "suggestions": {
-    "title": "Ways to save",
-    "none": "No suggestions for now.",
-    "more": "{{count}} more suggestions",
-    "less": "Show fewer",
-    "saving": "Keeps <m>{{amount}}</m> a month",
-    "fromAi": "AI suggestion",
-    "aiHint": "These come from my own calculations only. Connect the AI tool and it will look at your spending and add suggestions.",
-    "loadError": "I could not get the suggestions.",
+    "title": "Formas de economizar",
+    "none": "Por enquanto não tenho sugestões.",
+    "more": "Mais {{count}} sugestões",
+    "less": "Mostrar menos",
+    "saving": "Sobram <m>{{amount}}</m> por mês",
+    "fromAi": "Sugestão de IA",
+    "aiHint": "Estas sugestões vêm só dos meus próprios cálculos. Se você conectar a ferramenta de IA, ela olha seus gastos e acrescenta outras.",
+    "loadError": "Não consegui obter as sugestões.",
     "kind": {
       "price_rise": {
-        "title": "{{merchant}} costs more now",
-        "body": "It went from <m>{{previous}}</m> to <m>{{last}}</m>. If you use it, look at a cheaper plan; if not, cancel it."
+        "title": "{{merchant}} ficou mais caro",
+        "body": "Passou de <m>{{previous}}</m> para <m>{{last}}</m>. Se você usa, procure um plano mais barato; se não, cancele."
       },
       "duplicate_service": {
-        "title": "You have {{count}} subscriptions doing the same job",
-        "body": "{{merchants}} do the same thing. Drop one and you keep <m>{{saving}}</m> a month."
+        "title": "Você tem {{count}} assinaturas que fazem a mesma coisa",
+        "body": "{{merchants}} fazem a mesma coisa. Se cancelar uma, sobram <m>{{saving}}</m> por mês."
       },
       "card_fee": {
-        "title": "You can ask for the card fee back",
-        "body": "You paid a <m>{{amount}}</m> fee on {{card}}. Use the letter on the Rights screen to ask your bank for it."
+        "title": "Você pode pedir a anuidade de volta",
+        "body": "Você pagou <m>{{amount}}</m> de anuidade no {{card}}. Use a carta da tela Meus direitos para pedir ao seu banco."
       },
       "interest": {
-        "title": "You are paying interest on {{card}}",
-        "body": "The {{month}} statement has <m>{{amount}}</m> of interest and tax. Pay the full balance by the due date and it goes away."
+        "title": "Você está pagando juros no {{card}}",
+        "body": "A fatura de {{month}} tem <m>{{amount}}</m> de juros e impostos. Se pagar o total até o vencimento, esse valor some."
       },
       "foreign_currency": {
-        "title": "You spend in foreign currency",
-        "body": "Over the last three months you spent <m>{{amount}}</m> a month in foreign currency. Use a card with no foreign transaction fee for it."
+        "title": "Você tem gastos em moeda estrangeira",
+        "body": "Nos últimos três meses você gastou <m>{{amount}}</m> por mês em moeda estrangeira. Use para isso um cartão sem tarifa de compras internacionais."
       },
       "frequent_place": {
-        "title": "You spend {{amount}} a month at {{merchant}}",
-        "body": "Halve this {{category}} spending and you keep <m>{{yearly}}</m> a year."
+        "title": "Você gasta {{amount}} por mês em {{merchant}}",
+        "body": "Se reduzir pela metade esse gasto com {{category}}, sobram <m>{{yearly}}</m> por ano."
       },
       "installment_relief": {
-        "title": "Your installments go down in {{month}}",
-        "body": "That month your installments come to <m>{{amount}}</m>. You could set the freed amount aside."
+        "title": "Suas parcelas diminuem em {{month}}",
+        "body": "Nesse mês suas parcelas somam <m>{{amount}}</m>. Você pode guardar o que sobrar."
       }
     }
   },
   "where": {
-    "title": "Where your money goes",
-    "sentence": "In {{month}} you spent <m>{{total}}</m>. Most of it on {{top}}: <m>{{amount}}</m>.",
-    "go": "All spending",
-    "none": "No spending this month.",
-    "loadError": "I could not get your spending."
+    "title": "Para onde vai seu dinheiro",
+    "sentence": "Em {{month}} você gastou <m>{{total}}</m>. A maior parte em {{top}}: <m>{{amount}}</m>.",
+    "go": "Todos os gastos",
+    "none": "Nenhum gasto neste mês.",
+    "loadError": "Não consegui obter seus gastos."
   },
   "load": {
-    "go": "Go to installments",
-    "loadError": "I could not get the installment plan."
+    "go": "Ir para parcelas",
+    "loadError": "Não consegui obter o plano de parcelas."
   },
   "alerts": {
     "none": "Nenhum alerta no momento.",
@@ -127,10 +127,10 @@
         "detail": "Na fatura de {{month}}, os gastos em {{currencies}} somaram <m>{{total}}</m>."
       },
       "missing_statement": {
-        "title": "{{card}}: statement missing",
-        "detail": "The {{range}} {{what}} missing. Download the PDF from your bank’s app and drop it on the Statements screen.",
-        "what_one": "statement is",
-        "what_other": "statements are"
+        "title": "{{card}}: falta uma fatura",
+        "detail": "Não tenho {{what}} de {{range}}. Baixe o PDF no app do seu banco e solte na tela Faturas.",
+        "what_one": "a fatura",
+        "what_other": "as faturas"
       },
       "subscription_price_rise": {
         "title": "{{merchant}} aumentou",
@@ -150,8 +150,8 @@
         "detail": "Você marcou como cancelado em {{date}}; depois disso, foram cobrados <m>{{total}}</m>. Você pode contestar com o seu banco."
       }
     },
-    "more": "Show {{count}} more",
-    "less": "Show fewer"
+    "more": "Mostrar mais {{count}}",
+    "less": "Mostrar menos"
   },
   "first": {
     "lead": "Quando você enviar a fatura do seu cartão, eu mostro aqui a previsão da próxima, os alertas e a sua carga de parcelas.",

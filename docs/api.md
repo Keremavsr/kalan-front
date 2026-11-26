@@ -1,4 +1,10 @@
-# kalan API contract v0.3.0
+# kalan API contract v0.4.0
+
+Changes from v0.3.0 (see "v0.4.0 additions"): cards (`/cards`, `card_id` / `card_label` on statements, rows,
+plans, alerts, forecast); regular payments split into `subscription` / `bill` with an expected amount; frequent
+places; closing installment plans (`/plans/{id}/close`, `closed` on plans, schedule `summary`); per-card payment and
+forecast; `missing_statement` as one alert per card and gap with a `text`; `GET /suggestions`; the AI batch
+`/analysis/all` with job progress; cleaner merchant names (`merchant_unreadable`).
 
 Changes from v0.2.0: encrypted PDFs (`password` / `remember_password` on `POST /statements`, `/pdf-passwords`);
 save gate (422 `save_blocked`, `review` on statements, see "Save gate"); `POST /diagnose`; rule-based categories and
@@ -17,6 +23,178 @@ Codes used besides those listed per endpoint: `validation_error`, `not_found` (c
 `analysis_not_found`, `transaction_not_found`, `import_not_found`, `not_manual`, `unknown_provider`,
 `invalid_installment`; uploads also return `not_pdf`, `invalid_pdf` and `parse_error`.
 CORS exposes `X-Kalan-Password-Remembered`, `X-Kalan-Skipped-Rows` and `Content-Disposition` to the front end.
+
+## v0.4.0 additions (task 6: cards, regular payments, closed plans, per-card forecast, suggestions, AI batch)
+Every older route and field keeps its meaning unless this section says otherwise. Texts the back end writes
+(`text`, `note`, suggestion `title` / `body`) are in the settings locale (`tr`, else English); routes that return
+them accept `?locale=tr|en` to override. Each such text also comes with a `*_key` / `message_key` and `params`, so the
+front end may translate it itself (es, pt). Money is minor units, as everywhere.
+
+### Cards
+A card is one bank + last four digits seen on stored statements. Its id is a hash of those two
+(`cd_` + 10 hex), stable across uploads and deletes; the card exists while it has a stored statement.
+`Card` (digits are `card_last4`, as everywhere else in the API):
+```json
+{"id":"cd_0a1b2c3d4e","bank":"garanti","bank_name":"Garanti BBVA","product":"Bonus","card_last4":"0000",
+ "name":"Market kartım"|null,"label":"Garanti Bonus ··0000","statement_count":5,"first_month":"2099-01",
+ "last_month":"2099-05","latest_statement_id":"st_.."}
+```
+`label`: with a name `"<name> ··0000"`, else `"<short bank name> <product> ··0000"` (` ··0000` left out when the
+digits are unknown; the product is left out when it repeats the bank name).
+- `GET /cards` -> `{"items":[Card]}` sorted by label.
+- `PUT /cards/{card_id}` body `{"name":"Market kartım"}` (1-40 characters; `null` or `""` clears it) -> `Card`.
+  404 `card_not_found`. The name is redacted like other free text.
+
+New fields (always present):
+- `StatementSummary` / `Statement`: `card_id`, `card_label`.
+- `Transaction`: `card_id`, `card_label` (`null` for manual and imported rows), `category_source`
+  (`"rule"` built-in or user rule, `"model"` the AI, `"user"` typed by hand, `null` uncategorised) and
+  `merchant_unreadable` (bool, see "Merchant names").
+- Schedule `months[].items[]` and `plans[]`: `card_id`, `card_label` (null for manual / imported plans).
+- `Alert`: top-level `card_id`, `card_label` (null when the alert is not about one card) and `text` (see Alerts).
+- `/insights/which-card` cards: `card_id`, `card_label`.
+
+### Merchant names
+Payment-processor prefixes are removed with or without `*` for unambiguous names (`MONEYPAY`, `MOKA UNITED`,
+`IYZICO`, `PAYTR`, `SIPAY`, `PAPARA`, `PARAM` only with `*` ...). A name made only of address parts (cities, districts,
+`CD`, `CAD`, `CADDESI`, `SK`, `SOK`, `MAH`, `MH`, `BLV`, `NO` and the street word before such a marker) is not a
+merchant: kalan keeps the real name from the rest of the description when there is one; otherwise `merchant` is
+`null` and `merchant_unreadable` is `true` (show it as "adı okunamayan işyeri" / "unreadable merchant").
+Stored rows are cleaned again when read, so older uploads get the better names too. Unreadable merchants never
+form a subscription, bill or frequent place.
+
+### Regular payments (`GET /subscriptions`, changed)
+```json
+{"items":[{"id":"sb_0a1b2c3d4e","kind":"subscription|bill","merchant":"ORNEK MUZIK","category":"subscriptions"|null,
+   "amount_last":4999,"amount_previous":4999|null,"currency":"TRY","months_seen":["2099-01","2099-02"],
+   "price_change":"0.20"|null,"expected_amount":2999|null,"expected_since":"2099-03-02"|null,
+   "monthly_amount":2999,"last_date":"2099-02-14","card_id":"cd_.."|null,"card_label":"..."|null}],
+ "totals":[{"currency":"TRY","subscription":7998,"bill":123456}]}
+```
+- `bill`: category `utilities` or `telecom` (electricity, water, natural gas, internet, phone/GSM) or a bill word
+  in the name, charged in at least 2 consecutive months; the amount may change freely; up to 2 charges in a month
+  are added up. `price_change` is always `null` for a bill.
+- `subscription`: exactly one charge a month in at least 2 consecutive months, and either a known subscription
+  service (category `subscriptions` or `insurance`) with each amount within 25 % of the month before, or any other
+  allowed category with each amount within 5 %.
+- Never regular (they go to frequent places): groceries, dining (restaurants, food delivery, cafés, bakeries), fuel,
+  transport, shopping, clothing, electronics, home, travel, cash, fees, taxes, transfers, and any place whose amount
+  moves more than the limits above. A model "recurring" flag is ignored for these categories.
+- `monthly_amount` = `expected_amount` when set, else `amount_last`; `totals` add `monthly_amount` per kind.
+- `id` is stable (hash of merchant + currency).
+- `PUT /subscriptions/{id}/expected` body `{"amount":2999}` (>0) -> the item. 404 `subscription_not_found`.
+  The forecast and `totals` use it. It clears itself once a charge dated after `expected_since` is within 1 %
+  (at least 1.00) of it; `DELETE /subscriptions/{id}/expected` -> 204 clears it by hand (404 `expected_not_set`).
+- `subscription_price_rise` alerts only come from `kind:"subscription"` items without an `expected_amount`.
+
+### Frequent places (`GET /insights/frequent-places?months=6`)
+```json
+{"currency":"TRY","window":{"months":["2099-01","..."],"count":6},
+ "items":[{"merchant":"ORNEK YEMEK","kind":"frequent_place","category":"dining"|null,"months_seen":4,"visits":11,
+   "total":456789,"monthly_average":76132,"last_date":"2099-06-20","card_ids":["cd_.."]}]}
+```
+Window: the latest `months` (1-24, default 6) statement or loose-row months with data. A place qualifies when it is
+not a subscription or bill, has purchase rows (not installments, base currency) in at least 2 window months and at
+least 3 rows in the window. `monthly_average` = its window total divided by the window's month count (rounded half
+up). Sorted by `monthly_average`, highest first.
+
+### Installment plans (schedule changes, `POST|DELETE /plans/{plan_id}/close`)
+`GET /installments/schedule` adds `summary` (open plans only):
+`"summary":{"total_remaining":1234567,"plan_count":4,"last_month":"2100-03"|null}`.
+Every `plans[]` entry also has `card_id`, `card_label`, `total_count` (int|null), `paid_count`
+(`total_count - remaining_count`, int|null), `next_month` (first month still to pay, null when closed), `next_amount`
+(`amount_each`, 0 when closed), `closed` (`null|"user"|"statement"`), `closed_at` (date|null) and `statement_id`
+(for `closed:"statement"`: the newer statement without the plan's row, else null). Open plans come first (as
+before), closed plans after them in the same list. A closed plan keeps `remaining_count`, `amount_each`,
+`total_remaining` as they were when it closed (what would have come, not money owed), has `ends` = its last
+billed month, and is never in `months[]`, `summary` or any total.
+- `POST /plans/{plan_id}/close` -> 200 the plan entry (`closed:"user"`, `closed_at` today). Calling it again returns
+  the same. 404 `plan_not_found` (no open plan with this id), 409 `closed_by_statement`.
+- `DELETE /plans/{plan_id}/close` -> 204, the plan is open again. 404 `plan_not_closed`.
+- Automatic `closed:"statement"`: the plan was last seen on a card's statement for month M with r installments
+  left, and the same card has a newer statement for a month within M+1..M+r that has no row of the plan.
+- A closed plan also leaves the forecast, `/simulate/installment`, the share card, early payoff, the
+  `installment_ending` alert and the minimum-payment installments. This is separate from `closed_early` in
+  `/insights/early-payoff` (a statement that prints the payoff itself).
+
+### This month's payments and forecast per card (`GET /insights/forecast`, added fields)
+The old `open_period`, `forecast` and `backtest` stay. Added, one row per card:
+```json
+"currency":"TRY","total":234567,"fixed":100000,
+"cards":[{"card_id","card_label","bank","card_last4",
+  "due_date":"2099-06-05","amount":123456,"estimated":false,"statement_id":"st_.."|null,
+  "minimum_payment":24691|null,"days_left":9,"parts":{"installments":10000,"subscriptions":4999,"other":130000}|null,
+  "next_statement":{"month":"2099-06","cut_off":"2099-06-25","due_date":"2099-07-05","dates":"printed|estimated",
+    "total":144999,"parts":{"installments":10000,"subscriptions":4999,"other":130000},
+    "installment_items":[ScheduleItem],"subscriptions":[{"id","merchant","amount"}],
+    "note":"text","note_key":"forecast.note.usual|forecast.note.no_history","note_params":{"months":4}}}]
+```
+- Row (`due_date`, `amount`, `estimated`): the card's next unpaid due payment. While the latest statement's due date
+  is today or later and it owes something: that statement (`estimated:false`, printed total and minimum, `parts`
+  null). Otherwise the forecast of the card's next statement (`estimated:true`, `amount` = `next_statement.total`,
+  `parts` = its parts, `statement_id` null, `minimum_payment` null).
+- `next_statement`: the card's next statement month. Dates: the printed next cut-off and due date
+  (`dates:"printed"`), else the same days one month later (`"estimated"`). `installments`: that card's open plans in
+  that month; `subscriptions`: `monthly_amount` of regular payments last charged on this card in its latest month;
+  `other`: what that card usually spent on everything else over up to its 6 earlier statements (middle value), told
+  to the user only through `note`, in plain words (tr "Diğer harcamalar için bu kartla son 4 ayda genelde harcadığın
+  tutarı aldım.").
+- `total` adds the rows' `amount` in the base currency `currency`; `fixed` is fixed costs due in the forecast month
+  (not per card, not in `total`). Cards sorted by `due_date`.
+
+### Alerts (changes)
+- `missing_statement` is one alert per card and gap: `month` = first missing month, params
+  `{"bank","card_last4","card":"<card label>","from":"2099-03","to":"2099-08","months":6,"month_list":["2099-03",...]}`,
+  `refs.statement_ids` = the statements on both sides, `text` e.g. "Garanti Bonus ··0000 için Mart–Ağustos 2099
+  ekstreleri yok. Bankanın uygulamasından PDF olarak indirip ekle." (one month: "Mart 2099 ekstresi yok."; across
+  years "Kasım 2098–Şubat 2099").
+- Every alert has `text` (string or null; set for `missing_statement`, null for the others for now), `card_id`,
+  `card_label`.
+
+### Suggestions (`GET /suggestions?locale=tr|en`)
+```json
+{"items":[{"id":"sg_0a1b2c3d4e","kind":"duplicate_service|price_rise|card_fee|interest|foreign_currency|frequent_place|installment_relief|ai",
+   "title":"text","body":"text","monthly_saving":12345|null,"yearly_saving":148140|null,"currency":"TRY",
+   "card_id":"cd_.."|null,"card_label":"..."|null,"source":"rules|ai",
+   "link":"/recurring?id=sb_..",
+   "message_key":"suggestion.<kind>"|null,"params":{}}],
+ "ai":{"status":"none|pending|done|failed","provider":"claude-cli"|null,"created_at":"..."|null,"job_id":"job_.."|null}}
+```
+`link` is an in-app path: `/recurring?id=<sb_..>`, `/installments?id=<pl_..>`, `/rights?id=<tx_..>`,
+`/statements?id=<st_..>`, `/spending?merchant=<name>`, `/settings`.
+Rule suggestions (code only, no AI needed), most saving first, then the rest:
+| kind | when | saving |
+| --- | --- | --- |
+| `duplicate_service` | two or more subscriptions doing the same job (cloud storage, music, video, AI assistant) | the cheapest one's `monthly_amount` |
+| `price_rise` | a subscription's last charge is higher than the one before | null (`params.amount_previous`, `amount_last`) |
+| `card_fee` | an annual card fee row not refunded; link `/rights?id=<fee row id>` | yearly = the fee, monthly = fee / 12 |
+| `interest` | interest or late-payment rows (+ their taxes) on a card's latest statement | monthly = that total |
+| `foreign_currency` | foreign-currency rows in the latest 3 months | null (`params.monthly_average`) |
+| `frequent_place` | a dining / entertainment / shopping frequent place whose `monthly_average` is at least 5 % of the average monthly spend (top 3) | monthly = half of it, yearly = 12 x that |
+| `installment_relief` | the first schedule month whose installment total drops by 10 % or more because plans end | null (`params.month`, `amount`, `plans`) |
+`source:"ai"` items come from the last `POST /analysis/all` (`kind:"ai"`, `monthly_saving` and `yearly_saving`
+always null: kalan never shows a model's numbers as savings).
+
+### AI batch (`POST /analysis/all`, `GET /jobs/{id}` changed)
+- `POST /analysis/all` -> 202 `{"job_id","kind":"analysis_all","status":"pending","total":12}`. Analyses, one after
+  the other, every statement whose `analysis_status` is not `done` (categories for uncategorised rows + watch
+  items, as `POST /statements/{id}/analyze`), then writes AI suggestions. A pending batch is returned instead of a
+  second one and also picks up statements stored while it runs. 409 `no_provider` / `provider_unavailable`.
+- The model gets only aggregates for suggestions: category totals per month, regular payments (merchant, kind,
+  monthly amount), frequent places (merchant, category, monthly average) and the 12-month installment load; never
+  single transaction rows.
+- A failed or timed-out statement is marked `failed` and the batch goes on; a failed suggestion step keeps the old AI
+  suggestions. Rule results never depend on it.
+- `GET /analysis/all` -> the latest batch job (same body as `GET /jobs/{id}`) or `null`, so a reloaded page can find
+  a running batch.
+- `GET /jobs/{job_id}` -> `{"job_id","kind":"statement|analysis_all","statement_id":"st_.."|null,
+  "status":"pending|done|failed","phase":"statements|suggestions|done","done":3,"total":12,"failed":0,"error":null}`.
+  A single-statement job has `total:1`.
+- `POST /statements`: when a provider is selected and available, the stored statement joins the batch (a pending
+  one, else a new one); the 201 body then has `"analysis_job_id":"job_.."` (else `null`) and
+  `analysis_status:"pending"`.
+- Rules first: the model only fills rows no rule and no user categorised (`category_source:"model"`).
+- On start the service also re-applies the built-in rules to stored rows that still have no category.
 
 ## Health and setup
 - `GET /health` -> `{"status":"ok","version":"0.1.0"}`
@@ -209,7 +387,7 @@ Each plan also has `"source":"statement|manual|import"`. Every schedule item and
   (v0.2.0) over the same months: recurring fixed costs, never added to `months[].total`. `fixed.months[].total`
   sums only items in the schedule currency.
 - `GET /summary/monthly?month=2026-09` -> always 200 (a month with no data returns zeros, empty `by_category` and empty `statement_ids`, never 404) `{"month","currency","total_spend","total_credit","by_category":[{"category","amount","share":"0.18"}],"previous_month":{"total_spend","change":"0.12"}|null,"statement_ids":[...]}`
-- `GET /subscriptions` -> `{"items":[{"merchant","amount_last","amount_previous","currency","months_seen":["2026-08","2026-09"],"price_change":"0.20"|null}]}` (recurring = same normalized merchant in >= 2 consecutive months with amounts within 25% or flagged by the model).
+- `GET /subscriptions`: v0.4.0 shape and rules in "Regular payments" above.
 
 - `POST /simulate/installment` (v0.2.0) body `{"amount":120000,"count":6,"start_month":"2026-12","interest_monthly":"3.11"|null,"months":null}`
   -> `{"currency","purchase":{"amount","count","start_month","interest_monthly","installments":[{"month","amount","principal","interest"}],
@@ -232,7 +410,7 @@ Each plan also has `"source":"statement|manual|import"`. Every schedule item and
 | `interest_charged` | warning | count, total, currency | interest rows this period |
 | `fee_charged` / `tax_charged` | info | count, total, currency | fee / tax rows this period |
 | `foreign_currency` | info | count, currencies, total, currency | rows with an original foreign amount this period |
-| `missing_statement` | warning | bank, card_last4 | a month missing between two stored statements of a card |
+| `missing_statement` | warning | bank, card_last4, card, from, to, months, month_list | months missing between two stored statements of a card, one alert per gap (v0.4.0) |
 | `subscription_price_rise` | info | merchant, amount_previous, amount_last, price_change, currency | a subscription's last charge is higher than the one before |
 | `due_soon` | warning, critical at <= 1 day | due_date, days_left, statement_total, minimum_payment, currency | due date within 5 days and a balance is owed |
 | `statement_overdue` | warning | bank, card_last4, expected_cut_off, days_overdue | a card's next statement (printed next cut-off, else the same day next month) is more than 7 days past its cut-off and not uploaded |
@@ -240,7 +418,7 @@ Each plan also has `"source":"statement|manual|import"`. Every schedule item and
 
 ## Model analysis (one call per statement)
 - `POST /statements/{id}/analyze` -> 202 `{"job_id":"job_01","status":"pending"}`
-- `GET /jobs/{job_id}` -> `{"status":"pending|done|failed","error":null}`
+- `GET /jobs/{job_id}` -> see "AI batch" (v0.4.0 adds `kind`, `phase`, `done`, `total`, `failed`)
 - `GET /statements/{id}/analysis` -> `{"categories_applied":true,"commentary":{"locale":"tr","summary":"text","watch_items":[{"title","detail","transaction_ids":[...]}]},"provider":"claude-cli","created_at":"..."}`
 
 What is sent to the model: only date, description, amount, currency, kind per transaction plus code-computed totals. Never card number, name, address, IBAN, customer number.

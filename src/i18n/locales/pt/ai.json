@@ -1,7 +1,7 @@
 {
-  "tool": "The AI tool",
-  "reading": "{{name}} is reading your statements: {{done}}/{{total}}",
-  "writing": "{{name}} is writing suggestions",
-  "finished": "Categories and suggestions are updated.",
-  "failed": "The AI tool could not finish; my own calculations are unchanged."
+  "tool": "A ferramenta de IA",
+  "reading": "{{name}} está lendo suas faturas: {{done}}/{{total}}",
+  "writing": "{{name}} está escrevendo sugestões",
+  "finished": "Atualizei as categorias e as sugestões.",
+  "failed": "A ferramenta de IA não conseguiu terminar; meus próprios cálculos continuam iguais."
 }

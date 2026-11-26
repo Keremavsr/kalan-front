@@ -1099,6 +1099,13 @@ export type PlainErrorCode =
   | 'method_not_allowed'
   | 'unsupported_media_type'
   | 'http_error'
+  // v0.4.0
+  | 'card_not_found'
+  | 'plan_not_found'
+  | 'closed_by_statement'
+  | 'plan_not_closed'
+  | 'subscription_not_found'
+  | 'expected_not_set'
   // client side only
   | 'network'
   | 'aborted'

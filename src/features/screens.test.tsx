@@ -108,7 +108,7 @@ describe('spending', () => {
 // The recurring screen's test lives in recurring/recurring.test.tsx.
 
 describe('settings and overview', () => {
-  it('shows which providers exist, then analyses a statement with a pending state', async () => {
+  it('shows which providers exist; choosing one reads every statement, and the commentary sits in the statement detail', async () => {
     const user = userEvent.setup();
     await renderApp('/settings', { analysisMs: 60, uploaded: true });
 
@@ -117,13 +117,17 @@ describe('settings and overview', () => {
     expect(screen.getAllByText('Bu bilgisayarda bulundu')).toHaveLength(2);
     await user.click(claude);
     expect(await screen.findByText('Claude Code seçildi.')).toBeInTheDocument();
+    expect(screen.getByText(/Claude Code seçili. Ekstrelerini sırayla okur/)).toBeInTheDocument();
+    expect(await screen.findByText(/Claude Code ekstrelerini okuyor: \d\/\d/)).toBeInTheDocument();
+    expect(await screen.findByText('Kategoriler ve öneriler yenilendi.', {}, { timeout: 4000 })).toBeInTheDocument();
 
-    await user.click(screen.getByRole('link', { name: 'Özet' }));
-    await user.click(await screen.findByRole('button', { name: 'Yorumla' }));
-    expect(await screen.findByText(/Yorum hazırlanıyor/)).toBeInTheDocument();
+    await user.click(screen.getByRole('link', { name: 'Ekstreler' }));
+    const list = await screen.findByRole('list', { name: 'Yüklenen ekstreler' });
+    await user.click(within(list).getAllByRole('link')[0]!);
     expect(await screen.findByText('Nakit avansın iki taksiti kaldı', {}, { timeout: 4000 })).toBeInTheDocument();
     const link = screen.getAllByRole('link', { name: /STREAMFLIX/ })[0]!;
     expect(link).toHaveAttribute('href', '/spending/2026-10?tx=tx_10_03');
+    expect(screen.getByRole('button', { name: 'Yeniden yorumla' })).toBeInTheDocument();
   });
 
   it('says plainly when a month has no statement', async () => {
